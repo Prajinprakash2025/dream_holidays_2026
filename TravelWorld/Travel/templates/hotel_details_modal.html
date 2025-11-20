@@ -1,0 +1,75 @@
+<div class="row">
+    <div class="col-md-6">
+        <label>Name:</label>
+        <input class="form-control" value="{{ hotel.name }}">
+        
+        <label>Category:</label>
+        <input class="form-control" value="{{ hotel.category }}">
+        
+        <label>Destination:</label>
+        <input class="form-control" value="{{ hotel.destination.name }}">
+
+        <label>Details:</label>
+        <textarea class="form-control">{{ hotel.details }}</textarea>
+    </div>
+    <div class="col-md-6">
+        <label>Contact Person:</label>
+        <input class="form-control" value="{{ hotel.contact_person }}">
+
+        <label>Phone Number:</label>
+        <input class="form-control" value="{{ hotel.phone_number }}">
+
+        <label>Email:</label>
+        <input class="form-control" value="{{ hotel.email }}">
+
+        <label>Hotel Link:</label>
+        <input class="form-control" value="{{ hotel.hotel_link }}">
+    </div>
+</div>
+
+<hr>
+
+<h5>Images</h5>
+<div class="row">
+    {% for img in hotel.images.all %}
+    <div class="col-md-3 mb-2">
+        <img src="{{ img.image.url }}" class="img-fluid rounded border">
+    </div>
+    {% empty %}
+    <p>No images uploaded.</p>
+    {% endfor %}
+</div>
+
+<hr>
+
+<h5>Pricing</h5>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Room Type</th>
+            <th>Meal Plan</th>
+            <th>From</th>
+            <th>To</th>
+            <th>Double</th>
+            <th>Child W/O Bed</th>
+            <th>Child W/ Bed</th>
+            <th>Extra Bed</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for price in hotel.prices.all %}
+        <tr>
+            <td>{{ price.room_type.name }}</td>
+            <td>{{ price.meal_plan.name }}</td>
+            <td>{{ price.from_date }}</td>
+            <td>{{ price.to_date }}</td>
+            <td>{{ price.double_bed }}</td>
+            <td>{{ price.child_without_bed }}</td>
+            <td>{{ price.child_with_bed }}</td>
+            <td>{{ price.extra_bed }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="8">No price data available.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>

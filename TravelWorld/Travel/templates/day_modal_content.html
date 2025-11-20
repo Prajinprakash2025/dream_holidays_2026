@@ -1,0 +1,17 @@
+<form method="POST" action="{% url 'save_day_plan' day_plan.id %}">
+    {% csrf_token %}
+    <h6>Hotels</h6>
+    {% for hotel in hotels %}
+      <div><input type="checkbox" name="hotels" value="{{ hotel.id }}"> {{ hotel.name }}</div>
+    {% endfor %}
+  
+    <h6>Activities</h6>
+    {% for act in activities %}
+      <div><input type="checkbox" name="activities" value="{{ act.id }}"> {{ act.name }}</div>
+    {% endfor %}
+  
+    <!-- Add houseboats, meal_plans, etc. the same way -->
+  
+    <button class="btn btn-success mt-3" type="submit">Save</button>
+  </form>
+  

@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-9">
+    <h2>Add Special Inclusion</h2>
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="id_name" class="form-label">Inclusion Name</label>
+            {{ form.name }}
+        </div>
+
+        <div class="mb-3">
+            <label for="id_inclusion_type" class="form-label">Type</label>
+            {{ form.inclusion_type }}
+        </div>
+
+        <div id="hotel-field" class="mb-3 d-none">
+            <label for="id_hotel" class="form-label">Select Hotel</label>
+            {{ form.hotel }}
+        </div>
+
+        <div id="houseboat-field" class="mb-3 d-none">
+            <label for="id_houseboat" class="form-label">Select Houseboat</label>
+            {{ form.houseboat }}
+        </div>
+
+        <div class="mb-3">
+            <label for="id_details" class="form-label">Details</label>
+            {{ form.details }}
+        </div>
+
+        <div class="mb-3">
+            <label for="id_photo" class="form-label">Photo</label>
+            {{ form.photo }}
+        </div>
+
+        <div class="mb-3">
+            <label for="id_status" class="form-label">Status</label>
+            {{ form.status }}
+        </div>
+
+        <div class="mb-3">
+            <label for="id_created_by" class="form-label">Created By</label>
+            {{ form.created_by }}
+        </div>
+
+        <button type="submit" class="btn btn-success">Save</button>
+        <a href="{% url 'special_inclusion_list' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        function toggleFields() {
+            let type = document.getElementById("id_inclusion_type").value;
+            document.getElementById("hotel-field").classList.toggle("d-none", type !== "hotel");
+            document.getElementById("houseboat-field").classList.toggle("d-none", type !== "houseboat");
+        }
+
+        document.getElementById("id_inclusion_type").addEventListener("change", toggleFields);
+        toggleFields();
+    });
+</script>
+{% endblock %}

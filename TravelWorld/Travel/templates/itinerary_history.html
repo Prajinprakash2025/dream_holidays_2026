@@ -1,0 +1,248 @@
+<!-- itinerary_history.html -->
+
+{% extends 'base.html' %}
+
+{% block title %}Itinerary History - {{ query.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+  
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h3 class="mb-1">
+        <i class="fas fa-history me-2 text-warning"></i>Itinerary History
+      </h3>
+      <p class="text-muted mb-0">Query: {{ query.name }}</p>
+    </div>
+    <a href="{% url 'query_proposals' query.id %}" class="btn btn-primary">
+      <i class="fas fa-arrow-left me-1"></i>Back to Active Proposals
+    </a>
+  </div>
+
+  <!-- Breadcrumb -->
+  <nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'list_itineraries' %}">Queries</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'query_proposals' query.id %}">Proposals</a></li>
+      <li class="breadcrumb-item active">History</li>
+    </ol>
+  </nav>
+
+  <!-- Content -->
+  <div class="row">
+    <div class="col-lg-12">
+      
+      {% if archived_itineraries %}
+        <div class="proposals-grid">
+          {% for itinerary in archived_itineraries %}
+            <!-- Archived Card -->
+            <div class="card proposal-card archived-card h-100">
+              <div class="card-header bg-warning text-dark">
+                <div class="d-flex justify-content-between align-items-start">
+                  <div>
+                    <h6 class="mb-1">{{ itinerary.name }}</h6>
+                    <small class="text-muted">{{ itinerary.destination_list }}</small>
+                  </div>
+                  <span class="badge bg-warning">
+                    <i class="fas fa-history me-1"></i>ID: {{ itinerary.id }}
+                  </span>
+                </div>
+              </div>
+
+              <div class="card-body-compact">
+                <div class="info-section">
+                  
+                  <!-- Passengers -->
+                  <div class="info-row">
+                    <span class="info-label"><i class="fas fa-users me-1"></i>Passengers</span>
+                    <span class="info-value">
+                      {{ itinerary.adults|default:0 }}A
+                      {% if itinerary.childrens %} | {{ itinerary.childrens }}C{% endif %}
+                      {% if itinerary.infants %} | {{ itinerary.infants }}I{% endif %}
+                    </span>
+                  </div>
+
+                  <!-- Travel Dates -->
+                  <div class="info-row">
+                    <span class="info-label"><i class="fas fa-calendar me-1"></i>Travel Dates</span>
+                    <span class="info-value">
+                      {{ itinerary.travel_from|date:"d M Y" }} → {{ itinerary.travel_to|date:"d M Y" }}
+                    </span>
+                  </div>
+
+                  <!-- Archived Date -->
+                  <div class="info-row">
+                    <span class="info-label"><i class="fas fa-trash me-1"></i>Archived</span>
+                    <span class="info-value">{{ itinerary.archived_at|date:"d M Y H:i" }}</span>
+                  </div>
+
+                  <!-- Archived Reason -->
+                  {% if itinerary.archived_reason %}
+                  <div class="info-row">
+                    <span class="info-label"><i class="fas fa-comment-dots me-1"></i>Reason</span>
+                    <span class="info-value text-muted">{{ itinerary.archived_reason }}</span>
+                  </div>
+                  {% endif %}
+
+                  <!-- Created Date -->
+                  <div class="info-row">
+                    <span class="info-label"><i class="fas fa-clock me-1"></i>Created</span>
+                    <span class="info-value">{{ itinerary.created_at|date:"d M Y" }}</span>
+                  </div>
+
+                  <!-- Last Status -->
+                  <div class="text-center my-2">
+                    <span class="status-badge bg-secondary text-white">
+                      {{ itinerary.get_status_display|default:"Archived" }}
+                    </span>
+                  </div>
+
+                  <!-- Last Pricing -->
+                  {% if itinerary.pricing_options.count %}
+                  <div class="pricing-section">
+                    {% for option in itinerary.pricing_options.all %}
+                    <div class="price-item">
+                      <span class="price-label">{{ option.option_name }}</span>
+                      <span class="price-amount">₹{{ option.final_amount|floatformat:0 }}</span>
+                    </div>
+                    {% endfor %}
+                  </div>
+                  {% endif %}
+
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                  <a href="{% url 'itinerary_day_plan' itinerary.id %}" class="btn btn-outline-secondary btn-sm" title="View archived day plans">
+                    <i class="fas fa-eye me-1"></i>View Details
+                  </a>
+
+                    <button class="btn btn-outline-success btn-sm" onclick="unarchiveItinerary({{ itinerary.id }}, '{{ itinerary.name|escapejs }}')">
+                      <i class="fas fa-undo me-1"></i>Restore to Draft
+                    </button>
+
+                  <a href="{% url 'view_quotation' itinerary.id %}" class="btn btn-outline-info btn-sm" target="_blank">
+                    <i class="fas fa-file-invoice me-1"></i>Quotation
+                  </a>
+
+                  <button class="btn btn-outline-danger btn-sm" onclick="deleteArchivedItinerary({{ itinerary.id }}, '{{ itinerary.name|escapejs }}')">
+                    <i class="fas fa-trash me-1"></i>Delete
+                  </button>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+
+      {% else %}
+        <!-- Empty State -->
+        <div class="empty-state-card">
+          <div class="empty-state-icon">
+            <i class="fas fa-inbox"></i>
+          </div>
+          <h5>No History Yet</h5>
+          <p>Archived itineraries will appear here</p>
+          <a href="{% url 'query_proposals' query.id %}" class="btn btn-primary mt-3">
+            <i class="fas fa-arrow-left me-1"></i>Back to Active Proposals
+          </a>
+        </div>
+      {% endif %}
+
+    </div>
+  </div>
+
+</div>
+
+<style>
+  .archived-card {
+    opacity: 0.9;
+    border-left: 4px solid #ffc107;
+  }
+
+  .archived-card:hover {
+    box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+  }
+
+  .empty-state-card {
+    text-align: center;
+    padding: 60px 20px;
+    border: 2px dashed #dee2e6;
+    border-radius: 8px;
+    background: #f8f9fa;
+  }
+
+  .empty-state-icon {
+    font-size: 48px;
+    color: #6c757d;
+    margin-bottom: 20px;
+  }
+</style>
+
+<script>
+function deleteArchivedItinerary(itineraryId, itineraryName) {
+  if (!confirm(`⚠️ Delete archived itinerary "${itineraryName}"?\n\nThis cannot be undone.`)) {
+    return;
+  }
+  
+  fetch(`/api/itinerary/${itineraryId}/delete/`, {
+    method: 'POST',
+    headers: {
+      'X-CSRFToken': getCookie('csrftoken'),
+      'X-Requested-With': 'XMLHttpRequest'
+    }
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      alert('✅ Archived itinerary deleted');
+      location.reload();
+    } else {
+      alert('❌ Error: ' + data.message);
+    }
+  })
+  .catch(error => alert('❌ Error: ' + error));
+}
+
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== "") {
+    const cookies = document.cookie.split(";");
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === name + "=") {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+
+function unarchiveItinerary(itineraryId, itineraryName) {
+  if (!confirm(`📋 Restore "${itineraryName}" to Draft?\n\nThis will move it back to active proposals.`)) {
+    return;
+  }
+  
+  fetch(`/api/itinerary/${itineraryId}/unarchive/`, {
+    method: 'POST',
+    headers: {
+      'X-CSRFToken': getCookie('csrftoken'),
+      'X-Requested-With': 'XMLHttpRequest',
+      'Content-Type': 'application/json'
+    }
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      alert('✅ Itinerary restored to Draft status');
+      location.reload();
+    } else {
+      alert('❌ Error: ' + data.message);
+    }
+  })
+  .catch(error => alert('❌ Error: ' + error));
+}
+</script>
+
+{% endblock %}  

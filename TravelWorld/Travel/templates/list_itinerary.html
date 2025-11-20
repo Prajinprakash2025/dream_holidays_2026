@@ -1,0 +1,394 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+  .itinerary-table {
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  .itinerary-table th {
+    background: #2b4c7e;
+    color: white;
+    font-weight: 600;
+    padding: 12px;
+    font-size: 0.9rem;
+    white-space: nowrap;
+  }
+  .itinerary-table td {
+    padding: 12px;
+    vertical-align: middle;
+    border-bottom: 1px solid #e0e0e0;
+  }
+  
+  .itinerary-table tbody tr:hover {
+    background: #e3f2fd;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transform: translateY(-1px);
+    transition: all 0.2s ease;
+  }
+  
+  .action-btn {
+    padding: 4px 8px;
+    font-size: 0.85rem;
+  }
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    background: white;
+    border-radius: 8px;
+  }
+  .empty-state i {
+    font-size: 4rem;
+    color: #ccc;
+    margin-bottom: 20px;
+  }
+</style>
+
+<div class="container-fluid">
+  <!-- Header Section -->
+  <div class="row mb-4">
+    <div class="col-md-6">
+      <h4 class="mb-0">
+        <i class="fas fa-route me-2"></i> My Itineraries
+      </h4>
+      <p class="text-muted small mb-0">
+        {% if user_type == 'superuser' or current_user.role == 'admin' %}
+          Manage all itineraries
+        {% else %}
+          Manage your itineraries
+        {% endif %}
+      </p>
+    </div>
+    <div class="col-md-6 text-end">
+      <a href="{% url 'query_list' %}" class="btn btn-outline-secondary me-2">
+        <i class="fas fa-list me-2"></i> View Queries
+      </a>
+      <a href="{% url 'list_package_templates' %}" class="btn btn-primary">
+        <i class="fas fa-box-open me-2"></i> Package Templates
+      </a>
+    </div>
+  </div>
+
+  <!-- Search & Filter Section -->
+  <div class="card mb-4">
+    <div class="card-body">
+      <form method="get" id="filterForm">
+        <div class="row g-3 align-items-end">
+          <div class="col-md-3">
+            <label class="form-label small">Search Itineraries</label>
+            <input 
+              type="text" 
+              name="search" 
+              class="form-control" 
+              placeholder="Search by client name, itinerary..."
+              value="{{ request.GET.search }}">
+          </div>
+          
+          <!-- ✅ TEAM MEMBER FILTER (Admin Only) -->
+          {% if user_type == 'superuser' or current_user.role == 'admin' %}
+          <div class="col-md-3">
+            <label class="form-label small">Created By</label>
+            <select name="user" class="form-select">
+              <option value="">All Team Members</option>
+              {% for member in team_members %}
+              <option value="{{ member.id }}" {% if request.GET.user == member.id|stringformat:"s" %}selected{% endif %}>
+                {{ member.get_full_name }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+          {% endif %}
+          
+          <div class="col-md-2">
+            <label class="form-label small">Status</label>
+            <select name="status" class="form-select">
+              <option value="">All Statuses</option>
+              <option value="draft" {% if request.GET.status == 'draft' %}selected{% endif %}>Draft</option>
+              <option value="confirmed" {% if request.GET.status == 'confirmed' %}selected{% endif %}>Confirmed</option>
+              <option value="cancelled" {% if request.GET.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+            </select>
+          </div>
+          
+          <div class="col-md-2">
+            <label class="form-label small">Days</label>
+            <input 
+              type="number" 
+              name="days" 
+              class="form-control" 
+              placeholder="Days"
+              value="{{ request.GET.days }}">
+          </div>
+          
+          <div class="col-md-2">
+            <button type="submit" class="btn btn-outline-primary w-100">
+              <i class="fas fa-search me-1"></i> Search
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Statistics -->
+  <div class="alert alert-info mb-3">
+    <i class="fas fa-info-circle me-2"></i>
+    <strong>{{ itineraries.count }}</strong> itinerary{{ itineraries.count|pluralize:"ies,y" }} found
+    {% if request.GET.search %}
+      <span class="ms-2">| Search: <strong>{{ request.GET.search }}</strong></span>
+    {% endif %}
+    {% if selected_user %}
+      <span class="ms-2">| 
+        Created by: <strong>{{ selected_user.get_full_name }}</strong>
+        <a href="?{% if request.GET.search %}search={{ request.GET.search }}&{% endif %}{% if request.GET.status %}status={{ request.GET.status }}&{% endif %}{% if request.GET.days %}days={{ request.GET.days }}{% endif %}" class="ms-2 text-decoration-none">
+          <i class="fas fa-times-circle"></i> Clear
+        </a>
+      </span>
+    {% endif %}
+    {% if request.GET.status %}
+      <span class="ms-2">| Status: <strong>{{ request.GET.status|title }}</strong></span>
+    {% endif %}
+    {% if request.GET.days %}
+      <span class="ms-2">| Days: <strong>{{ request.GET.days }}</strong></span>
+    {% endif %}
+  </div>
+
+  <!-- Itineraries Table -->
+  {% if itineraries %}
+  <div class="table-responsive">
+    <table class="table itinerary-table mb-0">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Itinerary Name</th>
+          <th>Client Name</th>
+          <th style="width: 120px;">Days</th>
+          <th style="width: 150px;">Travel Dates</th>
+          <th style="width: 120px;">Passengers</th>
+          <th>Destinations</th>
+          <th style="width: 100px;">Day Plans</th>
+          <th style="width: 100px;">Status</th>
+          {% if user_type == 'superuser' or current_user.role == 'admin' %}
+          <th style="width: 120px;">Created By</th>
+          {% endif %}
+          <th style="width: 120px;">Created</th>
+          <th style="width: 180px;">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for itinerary in itineraries %}
+        <tr style="cursor: pointer;" onclick="window.location.href='{% url 'itinerary_day_plan' itinerary.id %}'">
+          <!-- ID -->
+          <td>
+            <span class="badge bg-secondary">#{{ itinerary.id }}</span>
+          </td>
+
+          <!-- Itinerary Name -->
+          <td>
+            <div>
+              <strong>{{ itinerary.name|truncatewords:5 }}</strong>
+              {% if itinerary.notes %}
+              <br>
+              <small class="text-muted">{{ itinerary.notes|truncatewords:8 }}</small>
+              {% endif %}
+            </div>
+          </td>
+
+          <!-- Client Name -->
+          <td>
+            <i class="fas fa-user me-1 text-muted"></i>
+            {{ itinerary.query.client_name }}
+          </td>
+
+          <!-- Days -->
+          <td class="text-center">
+            <span class="badge bg-primary">
+              {{ itinerary.query.total_days }} Day{{ itinerary.query.total_days|pluralize }}
+            </span>
+          </td>
+
+          <!-- Travel Dates -->
+          <td>
+            {% if itinerary.query.from_date and itinerary.query.to_date %}
+              <small class="text-muted">
+                <i class="fas fa-calendar-alt me-1"></i>
+                {{ itinerary.query.from_date|date:"d M Y" }}
+                <br>
+                <i class="fas fa-arrow-right me-1"></i>
+                {{ itinerary.query.to_date|date:"d M Y" }}
+              </small>
+            {% else %}
+              <small class="text-muted fst-italic">Dates not set</small>
+            {% endif %}
+          </td>
+
+          <!-- Passengers -->
+          <td class="text-center">
+            <small class="text-muted">
+              <i class="fas fa-users me-1"></i>
+              {{ itinerary.query.adult }}A 
+              {% if itinerary.query.children > 0 %}+ {{ itinerary.query.children }}C{% endif %}
+              {% if itinerary.query.infant > 0 %}+ {{ itinerary.query.infant }}I{% endif %}
+            </small>
+          </td>
+
+          <!-- Destinations -->
+          <td>
+            <small class="text-muted">
+              <i class="fas fa-map-marker-alt me-1"></i>
+              {% if itinerary.destinations.all %}
+                {% for dest in itinerary.destinations.all|slice:":3" %}
+                  {{ dest.name }}{% if not forloop.last %}, {% endif %}
+                {% endfor %}
+                {% if itinerary.destinations.count > 3 %}
+                  <span class="badge bg-secondary">+{{ itinerary.destinations.count|add:"-3" }}</span>
+                {% endif %}
+              {% else %}
+                <span class="fst-italic">No destinations</span>
+              {% endif %}
+            </small>
+          </td>
+
+          <!-- Day Plans Count -->
+          <td class="text-center">
+            <span class="badge bg-info">
+              {{ itinerary.day_plans.count }}
+            </span>
+          </td>
+
+          <!-- Status -->
+          <td class="text-center">
+            {% if itinerary.status == 'draft' %}
+              <span class="badge bg-secondary">Draft</span>
+            {% elif itinerary.status == 'confirmed' %}
+              <span class="badge bg-success">Confirmed</span>
+            {% elif itinerary.status == 'cancelled' %}
+              <span class="badge bg-danger">Cancelled</span>
+            {% else %}
+              <span class="badge bg-warning">{{ itinerary.status|title }}</span>
+            {% endif %}
+          </td>
+
+          <!-- Created By (Admin Only) -->
+          {% if user_type == 'superuser' or current_user.role == 'admin' %}
+          <td>
+            <small class="text-muted">
+              {% if itinerary.created_by %}
+                {{ itinerary.created_by.get_full_name }}
+              {% else %}
+                System
+              {% endif %}
+            </small>
+          </td>
+          {% endif %}
+
+          <!-- Created Date -->
+          <td>
+            <small class="text-muted">
+              {{ itinerary.created_at|date:"d M Y" }}
+            </small>
+          </td>
+
+          <!-- Actions -->
+          <td onclick="event.stopPropagation();">
+            <div class="btn-group btn-group-sm" role="group">
+              <a 
+                href="{% url 'itinerary_day_plan' itinerary.id %}"
+                class="btn btn-outline-primary action-btn"
+                title="Manage Day Plans">
+                <i class="fas fa-calendar-alt"></i>
+              </a>
+              <a 
+                href="{% url 'query_proposals' itinerary.query.id %}"
+                class="btn btn-outline-info action-btn"
+                title="View Query">
+                <i class="fas fa-eye"></i>
+              </a>
+              <button 
+                class="btn btn-outline-danger action-btn"
+                onclick="confirmDelete({{ itinerary.id }}, '{{ itinerary.name|escapejs }}')"
+                title="Delete">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <!-- Empty State -->
+  <div class="empty-state">
+    <i class="fas fa-route"></i>
+    <h5 class="text-muted">No Itineraries Found</h5>
+    <p class="text-muted">
+      {% if request.GET.search or request.GET.user or request.GET.status %}
+        Try adjusting your filters
+      {% else %}
+        Start by creating a query and building an itinerary
+      {% endif %}
+    </p>
+    <a href="{% url 'query_list' %}" class="btn btn-primary mt-3">
+      <i class="fas fa-list me-2"></i> View Queries
+    </a>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteItineraryModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title">
+          <i class="fas fa-exclamation-triangle me-2"></i> Confirm Delete
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body text-center py-4">
+        <i class="fas fa-trash fa-3x text-danger mb-3"></i>
+        <h5>Are you sure you want to delete this itinerary?</h5>
+        <p class="text-muted mb-0" id="deleteItineraryName"></p>
+        <div class="alert alert-warning mt-3 small">
+          <i class="fas fa-info-circle me-1"></i>
+          This action cannot be undone. All day plans and bookings will be deleted.
+        </div>
+      </div>
+      <div class="modal-footer justify-content-center">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Cancel
+        </button>
+        <form method="post" id="deleteItineraryForm" style="display: inline;">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger">
+            <i class="fas fa-trash me-1"></i> Yes, Delete
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Delete Confirmation
+function confirmDelete(itineraryId, itineraryName) {
+  document.getElementById('deleteItineraryName').textContent = itineraryName;
+  document.getElementById('deleteItineraryForm').action = `/itinerary/${itineraryId}/delete/`;
+  
+  const modal = new bootstrap.Modal(document.getElementById('deleteItineraryModal'));
+  modal.show();
+}
+
+// Auto-submit filter form
+document.querySelectorAll('#filterForm select').forEach(el => {
+  el.addEventListener('change', () => {
+    document.getElementById('filterForm').submit();
+  });
+});
+</script>
+
+{% endblock %}

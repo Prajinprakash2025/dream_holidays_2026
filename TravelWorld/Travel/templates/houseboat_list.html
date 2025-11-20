@@ -1,0 +1,773 @@
+{% extends "base.html" %}
+{% load widget_tweaks %}
+
+{% block content %}
+
+<style>
+  .houseboats-header {
+    background: linear-gradient(135deg, #36d1dc 0%, #5b86e5 100%);
+    padding: 2rem;
+    border-radius: 15px;
+    margin-bottom: 2rem;
+    color: white;
+    box-shadow: 0 10px 30px rgba(54, 209, 220, 0.3);
+  }
+
+  .modern-table-container {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+  }
+
+  .modern-table thead {
+    background: linear-gradient(135deg, #36d1dc 0%, #5b86e5 100%);
+    color: white;
+  }
+
+  .modern-table thead th {
+    border: none;
+    padding: 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+  }
+
+  .modern-table tbody tr {
+    transition: all 0.3s ease;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .modern-table tbody tr:hover {
+    background: #f0f9ff;
+    transform: scale(1.01);
+    box-shadow: 0 4px 12px rgba(54, 209, 220, 0.1);
+  }
+
+  .modern-table tbody td {
+    padding: 1rem;
+    vertical-align: middle;
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .btn-action {
+    padding: 0.4rem 0.8rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    border: none;
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .btn-action:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  }
+
+  .modal-header-gradient {
+    background: linear-gradient(135deg, #36d1dc 0%, #5b86e5 100%);
+    color: white;
+  }
+
+  .form-section-title {
+    color: #5b86e5;
+    font-weight: 600;
+    border-bottom: 2px solid #36d1dc;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .search-box {
+    background: white;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    margin-bottom: 1.5rem;
+  }
+
+  .search-input {
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    font-size: 14px;
+    transition: all 0.3s ease;
+  }
+
+  .search-input:focus {
+    border-color: #36d1dc;
+    box-shadow: 0 0 0 0.2rem rgba(54, 209, 220, 0.25);
+  }
+  .suppliers-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 2rem;
+    border-radius: 15px;
+    margin-bottom: 2rem;
+    color: white;
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+  }
+
+  /* Add this new style for back button */
+  .back-button-container {
+    padding: 1.5rem 2rem 0 2rem;
+    margin-bottom: -1rem;
+  }
+
+  .back-btn-modern {
+    padding: 0.6rem 1.2rem;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    border: 2px solid #667eea;
+    color: #667eea;
+    background: white;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .back-btn-modern:hover {
+    background: #667eea;
+    color: white;
+    transform: translateX(-5px);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  }
+
+  .back-btn-modern i {
+    font-size: 16px;
+  }
+
+  .search-filter-bar {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    margin-bottom: 1.5rem;
+  }
+
+  .modern-table {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+  }
+
+  .modern-table thead {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+  }
+
+  .modern-table thead th {
+    border: none;
+    padding: 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+  }
+
+  .modern-table tbody tr {
+    transition: all 0.3s ease;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .modern-table tbody tr:hover {
+    background: #f8f9ff;
+    transform: scale(1.01);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+  }
+
+  .modern-table tbody td {
+    padding: 1rem;
+    vertical-align: middle;
+  }
+
+  .action-btn-group {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .action-btn {
+    padding: 0.4rem 0.8rem;
+    border-radius: 8px;
+    border: none;
+    transition: all 0.3s ease;
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+
+  .badge-modern {
+    padding: 0.4rem 0.8rem;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 12px;
+  }
+
+  .stats-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    text-align: center;
+    transition: all 0.3s ease;
+  }
+
+  .stats-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+  }
+
+  .stats-card .icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    font-size: 24px;
+  }
+
+  .modal-header-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+  }
+
+  .form-section-title {
+    color: #667eea;
+    font-weight: 600;
+    border-bottom: 2px solid #667eea;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+  }
+</style>
+
+<!-- Back Button with Modern Styling -->
+<div class="back-button-container">
+    <a href="{% url 'admin_settings' %}" class="back-btn-modern">
+        <i class="fas fa-arrow-left"></i>
+        <span>Back to Admin Settings</span>
+    </a>
+</div>
+<div class="container-fluid" style="margin-top: 90px; padding: 0 2rem;">
+
+  <!-- Header -->
+  <div class="houseboats-header">
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <h2 class="mb-2">
+          <i class="fas fa-ship"></i> Houseboats Management
+        </h2>
+        <p class="mb-0" style="opacity: 0.9;">Manage houseboat listings and properties</p>
+      </div>
+      
+      <!-- ✅ PERMISSION CHECK: Add Houseboat Button -->
+      {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.permissions.can_add_houseboat %}
+      <button type="button" class="btn btn-light btn-lg shadow" data-bs-toggle="modal" data-bs-target="#houseboatModal" data-mode="add">
+        <i class="fas fa-plus-circle me-2"></i>Add Houseboat
+      </button>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Search Box -->
+  <div class="search-box">
+    <div class="input-group">
+      <span class="input-group-text bg-transparent border-0">
+        <i class="fas fa-search text-muted"></i>
+      </span>
+      <input type="text" class="form-control search-input border-0" id="searchInput" placeholder="Search houseboats..." onkeyup="filterHouseboats()">
+      <button class="btn btn-outline-secondary" onclick="resetSearch()">
+        <i class="fas fa-redo me-1"></i>Reset
+      </button>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="modern-table-container">
+    <div class="table-responsive">
+      <table class="table modern-table mb-0" id="houseboatsTable">
+        <thead>
+          <tr>
+            <th><i class="fas fa-ship me-2"></i>Name</th>
+            <th><i class="fas fa-tag me-2"></i>Type</th>
+            <th><i class="fas fa-map-marker-alt me-2"></i>Destination</th>
+            <th><i class="fas fa-truck me-2"></i>Supplier</th>
+            <th><i class="fas fa-info-circle me-2"></i>Specs</th>
+            <th><i class="fas fa-user me-2"></i>Contact</th>
+            <th class="text-center"><i class="fas fa-toggle-on me-2"></i>Status</th>
+            <th class="text-center"><i class="fas fa-cogs me-2"></i>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for houseboat in houseboats %}
+          <tr>
+            <td>
+              <div class="fw-bold">{{ houseboat.name }}</div>
+              <small class="text-muted">ID: #HB{{ houseboat.id }}</small>
+            </td>
+            <td>
+              <span class="badge bg-secondary" style="padding: 0.5rem 0.8rem;">
+                {{ houseboat.get_houseboat_type_display }}
+              </span>
+            </td>
+            <td>{{ houseboat.destination.name }}</td>
+            <td>
+              {% if houseboat.supplier %}
+                <span class="badge bg-warning text-dark" style="padding: 0.5rem 0.8rem;">
+                  <i class="bi bi-person-check"></i> {{ houseboat.supplier.company_name }}
+                </span>
+              {% else %}
+                <span class="text-muted"><em>No Supplier</em></span>
+              {% endif %}
+            </td>
+            <td>
+              <small class="text-muted">
+                🛏️ {{ houseboat.num_cabins }} | 🚿 {{ houseboat.num_bathrooms }} | 👥 {{ houseboat.total_capacity }}
+              </small>
+            </td>
+            <td>
+              <small>
+                <strong>{{ houseboat.contact_person }}</strong><br>
+                📞 {{ houseboat.phone_number }}
+              </small>
+            </td>
+            <td class="text-center">
+              {% if houseboat.status %}
+                <span class="badge bg-success" style="padding: 0.5rem 1rem;">
+                  <i class="fas fa-check-circle me-1"></i>Active
+                </span>
+              {% else %}
+                <span class="badge bg-danger" style="padding: 0.5rem 1rem;">
+                  <i class="fas fa-times-circle me-1"></i>Inactive
+                </span>
+              {% endif %}
+              {% if houseboat.is_premium %}
+                <br><span class="badge bg-warning text-dark mt-1">⭐ Premium</span>
+              {% endif %}
+            </td>
+            <td>
+              <div class="action-buttons">
+                
+                <!-- ✅ PERMISSION CHECK: Inclusions Button -->
+                {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.permissions.can_manage_hotel_inclusions %}
+                <a href="{% url 'manage_houseboat_inclusions' houseboat.id %}" class="btn btn-success btn-action">
+                  <i class="fas fa-star me-1"></i>Inclusions
+                </a>
+                {% endif %}
+                
+                <!-- ✅ PERMISSION CHECK: Prices Button -->
+                {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.permissions.can_manage_hotel_prices %}
+                <a href="{% url 'houseboat_price_list' houseboat.id %}" class="btn btn-info btn-action">
+                  <i class="fas fa-dollar-sign me-1"></i>Prices
+                </a>
+                {% endif %}
+                
+                <!-- ✅ PERMISSION CHECK: Edit Button -->
+                {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.permissions.can_edit_houseboat %}
+                <button type="button" class="btn btn-warning btn-action" onclick="editHouseboat(this)"
+                        data-bs-toggle="modal" data-bs-target="#houseboatModal"
+                        data-mode="edit"
+                        data-houseboat-id="{{ houseboat.id }}"
+                        data-name="{{ houseboat.name }}"
+                        data-houseboat-type="{{ houseboat.houseboat_type }}"
+                        data-destination-id="{{ houseboat.destination.id }}"
+                        data-supplier-id="{{ houseboat.supplier.id|default:'' }}"
+                        data-details="{{ houseboat.details }}"
+                        data-num-cabins="{{ houseboat.num_cabins }}"
+                        data-num-bathrooms="{{ houseboat.num_bathrooms }}"
+                        data-total-capacity="{{ houseboat.total_capacity }}"
+                        data-length-meters="{{ houseboat.length_meters }}"
+                        data-contact-person="{{ houseboat.contact_person }}"
+                        data-phone-number="{{ houseboat.phone_number }}"
+                        data-phone-alternate="{{ houseboat.phone_alternate|default:'' }}"
+                        data-email="{{ houseboat.email }}"
+                        data-website="{{ houseboat.website|default:'' }}"
+                        data-registration-number="{{ houseboat.registration_number|default:'' }}"
+                        data-amenities="{{ houseboat.amenities|default:'' }}"
+                        data-special-features="{{ houseboat.special_features|default:'' }}"
+                        data-is-premium="{{ houseboat.is_premium|yesno:'true,false' }}"
+                        data-maximum-stay-days="{{ houseboat.maximum_stay_days }}"
+                        data-status="{{ houseboat.status|yesno:'true,false' }}">
+                  <i class="fas fa-edit me-1"></i>Edit
+                </button>
+                {% endif %}
+                
+                <!-- ✅ PERMISSION CHECK: Delete Button -->
+                {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.permissions.can_delete_houseboat %}
+                <button type="button" class="btn btn-danger btn-action" 
+                        data-bs-toggle="modal" data-bs-target="#deleteModal"
+                        data-delete-url="{% url 'houseboat_delete' houseboat.id %}"
+                        data-delete-name="{{ houseboat.name }}">
+                  <i class="fas fa-trash me-1"></i>Delete
+                </button>
+                {% endif %}
+                
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="8" class="text-center py-5">
+              <i class="fas fa-ship fa-3x text-muted mb-3"></i>
+              <h5 class="text-muted">No houseboats found</h5>
+              <p class="text-muted">Start by adding your first houseboat</p>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit Modal -->
+<div class="modal fade" id="houseboatModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header modal-header-gradient">
+        <h5 class="modal-title" id="houseboatModalLabel">
+          <i class="fas fa-ship me-2"></i>Add New Houseboat
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+          <form method="POST" action="{% url 'houseboat_create' %}" id="houseboatForm" enctype="multipart/form-data">
+
+          {% csrf_token %}
+          
+          <!-- Basic Information Section -->
+          <div class="mb-4">
+            <h6 class="form-section-title">
+              <i class="fas fa-info-circle me-2"></i>Basic Information
+            </h6>
+            
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">{{ form.name.label }}</label>
+                {{ form.name|add_class:"form-control" }}
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">{{ form.houseboat_type.label }}</label>
+                {{ form.houseboat_type|add_class:"form-select" }}
+              </div>
+            </div>
+            
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">{{ form.destination.label }}</label>
+                {{ form.destination|add_class:"form-select" }}
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">{{ form.supplier.label }}</label>
+                {{ form.supplier|add_class:"form-select" }}
+                <small class="text-muted d-block mt-1">Assign a houseboat supplier</small>
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <label class="form-label fw-bold">{{ form.details.label }}</label>
+              {{ form.details|add_class:"form-control" }}
+            </div>
+          </div>
+
+          <hr>
+
+          <!-- Specifications Section -->
+          <div class="mb-4">
+            <h6 class="form-section-title">
+              <i class="fas fa-ruler-combined me-2"></i>Specifications
+            </h6>
+            
+            <div class="row">
+              <div class="col-md-3 mb-3">
+                <label class="form-label fw-bold">{{ form.length_meters.label }}</label>
+                {{ form.length_meters|add_class:"form-control" }}
+              </div>
+              <div class="col-md-3 mb-3">
+                <label class="form-label fw-bold">{{ form.num_cabins.label }}</label>
+                {{ form.num_cabins|add_class:"form-control" }}
+              </div>
+              <div class="col-md-3 mb-3">
+                <label class="form-label fw-bold">{{ form.num_bathrooms.label }}</label>
+                {{ form.num_bathrooms|add_class:"form-control" }}
+              </div>
+              <div class="col-md-3 mb-3">
+                <label class="form-label fw-bold">{{ form.total_capacity.label }}</label>
+                {{ form.total_capacity|add_class:"form-control" }}
+              </div>
+            </div>
+          </div>
+
+          <hr>
+
+          <!-- Amenities & Features Section -->
+          <div class="mb-4">
+            <h6 class="form-section-title">
+              <i class="fas fa-star me-2"></i>Amenities & Features
+            </h6>
+            
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">{{ form.amenities.label }}</label>
+                {{ form.amenities|add_class:"form-control" }}
+                <small class="text-muted d-block mt-1">e.g., A/C, Hot Water, WiFi, Kitchen</small>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">{{ form.special_features.label }}</label>
+                {{ form.special_features|add_class:"form-control" }}
+                <small class="text-muted d-block mt-1">e.g., Rooftop Deck, Spa, Restaurant</small>
+              </div>
+            </div>
+          </div>
+
+          <hr>
+
+          <!-- Contact Information Section -->
+          <div class="mb-4">
+            <h6 class="form-section-title">
+              <i class="fas fa-phone me-2"></i>Contact Information
+            </h6>
+            
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">{{ form.contact_person.label }}</label>
+                {{ form.contact_person|add_class:"form-control" }}
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">{{ form.email.label }}</label>
+                {{ form.email|add_class:"form-control" }}
+              </div>
+            </div>
+            
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">{{ form.phone_number.label }}</label>
+                {{ form.phone_number|add_class:"form-control" }}
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">{{ form.phone_alternate.label }}</label>
+                {{ form.phone_alternate|add_class:"form-control" }}
+              </div>
+            </div>
+          </div>
+
+          <hr>
+
+          <!-- Additional Information Section -->
+          <div class="mb-4">
+            <h6 class="form-section-title">
+              <i class="fas fa-link me-2"></i>Additional Information
+            </h6>
+            
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">{{ form.website.label }}</label>
+                {{ form.website|add_class:"form-control" }}
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">{{ form.registration_number.label }}</label>
+                {{ form.registration_number|add_class:"form-control" }}
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <label class="form-label fw-bold">{{ form.maximum_stay_days.label }}</label>
+              {{ form.maximum_stay_days|add_class:"form-control" }}
+            </div>
+          </div>
+
+          <hr>
+
+          <!-- Image Upload Section -->
+          <div id="initialImageUploadSection" class="mb-4">
+            <h6 class="form-section-title">
+              <i class="fas fa-image me-2"></i>Images
+            </h6>
+            <label for="initial_images" class="form-label fw-bold">Images (can select multiple)</label>
+            <input type="file" name="initial_images" class="form-control" multiple accept="image/*">
+            <small class="text-muted d-block mt-1">Upload houseboat images</small>
+          </div>
+
+          <!-- Status Section -->
+          <div class="mb-4">
+            <h6 class="form-section-title">
+              <i class="fas fa-toggle-on me-2"></i>Status
+            </h6>
+            
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-check form-switch">
+                  {{ form.status|add_class:"form-check-input" }}
+                  <label class="form-check-label ms-2 fw-bold" for="id_status">
+                    {{ form.status.label }}
+                  </label>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-check form-switch">
+                  {{ form.is_premium|add_class:"form-check-input" }}
+                  <label class="form-check-label ms-2 fw-bold" for="id_is_premium">
+                    {{ form.is_premium.label }} ⭐
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Image Management Section (for edit mode) -->
+          <div id="imageManagementSection" class="mb-4" style="display: none;">
+            <hr>
+            <h6 class="form-section-title">
+              <i class="fas fa-images me-2"></i>Manage Images
+            </h6>
+            <div id="currentImagesContainer" class="row mb-3"></div>
+            <div class="mb-3">
+              <label for="new_images_upload" class="form-label fw-bold">Upload More Images</label>
+              <div class="input-group">
+                <input type="file" name="new_images_upload" class="form-control" multiple id="new_images_upload" accept="image/*">
+                <button type="button" class="btn btn-secondary" id="uploadNewImagesBtn">
+                  <i class="fas fa-upload"></i> Upload
+                </button>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div class="modal-footer border-0 pt-3">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          <i class="fas fa-times me-1"></i>Close
+        </button>
+        <button type="submit" form="houseboatForm" class="btn" style="background: linear-gradient(135deg, #36d1dc 0%, #5b86e5 100%); color: white;">
+          <i class="fas fa-save me-1"></i>Save Houseboat
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title">
+          <i class="fas fa-exclamation-triangle me-2"></i>Confirm Delete
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body text-center py-4">
+        <i class="fas fa-trash-alt fa-3x text-danger mb-3"></i>
+        <p class="mb-2">Are you sure you want to delete this houseboat?</p>
+        <h5 class="text-danger" id="deleteModalItemName"></h5>
+        <p class="text-muted small mb-0">This action cannot be undone.</p>
+      </div>
+      <div class="modal-footer border-0">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          <i class="fas fa-times me-1"></i>Cancel
+        </button>
+        <form method="post" action="" id="deleteModalForm" class="d-inline">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger">
+            <i class="fas fa-trash me-1"></i>Delete
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Edit Houseboat Function
+function editHouseboat(button) {
+  const form = document.getElementById('houseboatForm');
+  const houseboatId = button.getAttribute('data-houseboat-id');
+  
+  form.reset();
+  form.action = `/houseboats/edit/${houseboatId}/`;
+  document.getElementById('houseboatModalLabel').innerHTML = '<i class="fas fa-edit me-2"></i>Edit Houseboat';
+  document.getElementById('imageManagementSection').style.display = 'block';
+  document.getElementById('initialImageUploadSection').style.display = 'none';
+  
+  // Populate fields
+  document.getElementById('id_name').value = button.getAttribute('data-name');
+  document.getElementById('id_houseboat_type').value = button.getAttribute('data-houseboat-type');
+  document.getElementById('id_destination').value = button.getAttribute('data-destination-id');
+  
+  const supplierId = button.getAttribute('data-supplier-id');
+  if (supplierId) document.getElementById('id_supplier').value = supplierId;
+  
+  document.getElementById('id_details').value = button.getAttribute('data-details');
+  document.getElementById('id_num_cabins').value = button.getAttribute('data-num-cabins');
+  document.getElementById('id_num_bathrooms').value = button.getAttribute('data-num-bathrooms');
+  document.getElementById('id_total_capacity').value = button.getAttribute('data-total-capacity');
+  document.getElementById('id_length_meters').value = button.getAttribute('data-length-meters');
+  document.getElementById('id_amenities').value = button.getAttribute('data-amenities');
+  document.getElementById('id_special_features').value = button.getAttribute('data-special-features');
+  document.getElementById('id_contact_person').value = button.getAttribute('data-contact-person');
+  document.getElementById('id_phone_number').value = button.getAttribute('data-phone-number');
+  document.getElementById('id_phone_alternate').value = button.getAttribute('data-phone-alternate');
+  document.getElementById('id_email').value = button.getAttribute('data-email');
+  document.getElementById('id_website').value = button.getAttribute('data-website');
+  document.getElementById('id_registration_number').value = button.getAttribute('data-registration-number');
+  document.getElementById('id_maximum_stay_days').value = button.getAttribute('data-maximum-stay-days');
+  document.getElementById('id_status').checked = (button.getAttribute('data-status') === 'true');
+  document.getElementById('id_is_premium').checked = (button.getAttribute('data-is-premium') === 'true');
+  
+  loadHouseboatImages(houseboatId);
+}
+
+// Load Images
+function loadHouseboatImages(houseboatId) {
+  fetch(`/houseboat/${houseboatId}/images/`)
+    .then(response => response.json())
+    .then(data => {
+      document.getElementById('currentImagesContainer').innerHTML = data.html || '<p class="text-muted col-12">No images uploaded yet.</p>';
+    });
+}
+
+// Delete Modal
+const deleteModal = document.getElementById('deleteModal');
+if (deleteModal) {
+  deleteModal.addEventListener('show.bs.modal', function (event) {
+    const button = event.relatedTarget;
+    document.getElementById('deleteModalForm').action = button.getAttribute('data-delete-url');
+    document.getElementById('deleteModalItemName').textContent = button.getAttribute('data-delete-name');
+  });
+}
+
+// Search/Filter
+function filterHouseboats() {
+  const searchValue = document.getElementById('searchInput').value.toLowerCase();
+  const table = document.getElementById('houseboatsTable');
+  const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i];
+    const text = row.textContent.toLowerCase();
+    row.style.display = text.includes(searchValue) ? '' : 'none';
+  }
+}
+
+function resetSearch() {
+  document.getElementById('searchInput').value = '';
+  filterHouseboats();
+}
+</script>
+
+{% endblock %}

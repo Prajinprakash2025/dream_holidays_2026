@@ -1,0 +1,726 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<style>
+.hotels-header {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    padding: 2rem;
+    border-radius: 15px;
+    margin-bottom: 2rem;
+    color: white;
+    box-shadow: 0 10px 30px rgba(240, 147, 251, 0.3);
+}
+
+.modern-table-container {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+}
+
+.modern-table thead {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+}
+
+.modern-table thead th {
+    border: none;
+    padding: 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+}
+
+.modern-table tbody tr {
+    transition: all 0.3s ease;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.modern-table tbody tr:hover {
+    background: #fff5f7;
+    transform: scale(1.01);
+    box-shadow: 0 4px 12px rgba(240, 147, 251, 0.1);
+}
+
+.modern-table tbody td {
+    padding: 1rem;
+    vertical-align: middle;
+}
+
+.hotel-image-thumb {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 10px;
+    border: 3px solid #f093fb;
+}
+
+.hotel-placeholder {
+    width: 80px;
+    height: 80px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 20px;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.btn-action {
+    padding: 0.4rem 0.8rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    border: none;
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.btn-action:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.modal-header-gradient {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+}
+
+.form-section-title {
+    color: #f5576c;
+    font-weight: 600;
+    border-bottom: 2px solid #f093fb;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.search-box {
+    background: white;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    margin-bottom: 1.5rem;
+}
+  .suppliers-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 2rem;
+    border-radius: 15px;
+    margin-bottom: 2rem;
+    color: white;
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+  }
+
+  /* Add this new style for back button */
+  .back-button-container {
+    padding: 1.5rem 2rem 0 2rem;
+    margin-bottom: -1rem;
+  }
+
+  .back-btn-modern {
+    padding: 0.6rem 1.2rem;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    border: 2px solid #667eea;
+    color: #667eea;
+    background: white;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .back-btn-modern:hover {
+    background: #667eea;
+    color: white;
+    transform: translateX(-5px);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  }
+
+  .back-btn-modern i {
+    font-size: 16px;
+  }
+
+  .search-filter-bar {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    margin-bottom: 1.5rem;
+  }
+
+  .modern-table {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+  }
+
+  .modern-table thead {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+  }
+
+  .modern-table thead th {
+    border: none;
+    padding: 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+  }
+
+  .modern-table tbody tr {
+    transition: all 0.3s ease;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .modern-table tbody tr:hover {
+    background: #f8f9ff;
+    transform: scale(1.01);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+  }
+
+  .modern-table tbody td {
+    padding: 1rem;
+    vertical-align: middle;
+  }
+
+  .action-btn-group {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .action-btn {
+    padding: 0.4rem 0.8rem;
+    border-radius: 8px;
+    border: none;
+    transition: all 0.3s ease;
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+
+  .badge-modern {
+    padding: 0.4rem 0.8rem;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 12px;
+  }
+
+  .stats-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    text-align: center;
+    transition: all 0.3s ease;
+  }
+
+  .stats-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+  }
+
+  .stats-card .icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    font-size: 24px;
+  }
+
+  .modal-header-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+  }
+
+  .form-section-title {
+    color: #667eea;
+    font-weight: 600;
+    border-bottom: 2px solid #667eea;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+  }
+</style>
+
+<!-- Back Button with Modern Styling -->
+<div class="back-button-container">
+    <a href="{% url 'admin_settings' %}" class="back-btn-modern">
+        <i class="fas fa-arrow-left"></i>
+        <span>Back to Admin Settings</span>
+    </a>
+</div>
+<div class="container-fluid" style="margin-top: 90px; padding: 0 2rem;">
+
+<!-- Header -->
+<div class="hotels-header">
+    <div class="d-flex justify-content-between align-items-center">
+    <div>
+        <h2 class="mb-2">
+        <i class="fas fa-hotel"></i> Hotels Management
+        </h2>
+        <p class="mb-0" style="opacity: 0.9;">Manage hotel listings and properties</p>
+    </div>
+    
+    <!-- ✅ PERMISSION CHECK: Add Hotel Button -->
+    {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.permissions.can_add_hotel %}
+    <button type="button" class="btn btn-light btn-lg shadow" data-bs-toggle="modal" data-bs-target="#hotelModal" onclick="resetForm()">
+        <i class="fas fa-plus-circle me-2"></i>Add Hotel
+    </button>
+    {% endif %}
+    </div>
+</div>
+
+<!-- Search Box -->
+<div class="search-box">
+    <div class="input-group">
+    <span class="input-group-text bg-transparent border-0">
+        <i class="fas fa-search text-muted"></i>
+    </span>
+    <input type="text" class="form-control border-0" id="searchInput" placeholder="Search hotels..." onkeyup="filterHotels()">
+    <button class="btn btn-outline-secondary" onclick="resetSearch()">
+        <i class="fas fa-redo me-1"></i>Reset
+    </button>
+    </div>
+</div>
+
+<!-- Table -->
+<div class="modern-table-container">
+    <div class="table-responsive">
+    <table class="table modern-table mb-0" id="hotelsTable">
+        <thead>
+        <tr>
+            <th><i class="fas fa-image me-2"></i>Image</th>
+            <th><i class="fas fa-hotel me-2"></i>Name</th>
+            <th><i class="fas fa-star me-2"></i>Category</th>
+            <th><i class="fas fa-map-marker-alt me-2"></i>Destination</th>
+            <th><i class="fas fa-truck me-2"></i>Supplier</th>
+            <th><i class="fas fa-toggle-on me-2"></i>Status</th>
+            <th class="text-center"><i class="fas fa-cogs me-2"></i>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for hotel in hotels %}
+        <tr>
+            <td>
+            {% if hotel.image %}
+                <img src="{{ hotel.image.url }}" alt="{{ hotel.name }}" class="hotel-image-thumb">
+            {% else %}
+                <div class="hotel-placeholder">
+                {{ hotel.name|first|upper }}
+                </div>
+            {% endif %}
+            </td>
+            <td>
+            <div class="fw-bold">{{ hotel.name }}</div>
+            <small class="text-muted">ID: #HOTEL{{ hotel.id }}</small>
+            </td>
+            <td>
+            <span class="badge bg-info" style="padding: 0.5rem 0.8rem;">
+                {{ hotel.get_category_display }}
+            </span>
+            </td>
+            <td>{{ hotel.destination.name }}</td>
+            <td>
+            {% if hotel.supplier %}
+                <span class="badge bg-warning text-dark" style="padding: 0.5rem 0.8rem;">
+                {{ hotel.supplier.company_name }}
+                </span>
+            {% else %}
+                <span class="text-muted fst-italic">No Supplier</span>
+            {% endif %}
+            </td>
+            <td>
+            {% if hotel.status %}
+                <span class="badge bg-success" style="padding: 0.5rem 1rem;">
+                <i class="fas fa-check-circle me-1"></i>Active
+                </span>
+            {% else %}
+                <span class="badge bg-danger" style="padding: 0.5rem 1rem;">
+                <i class="fas fa-times-circle me-1"></i>Inactive
+                </span>
+            {% endif %}
+            </td>
+            <td>
+            <div class="action-buttons">
+                
+                <!-- ✅ PERMISSION CHECK: Manage Inclusions Button -->
+                {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.permissions.can_manage_hotel_inclusions %}
+                <a href="{% url 'manage_hotel_inclusions' hotel.id %}" class="btn btn-success btn-action">
+                <i class="fas fa-star me-1"></i>Inclusions
+                </a>
+                {% endif %}
+                
+                <!-- ✅ PERMISSION CHECK: Manage Prices Button -->
+                {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.permissions.can_manage_hotel_prices %}
+                <a href="{% url 'price_list' hotel.id %}" class="btn btn-info btn-action">
+                <i class="fas fa-dollar-sign me-1"></i>Prices
+                </a>
+                {% endif %}
+                
+                <!-- ✅ PERMISSION CHECK: Edit Button -->
+                {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.permissions.can_edit_hotel %}
+                <button type="button" class="btn btn-warning btn-action" onclick="editHotel(this)"
+                        data-bs-toggle="modal"
+                        data-bs-target="#hotelModal"
+                        data-id="{{ hotel.id }}"
+                        data-name="{{ hotel.name }}"
+                        data-category="{{ hotel.category }}"
+                        data-destination="{{ hotel.destination.id }}"
+                        data-supplier="{{ hotel.supplier.id|default:'' }}"
+                        data-details="{{ hotel.details }}"
+                        data-contact-person="{{ hotel.contact_person }}"
+                        data-phone-number="{{ hotel.phone_number }}"
+                        data-phone="{{ hotel.phone|default:'' }}"
+                        data-email="{{ hotel.email }}"
+                        data-link="{{ hotel.hotel_link|default:'' }}"
+                        data-status="{{ hotel.status|yesno:'true,false' }}"
+                        data-image="{% if hotel.image %}{{ hotel.image.url }}{% endif %}">
+                <i class="fas fa-edit me-1"></i>Edit
+                </button>
+                {% endif %}
+                
+                <!-- ✅ PERMISSION CHECK: Delete Button -->
+                {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.permissions.can_delete_hotel %}
+                <button type="button" class="btn btn-danger btn-action"
+                        data-bs-toggle="modal"
+                        data-bs-target="#deleteModal"
+                        data-delete-url="{% url 'delete_hotel' hotel.id %}"
+                        data-delete-name="{{ hotel.name }}">
+                <i class="fas fa-trash me-1"></i>Delete
+                </button>
+                {% endif %}
+                
+            </div>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="7" class="text-center py-5">
+            <i class="fas fa-hotel fa-3x text-muted mb-3"></i>
+            <h5 class="text-muted">No hotels found</h5>
+            <p class="text-muted">Start by adding your first hotel</p>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</div>
+</div>
+
+<!-- Add/Edit Modal -->
+<div class="modal fade" id="hotelModal" tabindex="-1" aria-hidden="true">
+<div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+    <div class="modal-header modal-header-gradient">
+        <h5 class="modal-title" id="hotelModalLabel">
+        <i class="fas fa-hotel me-2"></i>Add New Hotel
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+    </div>
+    <div class="modal-body">
+        <form method="POST" action="{% url 'add_hotel' %}" enctype="multipart/form-data" id="hotelForm">
+        {% csrf_token %}
+        
+        <!-- Basic Information -->
+            <h6 class="form-section-title">
+            <i class="fas fa-info-circle me-2"></i>Basic Information
+            </h6>
+            <div class="row mb-4">
+            <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Hotel Name *</label>
+                <input type="text" class="form-control" name="name" id="name" required autocomplete="organization">
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Category *</label>
+                <select class="form-select" name="category" id="category" required autocomplete="off">
+                <option value="">Select Category</option>
+                <option value="budget">Budget</option>
+                <option value="3star">3 Star</option>
+                <option value="4star">4 Star</option>
+                <option value="5star">5 Star</option>
+                <option value="luxury">Luxury</option>
+                <option value="resort">Resort</option>
+                </select>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Destination *</label>
+                <select class="form-select" name="destination" id="destination" required autocomplete="off">
+                <option value="">Select Destination</option>
+                {% for dest in destinations %}
+                    <option value="{{ dest.id }}">{{ dest.name }}</option>
+                {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Supplier</label>
+                <select class="form-select" name="supplier" id="supplier" autocomplete="off">
+                <option value="">Select Supplier (Optional)</option>
+                {% for sup in suppliers %}
+                    <option value="{{ sup.id }}">{{ sup.company_name }}</option>
+                {% endfor %}
+                </select>
+                <small class="text-muted">Only hotel suppliers are shown</small>
+            </div>
+            <div class="col-12 mb-3">
+                <label class="form-label fw-bold">Details</label>
+                <textarea class="form-control" name="details" id="details" rows="3" autocomplete="off"></textarea>
+            </div>
+            </div>
+
+            <!-- Contact Information -->
+            <h6 class="form-section-title">
+            <i class="fas fa-phone me-2"></i>Contact Information
+            </h6>
+            <div class="row mb-4">
+            <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Contact Person *</label>
+                <input type="text" class="form-control" name="contact_person" id="contact_person" required autocomplete="name">
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Phone Number *</label>
+                <input type="text" class="form-control" name="phone_number" id="phone_number" required autocomplete="tel">
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Secondary Phone</label>
+                <input type="text" class="form-control" name="phone" id="phone" autocomplete="tel">
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Email *</label>
+                <input type="email" class="form-control" name="email" id="email" required autocomplete="email">
+            </div>
+            </div>
+
+            <!-- Links & Media -->
+            <h6 class="form-section-title">
+            <i class="fas fa-link me-2"></i>Links & Media
+            </h6>
+            <div class="row mb-4">
+            <div class="col-12 mb-3">
+                <label class="form-label fw-bold">Hotel Website</label>
+                <input type="url" class="form-control" name="hotel_link" id="hotel_link" autocomplete="url">
+            </div>
+            <div class="col-12 mb-3" id="currentImagePreview" style="display: none;">
+                <label class="form-label fw-bold">Current Image:</label>
+                <div>
+                <img id="currentImage" src="" alt="Current" class="img-thumbnail" style="max-width: 200px;">
+                </div>
+            </div>
+            <div class="col-12 mb-3">
+                <label class="form-label fw-bold" id="imageLabel" for="image">Upload Hotel Image</label>
+                <input type="file" class="form-control" name="image" id="image" accept="image/*" autocomplete="off">
+                <small class="text-muted" id="imageHint">Select a hotel image</small>
+            </div>
+            </div>
+
+        <!-- Status -->
+        <h6 class="form-section-title">
+            <i class="fas fa-toggle-on me-2"></i>Status
+        </h6>
+        <div class="mb-3">
+            <div class="form-check form-switch">
+            <input type="checkbox" class="form-check-input" name="status" id="status" checked style="width: 48px; height: 24px; cursor: pointer;">
+            <label class="form-check-label ms-2 fw-bold" for="status">
+                Active Status
+            </label>
+            </div>
+        </div>
+
+        <div class="modal-footer border-0 pt-3">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            <i class="fas fa-times me-1"></i>Close
+            </button>
+            <button type="submit" class="btn" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white;">
+            <i class="fas fa-save me-1"></i>Save Hotel
+            </button>
+        </div>
+        </form>
+    </div>
+    </div>
+</div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+<div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+    <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title">
+        <i class="fas fa-exclamation-triangle me-2"></i>Confirm Delete
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+    </div>
+    <div class="modal-body text-center py-4">
+        <i class="fas fa-trash-alt fa-3x text-danger mb-3"></i>
+        <p class="mb-2">Are you sure you want to delete this hotel?</p>
+        <h5 class="text-danger" id="deleteModalItemName"></h5>
+        <p class="text-muted small mb-0">This action cannot be undone.</p>
+    </div>
+    <div class="modal-footer border-0">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+        <i class="fas fa-times me-1"></i>Cancel
+        </button>
+        <form method="post" action="" id="deleteModalForm" class="d-inline">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">
+            <i class="fas fa-trash me-1"></i>Delete
+        </button>
+        </form>
+    </div>
+    </div>
+</div>
+</div>
+
+<script>
+// Reset Form
+function resetForm() {
+const form = document.getElementById('hotelForm');
+form.reset();
+form.action = "{% url 'add_hotel' %}";
+document.getElementById('hotelModalLabel').innerHTML = '<i class="fas fa-hotel me-2"></i>Add New Hotel';
+document.getElementById('status').checked = true;
+document.getElementById('currentImagePreview').style.display = 'none';
+document.getElementById('imageLabel').textContent = 'Upload Hotel Image';
+document.getElementById('imageHint').textContent = 'Select a hotel image';
+
+// Reset all select fields to default
+document.getElementById('category').value = '';
+document.getElementById('destination').value = '';
+document.getElementById('supplier').value = '';
+}
+
+// Edit Hotel
+function editHotel(button) {
+const form = document.getElementById('hotelForm');
+const hotelId = button.getAttribute('data-id');
+
+// First reset the form
+form.reset();
+
+// Set form action for edit
+form.action = "{% url 'edit_hotel' 0 %}".replace('/0/', `/${hotelId}/`);
+
+// Update modal title
+document.getElementById('hotelModalLabel').innerHTML = '<i class="fas fa-edit me-2"></i>Edit Hotel';
+
+// Populate text fields
+document.getElementById('name').value = button.getAttribute('data-name') || '';
+document.getElementById('details').value = button.getAttribute('data-details') || '';
+document.getElementById('contact_person').value = button.getAttribute('data-contact-person') || '';
+document.getElementById('phone_number').value = button.getAttribute('data-phone-number') || '';
+document.getElementById('phone').value = button.getAttribute('data-phone') || '';
+document.getElementById('email').value = button.getAttribute('data-email') || '';
+document.getElementById('hotel_link').value = button.getAttribute('data-link') || '';
+
+// Populate select fields
+const category = button.getAttribute('data-category');
+const destination = button.getAttribute('data-destination');
+const supplier = button.getAttribute('data-supplier');
+
+if (category) {
+    document.getElementById('category').value = category;
+}
+
+if (destination) {
+    document.getElementById('destination').value = destination;
+}
+
+// Handle supplier - can be empty
+if (supplier && supplier !== 'None' && supplier !== '') {
+    document.getElementById('supplier').value = supplier;
+} else {
+    document.getElementById('supplier').value = '';
+}
+
+// Handle status checkbox
+const status = button.getAttribute('data-status');
+document.getElementById('status').checked = (status === 'true');
+
+// Show current image if exists
+const hotelImageUrl = button.getAttribute('data-image');
+if (hotelImageUrl && hotelImageUrl !== '') {
+    document.getElementById('currentImage').src = hotelImageUrl;
+    document.getElementById('currentImagePreview').style.display = 'block';
+    document.getElementById('imageLabel').textContent = 'Change Image';
+    document.getElementById('imageHint').textContent = 'Leave empty to keep current image';
+} else {
+    document.getElementById('currentImagePreview').style.display = 'none';
+    document.getElementById('imageLabel').textContent = 'Upload Hotel Image';
+    document.getElementById('imageHint').textContent = 'Select a hotel image';
+}
+}
+
+// Image Preview on File Selection
+document.getElementById('image').addEventListener('change', function(e) {
+const file = e.target.files[0];
+if (file) {
+    const reader = new FileReader();
+    reader.onload = function(event) {
+    document.getElementById('currentImage').src = event.target.result;
+    document.getElementById('currentImagePreview').style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+}
+});
+
+// Delete Modal
+const deleteModal = document.getElementById('deleteModal');
+if (deleteModal) {
+deleteModal.addEventListener('show.bs.modal', function (event) {
+    const button = event.relatedTarget;
+    document.getElementById('deleteModalForm').action = button.getAttribute('data-delete-url');
+    document.getElementById('deleteModalItemName').textContent = button.getAttribute('data-delete-name');
+});
+}
+
+// Search/Filter
+function filterHotels() {
+const searchValue = document.getElementById('searchInput').value.toLowerCase();
+const table = document.getElementById('hotelsTable');
+const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+
+for (let i = 0; i < rows.length; i++) {
+    const row = rows[i];
+    const text = row.textContent.toLowerCase();
+    row.style.display = text.includes(searchValue) ? '' : 'none';
+}
+}
+
+function resetSearch() {
+document.getElementById('searchInput').value = '';
+filterHotels();
+}
+
+// Close modal and reset form when clicking outside or on close button
+const hotelModal = document.getElementById('hotelModal');
+if (hotelModal) {
+hotelModal.addEventListener('hidden.bs.modal', function () {
+    // Optional: Reset form when modal closes
+    // resetForm();
+});
+}
+</script>
+
+{% endblock %}

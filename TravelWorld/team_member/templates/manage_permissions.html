@@ -1,0 +1,2387 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="page-header">
+  <h3 class="fw-bold mb-3">
+    <i class="fas fa-user-shield me-2"></i>Manage Team Permissions
+  </h3>
+  <p class="text-muted">Grant or revoke specific permissions for team members</p>
+</div>
+
+<!-- ✅ USER SELECTION DROPDOWN -->
+<div class="row mb-4">
+  <div class="col-md-12">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <label class="form-label fw-bold mb-3">
+          <i class="fas fa-user-circle me-2"></i>Select Team Member
+        </label>
+        <select id="userSelect" class="form-select form-select-lg" onchange="showUserPermissions(this.value)">
+          <option value="">-- Choose a team member --</option>
+          {% for data in team_data %}
+          <option value="{{ data.member.id }}">
+            {{ data.member.get_full_name }} - {{ data.member.get_role_display }}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ✅ EMPTY STATE (Show when no user is selected) -->
+<div id="emptyState" class="card shadow-sm">
+  <div class="card-body text-center py-5">
+    <i class="fas fa-user-shield fa-4x text-muted mb-4" style="opacity: 0.3;"></i>
+    <h4 class="text-muted mb-3">No Team Member Selected</h4>
+    <p class="text-muted mb-0">Please select a team member from the dropdown above to view and manage their permissions.</p>
+  </div>
+</div>
+
+<div id="permissionsContainer">
+  {% for data in team_data %}
+  
+  <!-- USER PERMISSION SECTION (Hidden by default) -->
+  <div class="user-permissions" id="user-{{ data.member.id }}" style="display: none;">
+    
+    <!-- USER HEADER CARD -->
+    <div class="card mb-4">
+      <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h4 class="mb-0">
+              <i class="fas fa-user me-2"></i>{{ data.member.get_full_name }}
+              <span class="badge badge-primary ms-2">{{ data.member.get_role_display }}</span>
+            </h4>
+          </div>
+          <small class="text-muted">{{ data.member.email }}</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- QUERIES SECTION -->
+    <!-- ========================================== -->
+    <div class="card mb-4">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 text-primary">
+          <i class="fas fa-list me-2"></i>Queries
+        </h5>
+        <button class="btn btn-sm btn-outline-primary select-all-btn" onclick="selectAllInCard({{ data.member.id }}, 'queries')">
+          <i class="fas fa-check-double me-1"></i>Select All
+        </button>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <!-- Create Queries -->
+          <div class="col-md-6 mb-3">
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="flex-grow-1">
+                <label class="form-label fw-bold mb-1">Create Queries</label>
+                <p class="text-muted small mb-0">Can add new customer queries</p>
+              </div>
+              <div class="form-check form-switch ms-3">
+                <input class="form-check-input permission-queries" type="checkbox"
+                  id="{{ data.member.id }}_can_create_queries"
+                  data-permission="can_create_queries"
+                  {% if data.permissions_status.can_create_queries %}checked{% endif %}
+                  onchange="togglePermission({{ data.member.id }}, 'can_create_queries', this.checked)"
+                  style="width: 48px; height: 24px; cursor: pointer" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Edit All Queries -->
+          <div class="col-md-6 mb-3">
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="flex-grow-1">
+                <label class="form-label fw-bold mb-1">Edit All Queries</label>
+                <p class="text-muted small mb-0">Can edit any query (not just own)</p>
+              </div>
+              <div class="form-check form-switch ms-3">
+                <input class="form-check-input permission-queries" type="checkbox"
+                  id="{{ data.member.id }}_can_edit_all_queries"
+                  data-permission="can_edit_all_queries"
+                  {% if data.permissions_status.can_edit_all_queries %}checked{% endif %}
+                  onchange="togglePermission({{ data.member.id }}, 'can_edit_all_queries', this.checked)"
+                  style="width: 48px; height: 24px; cursor: pointer" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Delete Queries -->
+          <div class="col-md-6 mb-3">
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="flex-grow-1">
+                <label class="form-label fw-bold mb-1">Delete Queries</label>
+                <p class="text-muted small mb-0">Can delete queries</p>
+              </div>
+              <div class="form-check form-switch ms-3">
+                <input class="form-check-input permission-queries" type="checkbox"
+                  id="{{ data.member.id }}_can_delete_queries"
+                  data-permission="can_delete_queries"
+                  {% if data.permissions_status.can_delete_queries %}checked{% endif %}
+                  onchange="togglePermission({{ data.member.id }}, 'can_delete_queries', this.checked)"
+                  style="width: 48px; height: 24px; cursor: pointer" />
+              </div>
+            </div>
+          </div>
+
+          <!-- View All Queries -->
+          <div class="col-md-6 mb-3">
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="flex-grow-1">
+                <label class="form-label fw-bold mb-1">View All Queries</label>
+                <p class="text-muted small mb-0">Can see queries from all team members</p>
+              </div>
+              <div class="form-check form-switch ms-3">
+                <input class="form-check-input permission-queries" type="checkbox"
+                  id="{{ data.member.id }}_can_view_all_queries"
+                  data-permission="can_view_all_queries"
+                  {% if data.permissions_status.can_view_all_queries %}checked{% endif %}
+                  onchange="togglePermission({{ data.member.id }}, 'can_view_all_queries', this.checked)"
+                  style="width: 48px; height: 24px; cursor: pointer" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- PROPOSALS & ITINERARY BUILDING CARD -->
+    <!-- ========================================== -->
+    <div class="card mb-4">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 text-primary">
+          <i class="fas fa-file-alt me-2"></i>Proposals & Itinerary Building
+        </h5>
+        <button class="btn btn-sm btn-outline-primary select-all-btn" onclick="selectAllInCard({{ data.member.id }}, 'proposals')">
+          <i class="fas fa-check-double me-1"></i>Select All
+        </button>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <!-- View Proposals -->
+          <div class="col-md-6 mb-3">
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="flex-grow-1">
+                <label class="form-label fw-bold mb-1">View Proposals</label>
+                <p class="text-muted small mb-0">Can view and manage query proposals</p>
+              </div>
+              <div class="form-check form-switch ms-3">
+                <input class="form-check-input permission-proposals" type="checkbox"
+                  id="{{ data.member.id }}_can_view_proposals"
+                  data-permission="can_view_proposals"
+                  {% if data.permissions_status.can_view_proposals %}checked{% endif %}
+                  onchange="togglePermission({{ data.member.id }}, 'can_view_proposals', this.checked)"
+                  style="width: 48px; height: 24px; cursor: pointer" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Create Itinerary -->
+          <div class="col-md-6 mb-3">
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="flex-grow-1">
+                <label class="form-label fw-bold mb-1">Create Itinerary</label>
+                <p class="text-muted small mb-0">Can create new itineraries for queries</p>
+              </div>
+              <div class="form-check form-switch ms-3">
+                <input class="form-check-input permission-proposals" type="checkbox"
+                  id="{{ data.member.id }}_can_create_itinerary"
+                  data-permission="can_create_itinerary"
+                  {% if data.permissions_status.can_create_itinerary %}checked{% endif %}
+                  onchange="togglePermission({{ data.member.id }}, 'can_create_itinerary', this.checked)"
+                  style="width: 48px; height: 24px; cursor: pointer" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Insert Itinerary -->
+          <div class="col-md-6 mb-3">
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="flex-grow-1">
+                <label class="form-label fw-bold mb-1">Insert Itinerary</label>
+                <p class="text-muted small mb-0">Can insert existing packages as itineraries</p>
+              </div>
+              <div class="form-check form-switch ms-3">
+                <input class="form-check-input permission-proposals" type="checkbox"
+                  id="{{ data.member.id }}_can_insert_itinerary"
+                  data-permission="can_insert_itinerary"
+                  {% if data.permissions_status.can_insert_itinerary %}checked{% endif %}
+                  onchange="togglePermission({{ data.member.id }}, 'can_insert_itinerary', this.checked)"
+                  style="width: 48px; height: 24px; cursor: pointer" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Access Build Tab -->
+          <div class="col-md-6 mb-3">
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="flex-grow-1">
+                <label class="form-label fw-bold mb-1">Access Build Tab</label>
+                <p class="text-muted small mb-0">Can build and edit itinerary day plans</p>
+              </div>
+              <div class="form-check form-switch ms-3">
+                <input class="form-check-input permission-proposals" type="checkbox"
+                  id="{{ data.member.id }}_can_access_build_tab"
+                  data-permission="can_access_build_tab"
+                  {% if data.permissions_status.can_access_build_tab %}checked{% endif %}
+                  onchange="togglePermission({{ data.member.id }}, 'can_access_build_tab', this.checked)"
+                  style="width: 48px; height: 24px; cursor: pointer" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Access Pricing Tab -->
+          <div class="col-md-6 mb-3">
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="flex-grow-1">
+                <label class="form-label fw-bold mb-1">Access Pricing Tab</label>
+                <p class="text-muted small mb-0">Can view and manage pricing/costing</p>
+              </div>
+              <div class="form-check form-switch ms-3">
+                <input class="form-check-input permission-proposals" type="checkbox"
+                  id="{{ data.member.id }}_can_access_pricing_tab"
+                  data-permission="can_access_pricing_tab"
+                  {% if data.permissions_status.can_access_pricing_tab %}checked{% endif %}
+                  onchange="togglePermission({{ data.member.id }}, 'can_access_pricing_tab', this.checked)"
+                  style="width: 48px; height: 24px; cursor: pointer" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Access Final Tab -->
+          <div class="col-md-6 mb-3">
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="flex-grow-1">
+                <label class="form-label fw-bold mb-1">Access Final Tab</label>
+                <p class="text-muted small mb-0">Can finalize and confirm itinerary</p>
+              </div>
+              <div class="form-check form-switch ms-3">
+                <input class="form-check-input permission-proposals" type="checkbox"
+                  id="{{ data.member.id }}_can_access_final_tab"
+                  data-permission="can_access_final_tab"
+                  {% if data.permissions_status.can_access_final_tab %}checked{% endif %}
+                  onchange="togglePermission({{ data.member.id }}, 'can_access_final_tab', this.checked)"
+                  style="width: 48px; height: 24px; cursor: pointer" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Supplier Communication -->
+          <div class="col-md-6 mb-3">
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="flex-grow-1">
+                <label class="form-label fw-bold mb-1">Supplier Communication</label>
+                <p class="text-muted small mb-0">Can communicate and manage suppliers</p>
+              </div>
+              <div class="form-check form-switch ms-3">
+                <input class="form-check-input permission-proposals" type="checkbox"
+                  id="{{ data.member.id }}_can_supplier_communication"
+                  data-permission="can_supplier_communication"
+                  {% if data.permissions_status.can_supplier_communication %}checked{% endif %}
+                  onchange="togglePermission({{ data.member.id }}, 'can_supplier_communication', this.checked)"
+                  style="width: 48px; height: 24px; cursor: pointer" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Edit Day Plans -->
+          <div class="col-md-6 mb-3">
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="flex-grow-1">
+                <label class="form-label fw-bold mb-1">Edit Day Plans</label>
+                <p class="text-muted small mb-0">Can edit itinerary day plans in proposals</p>
+              </div>
+              <div class="form-check form-switch ms-3">
+                <input class="form-check-input permission-proposals" type="checkbox"
+                  id="{{ data.member.id }}_can_edit_day_plans"
+                  data-permission="can_edit_day_plans"
+                  {% if data.permissions_status.can_edit_day_plans %}checked{% endif %}
+                  onchange="togglePermission({{ data.member.id }}, 'can_edit_day_plans', this.checked)"
+                  style="width: 48px; height: 24px; cursor: pointer" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Delete Itinerary -->
+          <div class="col-md-6 mb-3">
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="flex-grow-1">
+                <label class="form-label fw-bold mb-1">Delete Itinerary</label>
+                <p class="text-muted small mb-0">Can delete itineraries from proposals</p>
+              </div>
+              <div class="form-check form-switch ms-3">
+                <input class="form-check-input permission-proposals" type="checkbox"
+                  id="{{ data.member.id }}_can_delete_itinerary"
+                  data-permission="can_delete_itinerary"
+                  {% if data.permissions_status.can_delete_itinerary %}checked{% endif %}
+                  onchange="togglePermission({{ data.member.id }}, 'can_delete_itinerary', this.checked)"
+                  style="width: 48px; height: 24px; cursor: pointer" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Confirm Itinerary -->
+          <div class="col-md-6 mb-3">
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="flex-grow-1">
+                <label class="form-label fw-bold mb-1">Confirm Itinerary</label>
+                <p class="text-muted small mb-0">Can confirm/finalize itineraries</p>
+              </div>
+              <div class="form-check form-switch ms-3">
+                <input class="form-check-input permission-proposals" type="checkbox"
+                  id="{{ data.member.id }}_can_confirm_itinerary"
+                  data-permission="can_confirm_itinerary"
+                  {% if data.permissions_status.can_confirm_itinerary %}checked{% endif %}
+                  onchange="togglePermission({{ data.member.id }}, 'can_confirm_itinerary', this.checked)"
+                  style="width: 48px; height: 24px; cursor: pointer" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Generate Quotation -->
+          <div class="col-md-6 mb-3">
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="flex-grow-1">
+                <label class="form-label fw-bold mb-1">Generate Quotation</label>
+                <p class="text-muted small mb-0">Can view and generate quotations for proposals</p>
+              </div>
+              <div class="form-check form-switch ms-3">
+                <input class="form-check-input permission-proposals" type="checkbox"
+                  id="{{ data.member.id }}_can_generate_quotation"
+                  data-permission="can_generate_quotation"
+                  {% if data.permissions_status.can_generate_quotation %}checked{% endif %}
+                  onchange="togglePermission({{ data.member.id }}, 'can_generate_quotation', this.checked)"
+                  style="width: 48px; height: 24px; cursor: pointer" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Set to Draft -->
+          <div class="col-md-6 mb-3">
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="flex-grow-1">
+                <label class="form-label fw-bold mb-1">Set to Draft</label>
+                <p class="text-muted small mb-0">Can revert itineraries to draft status</p>
+              </div>
+              <div class="form-check form-switch ms-3">
+                <input class="form-check-input permission-proposals" type="checkbox"
+                  id="{{ data.member.id }}_can_set_itinerary_draft"
+                  data-permission="can_set_itinerary_draft"
+                  {% if data.permissions_status.can_set_itinerary_draft %}checked{% endif %}
+                  onchange="togglePermission({{ data.member.id }}, 'can_set_itinerary_draft', this.checked)"
+                  style="width: 48px; height: 24px; cursor: pointer" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Cancel Itinerary -->
+          <div class="col-md-6 mb-3">
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="flex-grow-1">
+                <label class="form-label fw-bold mb-1">Cancel Itinerary</label>
+                <p class="text-muted small mb-0">Can cancel confirmed itineraries</p>
+              </div>
+              <div class="form-check form-switch ms-3">
+                <input class="form-check-input permission-proposals" type="checkbox"
+                  id="{{ data.member.id }}_can_cancel_itinerary"
+                  data-permission="can_cancel_itinerary"
+                  {% if data.permissions_status.can_cancel_itinerary %}checked{% endif %}
+                  onchange="togglePermission({{ data.member.id }}, 'can_cancel_itinerary', this.checked)"
+                  style="width: 48px; height: 24px; cursor: pointer" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Change Itinerary Option -->
+          <div class="col-md-6 mb-3">
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="flex-grow-1">
+                <label class="form-label fw-bold mb-1">Change Itinerary Option</label>
+                <p class="text-muted small mb-0">Can change selected pricing option</p>
+              </div>
+              <div class="form-check form-switch ms-3">
+                <input class="form-check-input permission-proposals" type="checkbox"
+                  id="{{ data.member.id }}_can_change_itinerary_option"
+                  data-permission="can_change_itinerary_option"
+                  {% if data.permissions_status.can_change_itinerary_option %}checked{% endif %}
+                  onchange="togglePermission({{ data.member.id }}, 'can_change_itinerary_option', this.checked)"
+                  style="width: 48px; height: 24px; cursor: pointer" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- MASTER DATA MANAGEMENT CARD -->
+    <!-- ========================================== -->
+    <div class="card mb-4">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 text-secondary">
+          <i class="fas fa-database me-2"></i>Master Data Management
+        </h5>
+        <button class="btn btn-sm btn-outline-secondary select-all-btn" onclick="selectAllInCard({{ data.member.id }}, 'masterdata')">
+          <i class="fas fa-check-double me-1"></i>Select All
+        </button>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          
+          <!-- 1. Manage Suppliers -->
+          <div class="col-md-6 mb-3">
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="flex-grow-1">
+                <label class="form-label fw-bold mb-1">
+                  Manage Suppliers
+                  <button class="btn btn-sm btn-link p-0 ms-1 text-decoration-none" 
+                          onclick="toggleSubPermissions('suppliers_{{ data.member.id }}')"
+                          title="Show detailed permissions">
+                    <i class="fas fa-chevron-down" id="icon_suppliers_{{ data.member.id }}" style="font-size: 12px;"></i>
+                  </button>
+                </label>
+                <p class="text-muted small mb-0">Can add, edit, and delete suppliers</p>
+              </div>
+              <div class="form-check form-switch ms-3">
+                <input class="form-check-input permission-masterdata" type="checkbox"
+                  id="{{ data.member.id }}_can_manage_suppliers"
+                  data-permission="can_manage_suppliers"
+                  {% if data.permissions_status.can_manage_suppliers %}checked{% endif %}
+                  onchange="togglePermission({{ data.member.id }}, 'can_manage_suppliers', this.checked)"
+                  style="width: 48px; height: 24px; cursor: pointer" />
+              </div>
+            </div>
+            
+            <!-- Sub-permissions (Hidden by default) -->
+            <div class="sub-permissions ms-3 mt-2" id="suppliers_{{ data.member.id }}" style="display: none;">
+              
+              <!-- Select All Sub-Permissions Button -->
+              <div class="d-flex justify-content-end mb-2">
+                <button class="btn btn-sm btn-outline-primary" 
+                        onclick="selectAllSubPermissions({{ data.member.id }}, 'suppliers')"
+                        style="font-size: 11px; padding: 3px 10px;">
+                  <i class="fas fa-check-double me-1"></i>Select All
+                </button>
+              </div>
+
+              <!-- View Permission -->
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <small class="text-muted"><i class="fas fa-eye me-1"></i> View</small>
+                <div class="form-check form-switch">
+                  <input class="form-check-input sub-perm-suppliers-{{ data.member.id }}" type="checkbox"
+                    id="{{ data.member.id }}_can_view_suppliers"
+                    data-permission="can_view_suppliers"
+                    {% if data.permissions_status.can_view_suppliers %}checked{% endif %}
+                    onchange="togglePermission({{ data.member.id }}, 'can_view_suppliers', this.checked)"
+                    style="width: 40px; height: 20px; cursor: pointer" />
+                </div>
+              </div>
+              
+              <!-- Add Permission -->
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <small class="text-muted"><i class="fas fa-plus me-1"></i> Add</small>
+                <div class="form-check form-switch">
+                  <input class="form-check-input sub-perm-suppliers-{{ data.member.id }}" type="checkbox"
+                    id="{{ data.member.id }}_can_add_supplier"
+                    data-permission="can_add_supplier"
+                    {% if data.permissions_status.can_add_supplier %}checked{% endif %}
+                    onchange="togglePermission({{ data.member.id }}, 'can_add_supplier', this.checked)"
+                    style="width: 40px; height: 20px; cursor: pointer" />
+                </div>
+              </div>
+              
+              <!-- Edit Permission -->
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <small class="text-muted"><i class="fas fa-edit me-1"></i> Edit</small>
+                <div class="form-check form-switch">
+                  <input class="form-check-input sub-perm-suppliers-{{ data.member.id }}" type="checkbox"
+                    id="{{ data.member.id }}_can_edit_supplier"
+                    data-permission="can_edit_supplier"
+                    {% if data.permissions_status.can_edit_supplier %}checked{% endif %}
+                    onchange="togglePermission({{ data.member.id }}, 'can_edit_supplier', this.checked)"
+                    style="width: 40px; height: 20px; cursor: pointer" />
+                </div>
+              </div>
+              
+              <!-- Delete Permission -->
+              <div class="d-flex justify-content-between align-items-center">
+                <small class="text-muted"><i class="fas fa-trash me-1"></i> Delete</small>
+                <div class="form-check form-switch">
+                  <input class="form-check-input sub-perm-suppliers-{{ data.member.id }}" type="checkbox"
+                    id="{{ data.member.id }}_can_delete_supplier"
+                    data-permission="can_delete_supplier"
+                    {% if data.permissions_status.can_delete_supplier %}checked{% endif %}
+                    onchange="togglePermission({{ data.member.id }}, 'can_delete_supplier', this.checked)"
+                    style="width: 40px; height: 20px; cursor: pointer" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. Manage Destinations -->
+          <div class="col-md-6 mb-3">
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="flex-grow-1">
+                <label class="form-label fw-bold mb-1">
+                  Manage Destinations
+                  <button class="btn btn-sm btn-link p-0 ms-1 text-decoration-none" 
+                          onclick="toggleSubPermissions('destinations_master_{{ data.member.id }}')"
+                          title="Show detailed permissions">
+                    <i class="fas fa-chevron-down" id="icon_destinations_master_{{ data.member.id }}" style="font-size: 12px;"></i>
+                  </button>
+                </label>
+                <p class="text-muted small mb-0">Can add, edit, and delete destinations</p>
+              </div>
+              <div class="form-check form-switch ms-3">
+                <input class="form-check-input permission-masterdata" type="checkbox"
+                  id="{{ data.member.id }}_can_manage_destinations_master"
+                  data-permission="can_manage_destinations_master"
+                  {% if data.permissions_status.can_manage_destinations_master %}checked{% endif %}
+                  onchange="togglePermission({{ data.member.id }}, 'can_manage_destinations_master', this.checked)"
+                  style="width: 48px; height: 24px; cursor: pointer" />
+              </div>
+            </div>
+            
+            <!-- Sub-permissions (Hidden by default) -->
+            <div class="sub-permissions ms-3 mt-2" id="destinations_master_{{ data.member.id }}" style="display: none;">
+              
+              <!-- Select All Sub-Permissions Button -->
+              <div class="d-flex justify-content-end mb-2">
+                <button class="btn btn-sm btn-outline-primary" 
+                        onclick="selectAllSubPermissions({{ data.member.id }}, 'destinations_master')"
+                        style="font-size: 11px; padding: 3px 10px;">
+                  <i class="fas fa-check-double me-1"></i>Select All
+                </button>
+              </div>
+
+              <!-- View Permission -->
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <small class="text-muted"><i class="fas fa-eye me-1"></i> View</small>
+                <div class="form-check form-switch">
+                  <input class="form-check-input sub-perm-destinations_master-{{ data.member.id }}" type="checkbox"
+                    id="{{ data.member.id }}_can_view_destinations_master"
+                    data-permission="can_view_destinations_master"
+                    {% if data.permissions_status.can_view_destinations_master %}checked{% endif %}
+                    onchange="togglePermission({{ data.member.id }}, 'can_view_destinations_master', this.checked)"
+                    style="width: 40px; height: 20px; cursor: pointer" />
+                </div>
+              </div>
+              
+              <!-- Add Permission -->
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <small class="text-muted"><i class="fas fa-plus me-1"></i> Add</small>
+                <div class="form-check form-switch">
+                  <input class="form-check-input sub-perm-destinations_master-{{ data.member.id }}" type="checkbox"
+                    id="{{ data.member.id }}_can_add_destinations_master"
+                    data-permission="can_add_destinations_master"
+                    {% if data.permissions_status.can_add_destinations_master %}checked{% endif %}
+                    onchange="togglePermission({{ data.member.id }}, 'can_add_destinations_master', this.checked)"
+                    style="width: 40px; height: 20px; cursor: pointer" />
+                </div>
+              </div>
+              
+              <!-- Edit Permission -->
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <small class="text-muted"><i class="fas fa-edit me-1"></i> Edit</small>
+                <div class="form-check form-switch">
+                  <input class="form-check-input sub-perm-destinations_master-{{ data.member.id }}" type="checkbox"
+                    id="{{ data.member.id }}_can_edit_destinations_master"
+                    data-permission="can_edit_destinations_master"
+                    {% if data.permissions_status.can_edit_destinations_master %}checked{% endif %}
+                    onchange="togglePermission({{ data.member.id }}, 'can_edit_destinations_master', this.checked)"
+                    style="width: 40px; height: 20px; cursor: pointer" />
+                </div>
+              </div>
+              
+              <!-- Delete Permission -->
+              <div class="d-flex justify-content-between align-items-center">
+                <small class="text-muted"><i class="fas fa-trash me-1"></i> Delete</small>
+                <div class="form-check form-switch">
+                  <input class="form-check-input sub-perm-destinations_master-{{ data.member.id }}" type="checkbox"
+                    id="{{ data.member.id }}_can_delete_destinations_master"
+                    data-permission="can_delete_destinations_master"
+                    {% if data.permissions_status.can_delete_destinations_master %}checked{% endif %}
+                    onchange="togglePermission({{ data.member.id }}, 'can_delete_destinations_master', this.checked)"
+                    style="width: 40px; height: 20px; cursor: pointer" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+         <!-- 3. Manage Room Types -->
+          <div class="col-md-6 mb-3">
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="flex-grow-1">
+                <label class="form-label fw-bold mb-1">
+                  Manage Room Types
+                  <button class="btn btn-sm btn-link p-0 ms-1 text-decoration-none" 
+                          onclick="toggleSubPermissions('room_types_{{ data.member.id }}')"
+                          title="Show detailed permissions">
+                    <i class="fas fa-chevron-down" id="icon_room_types_{{ data.member.id }}" style="font-size: 12px;"></i>
+                  </button>
+                </label>
+                <p class="text-muted small mb-0">Can add, edit, and delete room types</p>
+              </div>
+              <div class="form-check form-switch ms-3">
+                <input class="form-check-input permission-masterdata" type="checkbox"
+                  id="{{ data.member.id }}_can_manage_room_types"
+                  data-permission="can_manage_room_types"
+                  {% if data.permissions_status.can_manage_room_types %}checked{% endif %}
+                  onchange="togglePermission({{ data.member.id }}, 'can_manage_room_types', this.checked)"
+                  style="width: 48px; height: 24px; cursor: pointer" />
+              </div>
+            </div>
+            
+            <!-- Sub-permissions (Hidden by default) -->
+            <div class="sub-permissions ms-3 mt-2" id="room_types_{{ data.member.id }}" style="display: none;">
+              
+              <!-- Select All Sub-Permissions Button -->
+              <div class="d-flex justify-content-end mb-2">
+                <button class="btn btn-sm btn-outline-primary" 
+                        onclick="selectAllSubPermissions({{ data.member.id }}, 'room_types')"
+                        style="font-size: 11px; padding: 3px 10px;">
+                  <i class="fas fa-check-double me-1"></i>Select All
+                </button>
+              </div>
+
+              <!-- View Permission -->
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <small class="text-muted"><i class="fas fa-eye me-1"></i> View</small>
+                <div class="form-check form-switch">
+                  <input class="form-check-input sub-perm-room_types-{{ data.member.id }}" type="checkbox"
+                    id="{{ data.member.id }}_can_view_room_types"
+                    data-permission="can_view_room_types"
+                    {% if data.permissions_status.can_view_room_types %}checked{% endif %}
+                    onchange="togglePermission({{ data.member.id }}, 'can_view_room_types', this.checked)"
+                    style="width: 40px; height: 20px; cursor: pointer" />
+                </div>
+              </div>
+              
+              <!-- Add Permission -->
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <small class="text-muted"><i class="fas fa-plus me-1"></i> Add</small>
+                <div class="form-check form-switch">
+                  <input class="form-check-input sub-perm-room_types-{{ data.member.id }}" type="checkbox"
+                    id="{{ data.member.id }}_can_add_room_type"
+                    data-permission="can_add_room_type"
+                    {% if data.permissions_status.can_add_room_type %}checked{% endif %}
+                    onchange="togglePermission({{ data.member.id }}, 'can_add_room_type', this.checked)"
+                    style="width: 40px; height: 20px; cursor: pointer" />
+                </div>
+              </div>
+              
+              <!-- Edit Permission -->
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <small class="text-muted"><i class="fas fa-edit me-1"></i> Edit</small>
+                <div class="form-check form-switch">
+                  <input class="form-check-input sub-perm-room_types-{{ data.member.id }}" type="checkbox"
+                    id="{{ data.member.id }}_can_edit_room_type"
+                    data-permission="can_edit_room_type"
+                    {% if data.permissions_status.can_edit_room_type %}checked{% endif %}
+                    onchange="togglePermission({{ data.member.id }}, 'can_edit_room_type', this.checked)"
+                    style="width: 40px; height: 20px; cursor: pointer" />
+                </div>
+              </div>
+              
+              <!-- Delete Permission -->
+              <div class="d-flex justify-content-between align-items-center">
+                <small class="text-muted"><i class="fas fa-trash me-1"></i> Delete</small>
+                <div class="form-check form-switch">
+                  <input class="form-check-input sub-perm-room_types-{{ data.member.id }}" type="checkbox"
+                    id="{{ data.member.id }}_can_delete_room_type"
+                    data-permission="can_delete_room_type"
+                    {% if data.permissions_status.can_delete_room_type %}checked{% endif %}
+                    onchange="togglePermission({{ data.member.id }}, 'can_delete_room_type', this.checked)"
+                    style="width: 40px; height: 20px; cursor: pointer" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+          <!-- 4. Manage Meal Plans -->
+          <div class="col-md-6 mb-3">
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="flex-grow-1">
+                <label class="form-label fw-bold mb-1">
+                  Manage Meal Plans
+                  <button class="btn btn-sm btn-link p-0 ms-1 text-decoration-none" 
+                          onclick="toggleSubPermissions('meal_plans_{{ data.member.id }}')"
+                          title="Show detailed permissions">
+                    <i class="fas fa-chevron-down" id="icon_meal_plans_{{ data.member.id }}" style="font-size: 12px;"></i>
+                  </button>
+                </label>
+                <p class="text-muted small mb-0">Can add, edit, and delete meal plans</p>
+              </div>
+              <div class="form-check form-switch ms-3">
+                <input class="form-check-input permission-masterdata" type="checkbox"
+                  id="{{ data.member.id }}_can_manage_meal_plans"
+                  data-permission="can_manage_meal_plans"
+                  {% if data.permissions_status.can_manage_meal_plans %}checked{% endif %}
+                  onchange="togglePermission({{ data.member.id }}, 'can_manage_meal_plans', this.checked)"
+                  style="width: 48px; height: 24px; cursor: pointer" />
+              </div>
+            </div>
+            
+            <div class="sub-permissions ms-3 mt-2" id="meal_plans_{{ data.member.id }}" style="display: none;">
+              <div class="d-flex justify-content-end mb-2">
+                <button class="btn btn-sm btn-outline-primary" 
+                        onclick="selectAllSubPermissions({{ data.member.id }}, 'meal_plans')"
+                        style="font-size: 11px; padding: 3px 10px;">
+                  <i class="fas fa-check-double me-1"></i>Select All
+                </button>
+              </div>
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <small class="text-muted"><i class="fas fa-eye me-1"></i> View</small>
+                <div class="form-check form-switch">
+                  <input class="form-check-input sub-perm-meal_plans-{{ data.member.id }}" type="checkbox"
+                    id="{{ data.member.id }}_can_view_meal_plans"
+                    data-permission="can_view_meal_plans"
+                    {% if data.permissions_status.can_view_meal_plans %}checked{% endif %}
+                    onchange="togglePermission({{ data.member.id }}, 'can_view_meal_plans', this.checked)"
+                    style="width: 40px; height: 20px; cursor: pointer" />
+                </div>
+              </div>
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <small class="text-muted"><i class="fas fa-plus me-1"></i> Add</small>
+                <div class="form-check form-switch">
+                  <input class="form-check-input sub-perm-meal_plans-{{ data.member.id }}" type="checkbox"
+                    id="{{ data.member.id }}_can_add_meal_plan"
+                    data-permission="can_add_meal_plan"
+                    {% if data.permissions_status.can_add_meal_plan %}checked{% endif %}
+                    onchange="togglePermission({{ data.member.id }}, 'can_add_meal_plan', this.checked)"
+                    style="width: 40px; height: 20px; cursor: pointer" />
+                </div>
+              </div>
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <small class="text-muted"><i class="fas fa-edit me-1"></i> Edit</small>
+                <div class="form-check form-switch">
+                  <input class="form-check-input sub-perm-meal_plans-{{ data.member.id }}" type="checkbox"
+                    id="{{ data.member.id }}_can_edit_meal_plan"
+                    data-permission="can_edit_meal_plan"
+                    {% if data.permissions_status.can_edit_meal_plan %}checked{% endif %}
+                    onchange="togglePermission({{ data.member.id }}, 'can_edit_meal_plan', this.checked)"
+                    style="width: 40px; height: 20px; cursor: pointer" />
+                </div>
+              </div>
+              <div class="d-flex justify-content-between align-items-center">
+                <small class="text-muted"><i class="fas fa-trash me-1"></i> Delete</small>
+                <div class="form-check form-switch">
+                  <input class="form-check-input sub-perm-meal_plans-{{ data.member.id }}" type="checkbox"
+                    id="{{ data.member.id }}_can_delete_meal_plan"
+                    data-permission="can_delete_meal_plan"
+                    {% if data.permissions_status.can_delete_meal_plan %}checked{% endif %}
+                    onchange="togglePermission({{ data.member.id }}, 'can_delete_meal_plan', this.checked)"
+                    style="width: 40px; height: 20px; cursor: pointer" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 5. Manage Hotels -->
+          <div class="col-md-6 mb-3">
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="flex-grow-1">
+                <label class="form-label fw-bold mb-1">
+                  Manage Hotels
+                  <button class="btn btn-sm btn-link p-0 ms-1 text-decoration-none" 
+                          onclick="toggleSubPermissions('hotels_{{ data.member.id }}')"
+                          title="Show detailed permissions">
+                    <i class="fas fa-chevron-down" id="icon_hotels_{{ data.member.id }}" style="font-size: 12px;"></i>
+                  </button>
+                </label>
+                <p class="text-muted small mb-0">Can add, edit, and delete hotels</p>
+              </div>
+              <div class="form-check form-switch ms-3">
+                <input class="form-check-input permission-masterdata" type="checkbox"
+                  id="{{ data.member.id }}_can_manage_hotels"
+                  data-permission="can_manage_hotels"
+                  {% if data.permissions_status.can_manage_hotels %}checked{% endif %}
+                  onchange="togglePermission({{ data.member.id }}, 'can_manage_hotels', this.checked)"
+                  style="width: 48px; height: 24px; cursor: pointer" />
+              </div>
+            </div>
+            
+            <div class="sub-permissions ms-3 mt-2" id="hotels_{{ data.member.id }}" style="display: none;">
+              <div class="d-flex justify-content-end mb-2">
+                <button class="btn btn-sm btn-outline-primary" 
+                        onclick="selectAllSubPermissions({{ data.member.id }}, 'hotels')"
+                        style="font-size: 11px; padding: 3px 10px;">
+                  <i class="fas fa-check-double me-1"></i>Select All
+                </button>
+              </div>
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <small class="text-muted"><i class="fas fa-eye me-1"></i> View</small>
+                <div class="form-check form-switch">
+                  <input class="form-check-input sub-perm-hotels-{{ data.member.id }}" type="checkbox"
+                    id="{{ data.member.id }}_can_view_hotels"
+                    data-permission="can_view_hotels"
+                    {% if data.permissions_status.can_view_hotels %}checked{% endif %}
+                    onchange="togglePermission({{ data.member.id }}, 'can_view_hotels', this.checked)"
+                    style="width: 40px; height: 20px; cursor: pointer" />
+                </div>
+              </div>
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <small class="text-muted"><i class="fas fa-plus me-1"></i> Add</small>
+                <div class="form-check form-switch">
+                  <input class="form-check-input sub-perm-hotels-{{ data.member.id }}" type="checkbox"
+                    id="{{ data.member.id }}_can_add_hotel"
+                    data-permission="can_add_hotel"
+                    {% if data.permissions_status.can_add_hotel %}checked{% endif %}
+                    onchange="togglePermission({{ data.member.id }}, 'can_add_hotel', this.checked)"
+                    style="width: 40px; height: 20px; cursor: pointer" />
+                </div>
+              </div>
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <small class="text-muted"><i class="fas fa-edit me-1"></i> Edit</small>
+                <div class="form-check form-switch">
+                  <input class="form-check-input sub-perm-hotels-{{ data.member.id }}" type="checkbox"
+                    id="{{ data.member.id }}_can_edit_hotel"
+                    data-permission="can_edit_hotel"
+                    {% if data.permissions_status.can_edit_hotel %}checked{% endif %}
+                    onchange="togglePermission({{ data.member.id }}, 'can_edit_hotel', this.checked)"
+                    style="width: 40px; height: 20px; cursor: pointer" />
+                </div>
+              </div>
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <small class="text-muted"><i class="fas fa-trash me-1"></i> Delete</small>
+                <div class="form-check form-switch">
+                  <input class="form-check-input sub-perm-hotels-{{ data.member.id }}" type="checkbox"
+                    id="{{ data.member.id }}_can_delete_hotel"
+                    data-permission="can_delete_hotel"
+                    {% if data.permissions_status.can_delete_hotel %}checked{% endif %}
+                    onchange="togglePermission({{ data.member.id }}, 'can_delete_hotel', this.checked)"
+                    style="width: 40px; height: 20px; cursor: pointer" />
+                </div>
+              </div>
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <small class="text-muted"><i class="fas fa-star me-1"></i> Manage Inclusions</small>
+                <div class="form-check form-switch">
+                  <input class="form-check-input sub-perm-hotels-{{ data.member.id }}" type="checkbox"
+                    id="{{ data.member.id }}_can_manage_hotel_inclusions"
+                    data-permission="can_manage_hotel_inclusions"
+                    {% if data.permissions_status.can_manage_hotel_inclusions %}checked{% endif %}
+                    onchange="togglePermission({{ data.member.id }}, 'can_manage_hotel_inclusions', this.checked)"
+                    style="width: 40px; height: 20px; cursor: pointer" />
+                </div>
+              </div>
+              <div class="d-flex justify-content-between align-items-center">
+                <small class="text-muted"><i class="fas fa-dollar-sign me-1"></i> Manage Prices</small>
+                <div class="form-check form-switch">
+                  <input class="form-check-input sub-perm-hotels-{{ data.member.id }}" type="checkbox"
+                    id="{{ data.member.id }}_can_manage_hotel_prices"
+                    data-permission="can_manage_hotel_prices"
+                    {% if data.permissions_status.can_manage_hotel_prices %}checked{% endif %}
+                    onchange="togglePermission({{ data.member.id }}, 'can_manage_hotel_prices', this.checked)"
+                    style="width: 40px; height: 20px; cursor: pointer" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 6. Manage Houseboats -->
+          <div class="col-md-6 mb-3">
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="flex-grow-1">
+                <label class="form-label fw-bold mb-1">
+                  Manage Houseboats
+                  <button class="btn btn-sm btn-link p-0 ms-1 text-decoration-none" 
+                          onclick="toggleSubPermissions('houseboats_{{ data.member.id }}')"
+                          title="Show detailed permissions">
+                    <i class="fas fa-chevron-down" id="icon_houseboats_{{ data.member.id }}" style="font-size: 12px;"></i>
+                  </button>
+                </label>
+                <p class="text-muted small mb-0">Can add, edit, and delete houseboats</p>
+              </div>
+              <div class="form-check form-switch ms-3">
+                <input class="form-check-input permission-masterdata" type="checkbox"
+                  id="{{ data.member.id }}_can_manage_houseboats"
+                  data-permission="can_manage_houseboats"
+                  {% if data.permissions_status.can_manage_houseboats %}checked{% endif %}
+                  onchange="togglePermission({{ data.member.id }}, 'can_manage_houseboats', this.checked)"
+                  style="width: 48px; height: 24px; cursor: pointer" />
+              </div>
+            </div>
+            
+            <div class="sub-permissions ms-3 mt-2" id="houseboats_{{ data.member.id }}" style="display: none;">
+              <div class="d-flex justify-content-end mb-2">
+                <button class="btn btn-sm btn-outline-primary" 
+                        onclick="selectAllSubPermissions({{ data.member.id }}, 'houseboats')"
+                        style="font-size: 11px; padding: 3px 10px;">
+                  <i class="fas fa-check-double me-1"></i>Select All
+                </button>
+              </div>
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <small class="text-muted"><i class="fas fa-eye me-1"></i> View</small>
+                <div class="form-check form-switch">
+                  <input class="form-check-input sub-perm-houseboats-{{ data.member.id }}" type="checkbox"
+                    id="{{ data.member.id }}_can_view_houseboats"
+                    data-permission="can_view_houseboats"
+                    {% if data.permissions_status.can_view_houseboats %}checked{% endif %}
+                    onchange="togglePermission({{ data.member.id }}, 'can_view_houseboats', this.checked)"
+                    style="width: 40px; height: 20px; cursor: pointer" />
+                </div>
+              </div>
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <small class="text-muted"><i class="fas fa-plus me-1"></i> Add</small>
+                <div class="form-check form-switch">
+                  <input class="form-check-input sub-perm-houseboats-{{ data.member.id }}" type="checkbox"
+                    id="{{ data.member.id }}_can_add_houseboat"
+                    data-permission="can_add_houseboat"
+                    {% if data.permissions_status.can_add_houseboat %}checked{% endif %}
+                    onchange="togglePermission({{ data.member.id }}, 'can_add_houseboat', this.checked)"
+                    style="width: 40px; height: 20px; cursor: pointer" />
+                </div>
+              </div>
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <small class="text-muted"><i class="fas fa-edit me-1"></i> Edit</small>
+                <div class="form-check form-switch">
+                  <input class="form-check-input sub-perm-houseboats-{{ data.member.id }}" type="checkbox"
+                    id="{{ data.member.id }}_can_edit_houseboat"
+                    data-permission="can_edit_houseboat"
+                    {% if data.permissions_status.can_edit_houseboat %}checked{% endif %}
+                    onchange="togglePermission({{ data.member.id }}, 'can_edit_houseboat', this.checked)"
+                    style="width: 40px; height: 20px; cursor: pointer" />
+                </div>
+              </div>
+              <div class="d-flex justify-content-between align-items-center">
+                <small class="text-muted"><i class="fas fa-trash me-1"></i> Delete</small>
+                <div class="form-check form-switch">
+                  <input class="form-check-input sub-perm-houseboats-{{ data.member.id }}" type="checkbox"
+                    id="{{ data.member.id }}_can_delete_houseboat"
+                    data-permission="can_delete_houseboat"
+                    {% if data.permissions_status.can_delete_houseboat %}checked{% endif %}
+                    onchange="togglePermission({{ data.member.id }}, 'can_delete_houseboat', this.checked)"
+                    style="width: 40px; height: 20px; cursor: pointer" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 7. Manage Activities -->
+          <div class="col-md-6 mb-3">
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="flex-grow-1">
+                <label class="form-label fw-bold mb-1">
+                  Manage Activities
+                  <button class="btn btn-sm btn-link p-0 ms-1 text-decoration-none" 
+                          onclick="toggleSubPermissions('activities_{{ data.member.id }}')"
+                          title="Show detailed permissions">
+                    <i class="fas fa-chevron-down" id="icon_activities_{{ data.member.id }}" style="font-size: 12px;"></i>
+                  </button>
+                </label>
+                <p class="text-muted small mb-0">Can add, edit, and delete activities</p>
+              </div>
+              <div class="form-check form-switch ms-3">
+                <input class="form-check-input permission-masterdata" type="checkbox"
+                  id="{{ data.member.id }}_can_manage_activities"
+                  data-permission="can_manage_activities"
+                  {% if data.permissions_status.can_manage_activities %}checked{% endif %}
+                  onchange="togglePermission({{ data.member.id }}, 'can_manage_activities', this.checked)"
+                  style="width: 48px; height: 24px; cursor: pointer" />
+              </div>
+            </div>
+            
+            <div class="sub-permissions ms-3 mt-2" id="activities_{{ data.member.id }}" style="display: none;">
+              <div class="d-flex justify-content-end mb-2">
+                <button class="btn btn-sm btn-outline-primary" 
+                        onclick="selectAllSubPermissions({{ data.member.id }}, 'activities')"
+                        style="font-size: 11px; padding: 3px 10px;">
+                  <i class="fas fa-check-double me-1"></i>Select All
+                </button>
+              </div>
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <small class="text-muted"><i class="fas fa-eye me-1"></i> View</small>
+                <div class="form-check form-switch">
+                  <input class="form-check-input sub-perm-activities-{{ data.member.id }}" type="checkbox"
+                    id="{{ data.member.id }}_can_view_activities"
+                    data-permission="can_view_activities"
+                    {% if data.permissions_status.can_view_activities %}checked{% endif %}
+                    onchange="togglePermission({{ data.member.id }}, 'can_view_activities', this.checked)"
+                    style="width: 40px; height: 20px; cursor: pointer" />
+                </div>
+              </div>
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <small class="text-muted"><i class="fas fa-plus me-1"></i> Add</small>
+                <div class="form-check form-switch">
+                  <input class="form-check-input sub-perm-activities-{{ data.member.id }}" type="checkbox"
+                    id="{{ data.member.id }}_can_add_activity"
+                    data-permission="can_add_activity"
+                    {% if data.permissions_status.can_add_activity %}checked{% endif %}
+                    onchange="togglePermission({{ data.member.id }}, 'can_add_activity', this.checked)"
+                    style="width: 40px; height: 20px; cursor: pointer" />
+                </div>
+              </div>
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <small class="text-muted"><i class="fas fa-edit me-1"></i> Edit</small>
+                <div class="form-check form-switch">
+                  <input class="form-check-input sub-perm-activities-{{ data.member.id }}" type="checkbox"
+                    id="{{ data.member.id }}_can_edit_activity"
+                    data-permission="can_edit_activity"
+                    {% if data.permissions_status.can_edit_activity %}checked{% endif %}
+                    onchange="togglePermission({{ data.member.id }}, 'can_edit_activity', this.checked)"
+                    style="width: 40px; height: 20px; cursor: pointer" />
+                </div>
+              </div>
+              <div class="d-flex justify-content-between align-items-center">
+                <small class="text-muted"><i class="fas fa-trash me-1"></i> Delete</small>
+                <div class="form-check form-switch">
+                  <input class="form-check-input sub-perm-activities-{{ data.member.id }}" type="checkbox"
+                    id="{{ data.member.id }}_can_delete_activity"
+                    data-permission="can_delete_activity"
+                    {% if data.permissions_status.can_delete_activity %}checked{% endif %}
+                    onchange="togglePermission({{ data.member.id }}, 'can_delete_activity', this.checked)"
+                    style="width: 40px; height: 20px; cursor: pointer" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+          <!-- 8. Manage Special Inclusions -->
+          <div class="col-md-6 mb-3">
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="flex-grow-1">
+                <label class="form-label fw-bold mb-1">
+                  Manage Special Inclusions
+                  <button class="btn btn-sm btn-link p-0 ms-1 text-decoration-none" 
+                          onclick="toggleSubPermissions('special_inclusions_{{ data.member.id }}')"
+                          title="Show detailed permissions">
+                    <i class="fas fa-chevron-down" id="icon_special_inclusions_{{ data.member.id }}" style="font-size: 12px;"></i>
+                  </button>
+                </label>
+                <p class="text-muted small mb-0">Can add, edit, and delete special inclusions</p>
+              </div>
+              <div class="form-check form-switch ms-3">
+                <input class="form-check-input permission-masterdata" type="checkbox"
+                  id="{{ data.member.id }}_can_manage_special_inclusions"
+                  data-permission="can_manage_special_inclusions"
+                  {% if data.permissions_status.can_manage_special_inclusions %}checked{% endif %}
+                  onchange="togglePermission({{ data.member.id }}, 'can_manage_special_inclusions', this.checked)"
+                  style="width: 48px; height: 24px; cursor: pointer" />
+              </div>
+            </div>
+            
+            <div class="sub-permissions ms-3 mt-2" id="special_inclusions_{{ data.member.id }}" style="display: none;">
+              <div class="d-flex justify-content-end mb-2">
+                <button class="btn btn-sm btn-outline-primary" 
+                        onclick="selectAllSubPermissions({{ data.member.id }}, 'special_inclusions')"
+                        style="font-size: 11px; padding: 3px 10px;">
+                  <i class="fas fa-check-double me-1"></i>Select All
+                </button>
+              </div>
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <small class="text-muted"><i class="fas fa-eye me-1"></i> View</small>
+                <div class="form-check form-switch">
+                  <input class="form-check-input sub-perm-special_inclusions-{{ data.member.id }}" type="checkbox"
+                    id="{{ data.member.id }}_can_view_special_inclusions"
+                    data-permission="can_view_special_inclusions"
+                    {% if data.permissions_status.can_view_special_inclusions %}checked{% endif %}
+                    onchange="togglePermission({{ data.member.id }}, 'can_view_special_inclusions', this.checked)"
+                    style="width: 40px; height: 20px; cursor: pointer" />
+                </div>
+              </div>
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <small class="text-muted"><i class="fas fa-plus me-1"></i> Add</small>
+                <div class="form-check form-switch">
+                  <input class="form-check-input sub-perm-special_inclusions-{{ data.member.id }}" type="checkbox"
+                    id="{{ data.member.id }}_can_add_special_inclusion"
+                    data-permission="can_add_special_inclusion"
+                    {% if data.permissions_status.can_add_special_inclusion %}checked{% endif %}
+                    onchange="togglePermission({{ data.member.id }}, 'can_add_special_inclusion', this.checked)"
+                    style="width: 40px; height: 20px; cursor: pointer" />
+                </div>
+              </div>
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <small class="text-muted"><i class="fas fa-edit me-1"></i> Edit</small>
+                <div class="form-check form-switch">
+                  <input class="form-check-input sub-perm-special_inclusions-{{ data.member.id }}" type="checkbox"
+                    id="{{ data.member.id }}_can_edit_special_inclusion"
+                    data-permission="can_edit_special_inclusion"
+                    {% if data.permissions_status.can_edit_special_inclusion %}checked{% endif %}
+                    onchange="togglePermission({{ data.member.id }}, 'can_edit_special_inclusion', this.checked)"
+                    style="width: 40px; height: 20px; cursor: pointer" />
+                </div>
+              </div>
+              <div class="d-flex justify-content-between align-items-center">
+                <small class="text-muted"><i class="fas fa-trash me-1"></i> Delete</small>
+                <div class="form-check form-switch">
+                  <input class="form-check-input sub-perm-special_inclusions-{{ data.member.id }}" type="checkbox"
+                    id="{{ data.member.id }}_can_delete_special_inclusion"
+                    data-permission="can_delete_special_inclusion"
+                    {% if data.permissions_status.can_delete_special_inclusion %}checked{% endif %}
+                    onchange="togglePermission({{ data.member.id }}, 'can_delete_special_inclusion', this.checked)"
+                    style="width: 40px; height: 20px; cursor: pointer" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 9. Manage Vehicles -->
+          <div class="col-md-6 mb-3">
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="flex-grow-1">
+                <label class="form-label fw-bold mb-1">
+                  Manage Vehicles
+                  <button class="btn btn-sm btn-link p-0 ms-1 text-decoration-none" 
+                          onclick="toggleSubPermissions('vehicles_{{ data.member.id }}')"
+                          title="Show detailed permissions">
+                    <i class="fas fa-chevron-down" id="icon_vehicles_{{ data.member.id }}" style="font-size: 12px;"></i>
+                  </button>
+                </label>
+                <p class="text-muted small mb-0">Can add, edit, and delete vehicles</p>
+              </div>
+              <div class="form-check form-switch ms-3">
+                <input class="form-check-input permission-masterdata" type="checkbox"
+                  id="{{ data.member.id }}_can_manage_vehicles"
+                  data-permission="can_manage_vehicles"
+                  {% if data.permissions_status.can_manage_vehicles %}checked{% endif %}
+                  onchange="togglePermission({{ data.member.id }}, 'can_manage_vehicles', this.checked)"
+                  style="width: 48px; height: 24px; cursor: pointer" />
+              </div>
+            </div>
+            
+            <div class="sub-permissions ms-3 mt-2" id="vehicles_{{ data.member.id }}" style="display: none;">
+              <div class="d-flex justify-content-end mb-2">
+                <button class="btn btn-sm btn-outline-primary" 
+                        onclick="selectAllSubPermissions({{ data.member.id }}, 'vehicles')"
+                        style="font-size: 11px; padding: 3px 10px;">
+                  <i class="fas fa-check-double me-1"></i>Select All
+                </button>
+              </div>
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <small class="text-muted"><i class="fas fa-eye me-1"></i> View</small>
+                <div class="form-check form-switch">
+                  <input class="form-check-input sub-perm-vehicles-{{ data.member.id }}" type="checkbox"
+                    id="{{ data.member.id }}_can_view_vehicles"
+                    data-permission="can_view_vehicles"
+                    {% if data.permissions_status.can_view_vehicles %}checked{% endif %}
+                    onchange="togglePermission({{ data.member.id }}, 'can_view_vehicles', this.checked)"
+                    style="width: 40px; height: 20px; cursor: pointer" />
+                </div>
+              </div>
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <small class="text-muted"><i class="fas fa-plus me-1"></i> Add</small>
+                <div class="form-check form-switch">
+                  <input class="form-check-input sub-perm-vehicles-{{ data.member.id }}" type="checkbox"
+                    id="{{ data.member.id }}_can_add_vehicle"
+                    data-permission="can_add_vehicle"
+                    {% if data.permissions_status.can_add_vehicle %}checked{% endif %}
+                    onchange="togglePermission({{ data.member.id }}, 'can_add_vehicle', this.checked)"
+                    style="width: 40px; height: 20px; cursor: pointer" />
+                </div>
+              </div>
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <small class="text-muted"><i class="fas fa-edit me-1"></i> Edit</small>
+                <div class="form-check form-switch">
+                  <input class="form-check-input sub-perm-vehicles-{{ data.member.id }}" type="checkbox"
+                    id="{{ data.member.id }}_can_edit_vehicle"
+                    data-permission="can_edit_vehicle"
+                    {% if data.permissions_status.can_edit_vehicle %}checked{% endif %}
+                    onchange="togglePermission({{ data.member.id }}, 'can_edit_vehicle', this.checked)"
+                    style="width: 40px; height: 20px; cursor: pointer" />
+                </div>
+              </div>
+              <div class="d-flex justify-content-between align-items-center">
+                <small class="text-muted"><i class="fas fa-trash me-1"></i> Delete</small>
+                <div class="form-check form-switch">
+                  <input class="form-check-input sub-perm-vehicles-{{ data.member.id }}" type="checkbox"
+                    id="{{ data.member.id }}_can_delete_vehicle"
+                    data-permission="can_delete_vehicle"
+                    {% if data.permissions_status.can_delete_vehicle %}checked{% endif %}
+                    onchange="togglePermission({{ data.member.id }}, 'can_delete_vehicle', this.checked)"
+                    style="width: 40px; height: 20px; cursor: pointer" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 10. Manage Package Templates -->
+          <div class="col-md-6 mb-3">
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="flex-grow-1">
+                <label class="form-label fw-bold mb-1">
+                  Manage Package Templates
+                  <button class="btn btn-sm btn-link p-0 ms-1 text-decoration-none" 
+                          onclick="toggleSubPermissions('package_templates_{{ data.member.id }}')"
+                          title="Show detailed permissions">
+                    <i class="fas fa-chevron-down" id="icon_package_templates_{{ data.member.id }}" style="font-size: 12px;"></i>
+                  </button>
+                </label>
+                <p class="text-muted small mb-0">Can add, edit, and delete package templates/itineraries</p>
+              </div>
+              <div class="form-check form-switch ms-3">
+                <input class="form-check-input permission-masterdata" type="checkbox"
+                  id="{{ data.member.id }}_can_manage_package_templates"
+                  data-permission="can_manage_package_templates"
+                  {% if data.permissions_status.can_manage_package_templates %}checked{% endif %}
+                  onchange="togglePermission({{ data.member.id }}, 'can_manage_package_templates', this.checked)"
+                  style="width: 48px; height: 24px; cursor: pointer" />
+              </div>
+            </div>
+            
+            <div class="sub-permissions ms-3 mt-2" id="package_templates_{{ data.member.id }}" style="display: none;">
+              <div class="d-flex justify-content-end mb-2">
+                <button class="btn btn-sm btn-outline-primary" 
+                        onclick="selectAllSubPermissions({{ data.member.id }}, 'package_templates')"
+                        style="font-size: 11px; padding: 3px 10px;">
+                  <i class="fas fa-check-double me-1"></i>Select All
+                </button>
+              </div>
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <small class="text-muted"><i class="fas fa-eye me-1"></i> View</small>
+                <div class="form-check form-switch">
+                  <input class="form-check-input sub-perm-package_templates-{{ data.member.id }}" type="checkbox"
+                    id="{{ data.member.id }}_can_view_package_templates"
+                    data-permission="can_view_package_templates"
+                    {% if data.permissions_status.can_view_package_templates %}checked{% endif %}
+                    onchange="togglePermission({{ data.member.id }}, 'can_view_package_templates', this.checked)"
+                    style="width: 40px; height: 20px; cursor: pointer" />
+                </div>
+              </div>
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <small class="text-muted"><i class="fas fa-plus me-1"></i> Add</small>
+                <div class="form-check form-switch">
+                  <input class="form-check-input sub-perm-package_templates-{{ data.member.id }}" type="checkbox"
+                    id="{{ data.member.id }}_can_add_package_template"
+                    data-permission="can_add_package_template"
+                    {% if data.permissions_status.can_add_package_template %}checked{% endif %}
+                    onchange="togglePermission({{ data.member.id }}, 'can_add_package_template', this.checked)"
+                    style="width: 40px; height: 20px; cursor: pointer" />
+                </div>
+              </div>
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <small class="text-muted"><i class="fas fa-edit me-1"></i> Edit</small>
+                <div class="form-check form-switch">
+                  <input class="form-check-input sub-perm-package_templates-{{ data.member.id }}" type="checkbox"
+                    id="{{ data.member.id }}_can_edit_package_template"
+                    data-permission="can_edit_package_template"
+                    {% if data.permissions_status.can_edit_package_template %}checked{% endif %}
+                    onchange="togglePermission({{ data.member.id }}, 'can_edit_package_template', this.checked)"
+                    style="width: 40px; height: 20px; cursor: pointer" />
+                </div>
+              </div>
+              <div class="d-flex justify-content-between align-items-center">
+                <small class="text-muted"><i class="fas fa-trash me-1"></i> Delete</small>
+                <div class="form-check form-switch">
+                  <input class="form-check-input sub-perm-package_templates-{{ data.member.id }}" type="checkbox"
+                    id="{{ data.member.id }}_can_delete_package_template"
+                    data-permission="can_delete_package_template"
+                    {% if data.permissions_status.can_delete_package_template %}checked{% endif %}
+                    onchange="togglePermission({{ data.member.id }}, 'can_delete_package_template', this.checked)"
+                    style="width: 40px; height: 20px; cursor: pointer" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 11. Manage Lead Sources -->
+          <div class="col-md-6 mb-3">
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="flex-grow-1">
+                <label class="form-label fw-bold mb-1">
+                  Manage Lead Sources
+                  <button class="btn btn-sm btn-link p-0 ms-1 text-decoration-none" 
+                          onclick="toggleSubPermissions('lead_sources_{{ data.member.id }}')"
+                          title="Show detailed permissions">
+                    <i class="fas fa-chevron-down" id="icon_lead_sources_{{ data.member.id }}" style="font-size: 12px;"></i>
+                  </button>
+                </label>
+                <p class="text-muted small mb-0">Can add, edit, and delete lead sources</p>
+              </div>
+              <div class="form-check form-switch ms-3">
+                <input class="form-check-input permission-masterdata" type="checkbox"
+                  id="{{ data.member.id }}_can_manage_lead_sources"
+                  data-permission="can_manage_lead_sources"
+                  {% if data.permissions_status.can_manage_lead_sources %}checked{% endif %}
+                  onchange="togglePermission({{ data.member.id }}, 'can_manage_lead_sources', this.checked)"
+                  style="width: 48px; height: 24px; cursor: pointer" />
+              </div>
+            </div>
+            
+            <div class="sub-permissions ms-3 mt-2" id="lead_sources_{{ data.member.id }}" style="display: none;">
+              <div class="d-flex justify-content-end mb-2">
+                <button class="btn btn-sm btn-outline-primary" 
+                        onclick="selectAllSubPermissions({{ data.member.id }}, 'lead_sources')"
+                        style="font-size: 11px; padding: 3px 10px;">
+                  <i class="fas fa-check-double me-1"></i>Select All
+                </button>
+              </div>
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <small class="text-muted"><i class="fas fa-eye me-1"></i> View</small>
+                <div class="form-check form-switch">
+                  <input class="form-check-input sub-perm-lead_sources-{{ data.member.id }}" type="checkbox"
+                    id="{{ data.member.id }}_can_view_lead_sources"
+                    data-permission="can_view_lead_sources"
+                    {% if data.permissions_status.can_view_lead_sources %}checked{% endif %}
+                    onchange="togglePermission({{ data.member.id }}, 'can_view_lead_sources', this.checked)"
+                    style="width: 40px; height: 20px; cursor: pointer" />
+                </div>
+              </div>
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <small class="text-muted"><i class="fas fa-plus me-1"></i> Add</small>
+                <div class="form-check form-switch">
+                  <input class="form-check-input sub-perm-lead_sources-{{ data.member.id }}" type="checkbox"
+                    id="{{ data.member.id }}_can_add_lead_source"
+                    data-permission="can_add_lead_source"
+                    {% if data.permissions_status.can_add_lead_source %}checked{% endif %}
+                    onchange="togglePermission({{ data.member.id }}, 'can_add_lead_source', this.checked)"
+                    style="width: 40px; height: 20px; cursor: pointer" />
+                </div>
+              </div>
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <small class="text-muted"><i class="fas fa-edit me-1"></i> Edit</small>
+                <div class="form-check form-switch">
+                  <input class="form-check-input sub-perm-lead_sources-{{ data.member.id }}" type="checkbox"
+                    id="{{ data.member.id }}_can_edit_lead_source"
+                    data-permission="can_edit_lead_source"
+                    {% if data.permissions_status.can_edit_lead_source %}checked{% endif %}
+                    onchange="togglePermission({{ data.member.id }}, 'can_edit_lead_source', this.checked)"
+                    style="width: 40px; height: 20px; cursor: pointer" />
+                </div>
+              </div>
+              <div class="d-flex justify-content-between align-items-center">
+                <small class="text-muted"><i class="fas fa-trash me-1"></i> Delete</small>
+                <div class="form-check form-switch">
+                  <input class="form-check-input sub-perm-lead_sources-{{ data.member.id }}" type="checkbox"
+                    id="{{ data.member.id }}_can_delete_lead_source"
+                    data-permission="can_delete_lead_source"
+                    {% if data.permissions_status.can_delete_lead_source %}checked{% endif %}
+                    onchange="togglePermission({{ data.member.id }}, 'can_delete_lead_source', this.checked)"
+                    style="width: 40px; height: 20px; cursor: pointer" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 12. Manage Package Themes -->
+          <div class="col-md-6 mb-3">
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="flex-grow-1">
+                <label class="form-label fw-bold mb-1">
+                  Manage Package Themes
+                  <button class="btn btn-sm btn-link p-0 ms-1 text-decoration-none" 
+                          onclick="toggleSubPermissions('package_themes_{{ data.member.id }}')"
+                          title="Show detailed permissions">
+                    <i class="fas fa-chevron-down" id="icon_package_themes_{{ data.member.id }}" style="font-size: 12px;"></i>
+                  </button>
+                </label>
+                <p class="text-muted small mb-0">Can add, edit, and delete package themes</p>
+              </div>
+              <div class="form-check form-switch ms-3">
+                <input class="form-check-input permission-masterdata" type="checkbox"
+                  id="{{ data.member.id }}_can_manage_package_themes"
+                  data-permission="can_manage_package_themes"
+                  {% if data.permissions_status.can_manage_package_themes %}checked{% endif %}
+                  onchange="togglePermission({{ data.member.id }}, 'can_manage_package_themes', this.checked)"
+                  style="width: 48px; height: 24px; cursor: pointer" />
+              </div>
+            </div>
+            
+            <div class="sub-permissions ms-3 mt-2" id="package_themes_{{ data.member.id }}" style="display: none;">
+              <div class="d-flex justify-content-end mb-2">
+                <button class="btn btn-sm btn-outline-primary" 
+                        onclick="selectAllSubPermissions({{ data.member.id }}, 'package_themes')"
+                        style="font-size: 11px; padding: 3px 10px;">
+                  <i class="fas fa-check-double me-1"></i>Select All
+                </button>
+              </div>
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <small class="text-muted"><i class="fas fa-eye me-1"></i> View</small>
+                <div class="form-check form-switch">
+                  <input class="form-check-input sub-perm-package_themes-{{ data.member.id }}" type="checkbox"
+                    id="{{ data.member.id }}_can_view_package_themes"
+                    data-permission="can_view_package_themes"
+                    {% if data.permissions_status.can_view_package_themes %}checked{% endif %}
+                    onchange="togglePermission({{ data.member.id }}, 'can_view_package_themes', this.checked)"
+                    style="width: 40px; height: 20px; cursor: pointer" />
+                </div>
+              </div>
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <small class="text-muted"><i class="fas fa-plus me-1"></i> Add</small>
+                <div class="form-check form-switch">
+                  <input class="form-check-input sub-perm-package_themes-{{ data.member.id }}" type="checkbox"
+                    id="{{ data.member.id }}_can_add_package_theme"
+                    data-permission="can_add_package_theme"
+                    {% if data.permissions_status.can_add_package_theme %}checked{% endif %}
+                    onchange="togglePermission({{ data.member.id }}, 'can_add_package_theme', this.checked)"
+                    style="width: 40px; height: 20px; cursor: pointer" />
+                </div>
+              </div>
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <small class="text-muted"><i class="fas fa-edit me-1"></i> Edit</small>
+                <div class="form-check form-switch">
+                  <input class="form-check-input sub-perm-package_themes-{{ data.member.id }}" type="checkbox"
+                    id="{{ data.member.id }}_can_edit_package_theme"
+                    data-permission="can_edit_package_theme"
+                    {% if data.permissions_status.can_edit_package_theme %}checked{% endif %}
+                    onchange="togglePermission({{ data.member.id }}, 'can_edit_package_theme', this.checked)"
+                    style="width: 40px; height: 20px; cursor: pointer" />
+                </div>
+              </div>
+              <div class="d-flex justify-content-between align-items-center">
+                <small class="text-muted"><i class="fas fa-trash me-1"></i> Delete</small>
+                <div class="form-check form-switch">
+                  <input class="form-check-input sub-perm-package_themes-{{ data.member.id }}" type="checkbox"
+                    id="{{ data.member.id }}_can_delete_package_theme"
+                    data-permission="can_delete_package_theme"
+                    {% if data.permissions_status.can_delete_package_theme %}checked{% endif %}
+                    onchange="togglePermission({{ data.member.id }}, 'can_delete_package_theme', this.checked)"
+                    style="width: 40px; height: 20px; cursor: pointer" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 13. Manage Currencies -->
+          <div class="col-md-6 mb-3">
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="flex-grow-1">
+                <label class="form-label fw-bold mb-1">
+                  Manage Currencies
+                  <button class="btn btn-sm btn-link p-0 ms-1 text-decoration-none" 
+                          onclick="toggleSubPermissions('currencies_{{ data.member.id }}')"
+                          title="Show detailed permissions">
+                    <i class="fas fa-chevron-down" id="icon_currencies_{{ data.member.id }}" style="font-size: 12px;"></i>
+                  </button>
+                </label>
+                <p class="text-muted small mb-0">Can add, edit, and delete currencies</p>
+              </div>
+              <div class="form-check form-switch ms-3">
+                <input class="form-check-input permission-masterdata" type="checkbox"
+                  id="{{ data.member.id }}_can_manage_currencies"
+                  data-permission="can_manage_currencies"
+                  {% if data.permissions_status.can_manage_currencies %}checked{% endif %}
+                  onchange="togglePermission({{ data.member.id }}, 'can_manage_currencies', this.checked)"
+                  style="width: 48px; height: 24px; cursor: pointer" />
+              </div>
+            </div>
+            
+            <div class="sub-permissions ms-3 mt-2" id="currencies_{{ data.member.id }}" style="display: none;">
+              <div class="d-flex justify-content-end mb-2">
+                <button class="btn btn-sm btn-outline-primary" 
+                        onclick="selectAllSubPermissions({{ data.member.id }}, 'currencies')"
+                        style="font-size: 11px; padding: 3px 10px;">
+                  <i class="fas fa-check-double me-1"></i>Select All
+                </button>
+              </div>
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <small class="text-muted"><i class="fas fa-eye me-1"></i> View</small>
+                <div class="form-check form-switch">
+                  <input class="form-check-input sub-perm-currencies-{{ data.member.id }}" type="checkbox"
+                    id="{{ data.member.id }}_can_view_currencies"
+                    data-permission="can_view_currencies"
+                    {% if data.permissions_status.can_view_currencies %}checked{% endif %}
+                    onchange="togglePermission({{ data.member.id }}, 'can_view_currencies', this.checked)"
+                    style="width: 40px; height: 20px; cursor: pointer" />
+                </div>
+              </div>
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <small class="text-muted"><i class="fas fa-plus me-1"></i> Add</small>
+                <div class="form-check form-switch">
+                  <input class="form-check-input sub-perm-currencies-{{ data.member.id }}" type="checkbox"
+                    id="{{ data.member.id }}_can_add_currency"
+                    data-permission="can_add_currency"
+                    {% if data.permissions_status.can_add_currency %}checked{% endif %}
+                    onchange="togglePermission({{ data.member.id }}, 'can_add_currency', this.checked)"
+                    style="width: 40px; height: 20px; cursor: pointer" />
+                </div>
+              </div>
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <small class="text-muted"><i class="fas fa-edit me-1"></i> Edit</small>
+                <div class="form-check form-switch">
+                  <input class="form-check-input sub-perm-currencies-{{ data.member.id }}" type="checkbox"
+                    id="{{ data.member.id }}_can_edit_currency"
+                    data-permission="can_edit_currency"
+                    {% if data.permissions_status.can_edit_currency %}checked{% endif %}
+                    onchange="togglePermission({{ data.member.id }}, 'can_edit_currency', this.checked)"
+                    style="width: 40px; height: 20px; cursor: pointer" />
+                </div>
+              </div>
+              <div class="d-flex justify-content-between align-items-center">
+                <small class="text-muted"><i class="fas fa-trash me-1"></i> Delete</small>
+                <div class="form-check form-switch">
+                  <input class="form-check-input sub-perm-currencies-{{ data.member.id }}" type="checkbox"
+                    id="{{ data.member.id }}_can_delete_currency"
+                    data-permission="can_delete_currency"
+                    {% if data.permissions_status.can_delete_currency %}checked{% endif %}
+                    onchange="togglePermission({{ data.member.id }}, 'can_delete_currency', this.checked)"
+                    style="width: 40px; height: 20px; cursor: pointer" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Continue with other cards similarly... -->
+    <!-- I'll add the "Select All" button to each card header -->
+    
+    <!-- DAY PLAN MANAGEMENT -->
+    <div class="card mb-4">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 text-primary">
+          <i class="fas fa-calendar-alt me-2"></i>Day Plan Management
+        </h5>
+        <button class="btn btn-sm btn-outline-primary select-all-btn" onclick="selectAllInCard({{ data.member.id }}, 'dayplan')">
+          <i class="fas fa-check-double me-1"></i>Select All
+        </button>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <!-- Manage Destinations -->
+          <div class="col-md-6 mb-3">
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="flex-grow-1">
+                <label class="form-label fw-bold mb-1">Manage Destinations</label>
+                <p class="text-muted small mb-0">Can select and save day destinations</p>
+              </div>
+              <div class="form-check form-switch ms-3">
+                <input class="form-check-input permission-dayplan" type="checkbox"
+                  id="{{ data.member.id }}_can_manage_destinations"
+                  data-permission="can_manage_destinations"
+                  {% if data.permissions_status.can_manage_destinations %}checked{% endif %}
+                  onchange="togglePermission({{ data.member.id }}, 'can_manage_destinations', this.checked)"
+                  style="width: 48px; height: 24px; cursor: pointer" />
+              </div>
+            </div>
+          </div>
+
+          <!-- View Saved Items -->
+          <div class="col-md-6 mb-3">
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="flex-grow-1">
+                <label class="form-label fw-bold mb-1">View Saved Items</label>
+                <p class="text-muted small mb-0">Can view booked items for each day</p>
+              </div>
+              <div class="form-check form-switch ms-3">
+                <input class="form-check-input permission-dayplan" type="checkbox"
+                  id="{{ data.member.id }}_can_view_saved_items"
+                  data-permission="can_view_saved_items"
+                  {% if data.permissions_status.can_view_saved_items %}checked{% endif %}
+                  onchange="togglePermission({{ data.member.id }}, 'can_view_saved_items', this.checked)"
+                  style="width: 48px; height: 24px; cursor: pointer" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Add Items to Day -->
+          <div class="col-md-6 mb-3">
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="flex-grow-1">
+                <label class="form-label fw-bold mb-1">Add Items to Day</label>
+                <p class="text-muted small mb-0">Can load and add hotels/vehicles/activities</p>
+              </div>
+              <div class="form-check form-switch ms-3">
+                <input class="form-check-input permission-dayplan" type="checkbox"
+                  id="{{ data.member.id }}_can_add_items_to_day"
+                  data-permission="can_add_items_to_day"
+                  {% if data.permissions_status.can_add_items_to_day %}checked{% endif %}
+                  onchange="togglePermission({{ data.member.id }}, 'can_add_items_to_day', this.checked)"
+                  style="width: 48px; height: 24px; cursor: pointer" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ITINERARY MANAGEMENT -->
+    <div class="card mb-4">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 text-primary">
+          <i class="fas fa-tasks me-2"></i>Itinerary Management
+        </h5>
+        <button class="btn btn-sm btn-outline-primary select-all-btn" onclick="selectAllInCard({{ data.member.id }}, 'itinerary')">
+          <i class="fas fa-check-double me-1"></i>Select All
+        </button>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <!-- Edit Bookings -->
+          <div class="col-md-6 mb-3">
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="flex-grow-1">
+                <label class="form-label fw-bold mb-1">Edit Bookings</label>
+                <p class="text-muted small mb-0">Can edit hotel, vehicle, and activity bookings</p>
+              </div>
+              <div class="form-check form-switch ms-3">
+                <input class="form-check-input permission-itinerary" type="checkbox"
+                  id="{{ data.member.id }}_can_edit_bookings"
+                  data-permission="can_edit_bookings"
+                  {% if data.permissions_status.can_edit_bookings %}checked{% endif %}
+                  onchange="togglePermission({{ data.member.id }}, 'can_edit_bookings', this.checked)"
+                  style="width: 48px; height: 24px; cursor: pointer" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Delete Bookings -->
+          <div class="col-md-6 mb-3">
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="flex-grow-1">
+                <label class="form-label fw-bold mb-1">Delete Bookings</label>
+                <p class="text-muted small mb-0">Can delete hotel, vehicle, and activity bookings</p>
+              </div>
+              <div class="form-check form-switch ms-3">
+                <input class="form-check-input permission-itinerary" type="checkbox"
+                  id="{{ data.member.id }}_can_delete_bookings"
+                  data-permission="can_delete_bookings"
+                  {% if data.permissions_status.can_delete_bookings %}checked{% endif %}
+                  onchange="togglePermission({{ data.member.id }}, 'can_delete_bookings', this.checked)"
+                  style="width: 48px; height: 24px; cursor: pointer" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PRICING CONTROLS -->
+    <div class="card mb-4">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 text-primary">
+          <i class="fas fa-dollar-sign me-2"></i>Pricing Controls
+        </h5>
+        <button class="btn btn-sm btn-outline-primary select-all-btn" onclick="selectAllInCard({{ data.member.id }}, 'pricing')">
+          <i class="fas fa-check-double me-1"></i>Select All
+        </button>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <!-- Edit Item Prices -->
+          <div class="col-md-6 mb-3">
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="flex-grow-1">
+                <label class="form-label fw-bold mb-1">Edit Item Prices</label>
+                <p class="text-muted small mb-0">Can edit net price and markup for items</p>
+              </div>
+              <div class="form-check form-switch ms-3">
+                <input class="form-check-input permission-pricing" type="checkbox"
+                  id="{{ data.member.id }}_can_edit_item_prices"
+                  data-permission="can_edit_item_prices"
+                  {% if data.permissions_status.can_edit_item_prices %}checked{% endif %}
+                  onchange="togglePermission({{ data.member.id }}, 'can_edit_item_prices', this.checked)"
+                  style="width: 48px; height: 24px; cursor: pointer" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Apply Global Markup -->
+          <div class="col-md-6 mb-3">
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="flex-grow-1">
+                <label class="form-label fw-bold mb-1">Apply Global Markup</label>
+                <p class="text-muted small mb-0">Can apply global markup options</p>
+              </div>
+              <div class="form-check form-switch ms-3">
+                <input class="form-check-input permission-pricing" type="checkbox"
+                  id="{{ data.member.id }}_can_apply_global_markup"
+                  data-permission="can_apply_global_markup"
+                  {% if data.permissions_status.can_apply_global_markup %}checked{% endif %}
+                  onchange="togglePermission({{ data.member.id }}, 'can_apply_global_markup', this.checked)"
+                  style="width: 48px; height: 24px; cursor: pointer" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Edit Taxes -->
+          <div class="col-md-6 mb-3">
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="flex-grow-1">
+                <label class="form-label fw-bold mb-1">Edit Taxes</label>
+                <p class="text-muted small mb-0">Can edit CGST and SGST percentages</p>
+              </div>
+              <div class="form-check form-switch ms-3">
+                <input class="form-check-input permission-pricing" type="checkbox"
+                  id="{{ data.member.id }}_can_edit_taxes"
+                  data-permission="can_edit_taxes"
+                  {% if data.permissions_status.can_edit_taxes %}checked{% endif %}
+                  onchange="togglePermission({{ data.member.id }}, 'can_edit_taxes', this.checked)"
+                  style="width: 48px; height: 24px; cursor: pointer" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Apply Discount -->
+          <div class="col-md-6 mb-3">
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="flex-grow-1">
+                <label class="form-label fw-bold mb-1">Apply Discount</label>
+                <p class="text-muted small mb-0">Can apply discounts to pricing</p>
+              </div>
+              <div class="form-check form-switch ms-3">
+                <input class="form-check-input permission-pricing" type="checkbox"
+                  id="{{ data.member.id }}_can_apply_discount"
+                  data-permission="can_apply_discount"
+                  {% if data.permissions_status.can_apply_discount %}checked{% endif %}
+                  onchange="togglePermission({{ data.member.id }}, 'can_apply_discount', this.checked)"
+                  style="width: 48px; height: 24px; cursor: pointer" />
+              </div>
+            </div>
+          </div>
+
+          <!-- View Item Actions -->
+          <div class="col-md-6 mb-3">
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="flex-grow-1">
+                <label class="form-label fw-bold mb-1">View Item Actions</label>
+                <p class="text-muted small mb-0">Can view and use action buttons (3-dot menu)</p>
+              </div>
+              <div class="form-check form-switch ms-3">
+                <input class="form-check-input permission-pricing" type="checkbox"
+                  id="{{ data.member.id }}_can_view_item_actions"
+                  data-permission="can_view_item_actions"
+                  {% if data.permissions_status.can_view_item_actions %}checked{% endif %}
+                  onchange="togglePermission({{ data.member.id }}, 'can_view_item_actions', this.checked)"
+                  style="width: 48px; height: 24px; cursor: pointer" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Finalize Pricing -->
+          <div class="col-md-6 mb-3">
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="flex-grow-1">
+                <label class="form-label fw-bold mb-1">Finalize Pricing</label>
+                <p class="text-muted small mb-0">Can save and finalize pricing for itineraries</p>
+              </div>
+              <div class="form-check form-switch ms-3">
+                <input class="form-check-input permission-pricing" type="checkbox"
+                  id="{{ data.member.id }}_can_finalize_pricing"
+                  data-permission="can_finalize_pricing"
+                  {% if data.permissions_status.can_finalize_pricing %}checked{% endif %}
+                  onchange="togglePermission({{ data.member.id }}, 'can_finalize_pricing', this.checked)"
+                  style="width: 48px; height: 24px; cursor: pointer" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ITINERARY ACTIONS -->
+    <div class="card mb-4">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 text-primary">
+          <i class="fas fa-tools me-2"></i>Itinerary Actions
+        </h5>
+        <button class="btn btn-sm btn-outline-primary select-all-btn" onclick="selectAllInCard({{ data.member.id }}, 'actions')">
+          <i class="fas fa-check-double me-1"></i>Select All
+        </button>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <!-- View Quotation -->
+          <div class="col-md-6 mb-3">
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="flex-grow-1">
+                <label class="form-label fw-bold mb-1">View Quotation</label>
+                <p class="text-muted small mb-0">Can view and generate quotations</p>
+              </div>
+              <div class="form-check form-switch ms-3">
+                <input class="form-check-input permission-actions" type="checkbox"
+                  id="{{ data.member.id }}_can_view_quotation"
+                  data-permission="can_view_quotation"
+                  {% if data.permissions_status.can_view_quotation %}checked{% endif %}
+                  onchange="togglePermission({{ data.member.id }}, 'can_view_quotation', this.checked)"
+                  style="width: 48px; height: 24px; cursor: pointer" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Export Itinerary -->
+          <div class="col-md-6 mb-3">
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="flex-grow-1">
+                <label class="form-label fw-bold mb-1">Export Itinerary</label>
+                <p class="text-muted small mb-0">Can export itinerary as PDF/Excel</p>
+              </div>
+              <div class="form-check form-switch ms-3">
+                <input class="form-check-input permission-actions" type="checkbox"
+                  id="{{ data.member.id }}_can_export_itinerary"
+                  data-permission="can_export_itinerary"
+                  {% if data.permissions_status.can_export_itinerary %}checked{% endif %}
+                  onchange="togglePermission({{ data.member.id }}, 'can_export_itinerary', this.checked)"
+                  style="width: 48px; height: 24px; cursor: pointer" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Share Itinerary -->
+          <div class="col-md-6 mb-3">
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="flex-grow-1">
+                <label class="form-label fw-bold mb-1">Share Itinerary</label>
+                <p class="text-muted small mb-0">Can share itinerary with clients</p>
+              </div>
+              <div class="form-check form-switch ms-3">
+                <input class="form-check-input permission-actions" type="checkbox"
+                  id="{{ data.member.id }}_can_share_itinerary"
+                  data-permission="can_share_itinerary"
+                  {% if data.permissions_status.can_share_itinerary %}checked{% endif %}
+                  onchange="togglePermission({{ data.member.id }}, 'can_share_itinerary', this.checked)"
+                  style="width: 48px; height: 24px; cursor: pointer" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADMINISTRATION -->
+    <div class="card mb-4">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 text-danger">
+          <i class="fas fa-shield-alt me-2"></i>Administration & Settings
+        </h5>
+        <button class="btn btn-sm btn-outline-danger select-all-btn" onclick="selectAllInCard({{ data.member.id }}, 'admin')">
+          <i class="fas fa-check-double me-1"></i>Select All
+        </button>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <!-- Access Admin Settings -->
+          <div class="col-md-6 mb-3">
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="flex-grow-1">
+                <label class="form-label fw-bold mb-1">Access Admin Settings</label>
+                <p class="text-muted small mb-0">Can access admin settings dashboard</p>
+              </div>
+              <div class="form-check form-switch ms-3">
+                <input class="form-check-input permission-admin" type="checkbox"
+                  id="{{ data.member.id }}_can_access_admin_settings"
+                  data-permission="can_access_admin_settings"
+                  {% if data.permissions_status.can_access_admin_settings %}checked{% endif %}
+                  onchange="togglePermission({{ data.member.id }}, 'can_access_admin_settings', this.checked)"
+                  style="width: 48px; height: 24px; cursor: pointer" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Manage Team Members -->
+          <div class="col-md-6 mb-3">
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="flex-grow-1">
+                <label class="form-label fw-bold mb-1">Manage Team Members</label>
+                <p class="text-muted small mb-0">Can add, edit, and remove team members</p>
+              </div>
+              <div class="form-check form-switch ms-3">
+                <input class="form-check-input permission-admin" type="checkbox"
+                  id="{{ data.member.id }}_can_manage_team_members"
+                  data-permission="can_manage_team_members"
+                  {% if data.permissions_status.can_manage_team_members %}checked{% endif %}
+                  onchange="togglePermission({{ data.member.id }}, 'can_manage_team_members', this.checked)"
+                  style="width: 48px; height: 24px; cursor: pointer" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Manage Organization -->
+          <div class="col-md-6 mb-3">
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="flex-grow-1">
+                <label class="form-label fw-bold mb-1">Manage Organization</label>
+                <p class="text-muted small mb-0">Can edit organization settings</p>
+              </div>
+              <div class="form-check form-switch ms-3">
+                <input class="form-check-input permission-admin" type="checkbox"
+                  id="{{ data.member.id }}_can_manage_organization"
+                  data-permission="can_manage_organization"
+                  {% if data.permissions_status.can_manage_organization %}checked{% endif %}
+                  onchange="togglePermission({{ data.member.id }}, 'can_manage_organization', this.checked)"
+                  style="width: 48px; height: 24px; cursor: pointer" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Manage Branches -->
+          <div class="col-md-6 mb-3">
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="flex-grow-1">
+                <label class="form-label fw-bold mb-1">Manage Branches</label>
+                <p class="text-muted small mb-0">Can add and edit branch locations</p>
+              </div>
+              <div class="form-check form-switch ms-3">
+                <input class="form-check-input permission-admin" type="checkbox"
+                  id="{{ data.member.id }}_can_manage_branches"
+                  data-permission="can_manage_branches"
+                  {% if data.permissions_status.can_manage_branches %}checked{% endif %}
+                  onchange="togglePermission({{ data.member.id }}, 'can_manage_branches', this.checked)"
+                  style="width: 48px; height: 24px; cursor: pointer" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Manage Roles -->
+          <div class="col-md-6 mb-3">
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="flex-grow-1">
+                <label class="form-label fw-bold mb-1">Manage Roles</label>
+                <p class="text-muted small mb-0">Can create and edit user roles</p>
+              </div>
+              <div class="form-check form-switch ms-3">
+                <input class="form-check-input permission-admin" type="checkbox"
+                  id="{{ data.member.id }}_can_manage_roles"
+                  data-permission="can_manage_roles"
+                  {% if data.permissions_status.can_manage_roles %}checked{% endif %}
+                  onchange="togglePermission({{ data.member.id }}, 'can_manage_roles', this.checked)"
+                  style="width: 48px; height: 24px; cursor: pointer" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Manage Business Settings -->
+          <div class="col-md-6 mb-3">
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="flex-grow-1">
+                <label class="form-label fw-bold mb-1">Manage Business Settings</label>
+                <p class="text-muted small mb-0">Can configure business rules</p>
+              </div>
+              <div class="form-check form-switch ms-3">
+                <input class="form-check-input permission-admin" type="checkbox"
+                  id="{{ data.member.id }}_can_manage_business_settings"
+                  data-permission="can_manage_business_settings"
+                  {% if data.permissions_status.can_manage_business_settings %}checked{% endif %}
+                  onchange="togglePermission({{ data.member.id }}, 'can_manage_business_settings', this.checked)"
+                  style="width: 48px; height: 24px; cursor: pointer" />
+              </div>
+            </div>
+          </div>
+
+          <!-- View Package Details -->
+          <div class="col-md-6 mb-3">
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="flex-grow-1">
+                <label class="form-label fw-bold mb-1">View Package Details</label>
+                <p class="text-muted small mb-0">Can view and edit package details</p>
+              </div>
+              <div class="form-check form-switch ms-3">
+                <input class="form-check-input permission-admin" type="checkbox"
+                  id="{{ data.member.id }}_can_view_package_details"
+                  data-permission="can_view_package_details"
+                  {% if data.permissions_status.can_view_package_details %}checked{% endif %}
+                  onchange="togglePermission({{ data.member.id }}, 'can_view_package_details', this.checked)"
+                  style="width: 48px; height: 24px; cursor: pointer" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Empty State -->
+{% if not team_data %}
+<div class="card">
+  <div class="card-body text-center py-5">
+    <i class="fas fa-users fa-3x text-muted mb-3"></i>
+    <h5 class="text-muted">No Team Members Found</h5>
+    <p class="text-muted">Add team members to manage their permissions</p>
+  </div>
+</div>
+{% endif %}
+
+<!-- JAVASCRIPT -->
+<script>
+  // Show selected user's permissions
+  function showUserPermissions(userId) {
+    const emptyState = document.getElementById("emptyState");
+
+    // Hide all user permission sections
+    document.querySelectorAll(".user-permissions").forEach((section) => {
+      section.style.display = "none";
+    });
+
+    // Show or hide empty state
+    if (!userId) {
+      emptyState.style.display = "block";
+      return;
+    } else {
+      emptyState.style.display = "none";
+    }
+
+    // Show selected user's permissions
+    const selectedUser = document.getElementById("user-" + userId);
+    if (selectedUser) {
+      selectedUser.style.display = "block";
+      // Smooth scroll to the permissions
+      selectedUser.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }
+
+  // Select all permissions in a specific card
+  function selectAllInCard(userId, cardType) {
+    const checkboxes = document.querySelectorAll(
+      `#user-${userId} .permission-${cardType}`
+    );
+    const allChecked = Array.from(checkboxes).every((cb) => cb.checked);
+    const btn = event.target.closest("button");
+
+    // Disable button during processing
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Processing...';
+
+    // Toggle all checkboxes in this card
+    let processedCount = 0;
+    const totalCheckboxes = checkboxes.length;
+
+    checkboxes.forEach((checkbox, index) => {
+      if (checkbox.checked !== !allChecked) {
+        checkbox.checked = !allChecked;
+        const permission = checkbox.getAttribute("data-permission");
+
+        // Add small delay between each request to avoid overwhelming the server
+        setTimeout(() => {
+          togglePermission(userId, permission, !allChecked, () => {
+            processedCount++;
+            if (processedCount === totalCheckboxes) {
+              // Re-enable button and update text
+              btn.disabled = false;
+              btn.innerHTML =
+                '<i class="fas fa-check-double me-1"></i>Select All';
+            }
+          });
+        }, index * 100);
+      }
+    });
+
+    // If no checkboxes need updating, re-enable button immediately
+    if (processedCount === totalCheckboxes || totalCheckboxes === 0) {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-check-double me-1"></i>Select All';
+    }
+  }
+
+  // Toggle sub-permissions visibility (expand/collapse)
+  function toggleSubPermissions(id) {
+    const element = document.getElementById(id);
+    const icon = document.getElementById('icon_' + id);
+    const button = icon.parentElement;
+    
+    if (element.style.display === 'none') {
+      element.style.display = 'block';
+      button.classList.add('expanded');
+    } else {
+      element.style.display = 'none';
+      button.classList.remove('expanded');
+    }
+  }
+
+  // ✅ NEW FUNCTION: Select all sub-permissions for a specific category
+  function selectAllSubPermissions(userId, category) {
+    // Get all checkboxes with the specific class
+    const checkboxes = document.querySelectorAll(`.sub-perm-${category}-${userId}`);
+    
+    // Check if all are already selected
+    const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+    
+    // Toggle: if all checked, uncheck all; otherwise, check all
+    const newState = !allChecked;
+    
+    // Get the button that was clicked
+    const button = event.target.closest('button');
+    
+    // Disable button during processing
+    button.disabled = true;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Processing...';
+    
+    let processedCount = 0;
+    const totalCheckboxes = checkboxes.length;
+    
+    checkboxes.forEach((checkbox, index) => {
+      if (checkbox.checked !== newState) {
+        checkbox.checked = newState;
+        
+        // Get the permission key from data attribute
+        const permission = checkbox.getAttribute('data-permission');
+        
+        // Add small delay between requests
+        setTimeout(() => {
+          togglePermission(userId, permission, newState, () => {
+            processedCount++;
+            if (processedCount === totalCheckboxes) {
+              // Re-enable button and update text/style
+              button.disabled = false;
+              if (newState) {
+                button.innerHTML = '<i class="fas fa-times me-1"></i>Deselect All';
+                button.classList.remove('btn-outline-primary');
+                button.classList.add('btn-outline-danger');
+              } else {
+                button.innerHTML = '<i class="fas fa-check-double me-1"></i>Select All';
+                button.classList.remove('btn-outline-danger');
+                button.classList.add('btn-outline-primary');
+              }
+            }
+          });
+        }, index * 100);
+      } else {
+        processedCount++;
+      }
+    });
+    
+    // If no checkboxes need updating, re-enable button immediately
+    if (processedCount === totalCheckboxes) {
+      button.disabled = false;
+      if (newState) {
+        button.innerHTML = '<i class="fas fa-times me-1"></i>Deselect All';
+        button.classList.remove('btn-outline-primary');
+        button.classList.add('btn-outline-danger');
+      } else {
+        button.innerHTML = '<i class="fas fa-check-double me-1"></i>Select All';
+        button.classList.remove('btn-outline-danger');
+        button.classList.add('btn-outline-primary');
+      }
+    }
+  }
+
+  // Toggle individual permission
+  function togglePermission(userId, permission, isGranted, callback) {
+    const action = isGranted ? "grant" : "revoke";
+    const checkbox = document.getElementById(`${userId}_${permission}`);
+    
+    if (checkbox) {
+      checkbox.disabled = true;
+    }
+
+    fetch('{% url "team_member:toggle_permission" %}', {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "X-CSRFToken": "{{ csrf_token }}",
+      },
+      body: `user_id=${userId}&permission=${permission}&action=${action}`,
+    })
+      .then((response) => {
+        if (checkbox) {
+          checkbox.disabled = false;
+        }
+        if (response.ok) {
+          return response.json();
+        } else {
+          throw new Error("Failed to update permission");
+        }
+      })
+      .then((data) => {
+        if (typeof callback === "function") {
+          callback();
+        }
+        // Optional: Show subtle success feedback without popup
+        console.log(`✅ ${data.message || "Permission updated successfully"}`);
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        if (checkbox) {
+          checkbox.disabled = false;
+          checkbox.checked = !isGranted;
+        }
+
+        if (typeof Swal !== "undefined") {
+          Swal.fire({
+            icon: "error",
+            title: "Error!",
+            text: "Failed to update permission. Please try again.",
+            toast: true,
+            position: "top-end",
+            showConfirmButton: false,
+            timer: 3000,
+          });
+        } else {
+          alert("Failed to update permission. Please try again.");
+        }
+      });
+  }
+</script>
+
+<style>
+  .form-check-input:checked {
+    background-color: #1572e8;
+    border-color: #1572e8;
+  }
+
+  .form-check-input {
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .form-check-input:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  .form-check-input:focus {
+    box-shadow: 0 0 0 0.2rem rgba(21, 114, 232, 0.25);
+  }
+
+  .card {
+    border: 1px solid #e3e6f0;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    transition: box-shadow 0.3s ease;
+  }
+
+  .card:hover {
+    box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1);
+  }
+
+  .card-header {
+    background-color: #f8f9fc;
+    border-bottom: 1px solid #e3e6f0;
+    padding: 1rem 1.25rem;
+  }
+
+  .badge-primary {
+    background-color: #1572e8;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .form-select:focus {
+    border-color: #1572e8;
+    box-shadow: 0 0 0 0.2rem rgba(21, 114, 232, 0.25);
+  }
+
+  .btn-outline-primary:hover {
+    background-color: #1572e8;
+    border-color: #1572e8;
+    color: white;
+  }
+
+  .btn-outline-danger:hover {
+    background-color: #dc3545;
+    border-color: #dc3545;
+    color: white;
+  }
+
+  .select-all-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  .user-permissions {
+    animation: fadeIn 0.4s ease-in;
+  }
+
+  #emptyState {
+    animation: fadeIn 0.3s ease-in;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Improve toggle switch appearance */
+  .form-check-input[type="checkbox"] {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e");
+  }
+
+  .form-check-input:checked[type="checkbox"] {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e");
+  }
+
+  /* Empty state styling */
+  #emptyState .fa-user-shield {
+    color: #858796;
+  }
+
+  /* Sub-permissions expandable section */
+  .sub-permissions {
+    background: #f8f9fa;
+    border-left: 3px solid #667eea;
+    padding: 10px;
+    border-radius: 6px;
+    margin-top: 8px;
+    animation: slideDown 0.3s ease;
+  }
+
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      max-height: 0;
+      padding: 0 10px;
+    }
+    to {
+      opacity: 1;
+      max-height: 500px;
+      padding: 10px;
+    }
+  }
+
+  /* Chevron button styling */
+  .btn-link {
+    color: #667eea;
+    transition: all 0.3s ease;
+    text-decoration: none;
+  }
+
+  .btn-link:hover {
+    color: #764ba2;
+    text-decoration: none;
+  }
+
+  .btn-link i {
+    transition: transform 0.3s ease;
+  }
+
+  .btn-link.expanded i {
+    transform: rotate(180deg);
+  }
+
+  /* Select All Sub-Permissions button */
+  .btn-outline-primary.btn-sm {
+    transition: all 0.3s ease;
+  }
+
+  .btn-outline-danger.btn-sm {
+    transition: all 0.3s ease;
+  }
+
+  /* Smooth hover effects */
+  .sub-permissions .form-check-input:hover {
+    transform: scale(1.05);
+  }
+
+  /* Loading state for buttons */
+  button:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  .fa-spinner.fa-spin {
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+</style>
+
+{% endblock %}

@@ -1,0 +1,1096 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+  .package-table {
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  .package-table th {
+    background: #2b4c7e;
+    color: white;
+    font-weight: 600;
+    padding: 12px;
+    font-size: 0.9rem;
+    white-space: nowrap;
+  }
+  .package-table td {
+    padding: 12px;
+    vertical-align: middle;
+    border-bottom: 1px solid #e0e0e0;
+  }
+  
+  /* Enhanced hover effect for clickable rows */
+  .package-table tbody tr:hover {
+    background: #e3f2fd;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transform: translateY(-1px);
+    transition: all 0.2s ease;
+  }
+  
+  .package-thumbnail-small {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 4px;
+  }
+  .action-btn {
+    padding: 4px 8px;
+    font-size: 0.85rem;
+  }
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    background: white;
+    border-radius: 8px;
+  }
+  .empty-state i {
+    font-size: 4rem;
+    color: #ccc;
+    margin-bottom: 20px;
+  }
+  .suppliers-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 2rem;
+    border-radius: 15px;
+    margin-bottom: 2rem;
+    color: white;
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+  }
+
+  /* Add this new style for back button */
+  .back-button-container {
+    padding: 1.5rem 2rem 0 2rem;
+    margin-bottom: -1rem;
+  }
+
+  .back-btn-modern {
+    padding: 0.6rem 1.2rem;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    border: 2px solid #667eea;
+    color: #667eea;
+    background: white;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .back-btn-modern:hover {
+    background: #667eea;
+    color: white;
+    transform: translateX(-5px);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  }
+
+  .back-btn-modern i {
+    font-size: 16px;
+  }
+
+  .search-filter-bar {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    margin-bottom: 1.5rem;
+  }
+
+  .modern-table {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+  }
+
+  .modern-table thead {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+  }
+
+  .modern-table thead th {
+    border: none;
+    padding: 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+  }
+
+  .modern-table tbody tr {
+    transition: all 0.3s ease;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .modern-table tbody tr:hover {
+    background: #f8f9ff;
+    transform: scale(1.01);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+  }
+
+  .modern-table tbody td {
+    padding: 1rem;
+    vertical-align: middle;
+  }
+
+  .action-btn-group {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .action-btn {
+    padding: 0.4rem 0.8rem;
+    border-radius: 8px;
+    border: none;
+    transition: all 0.3s ease;
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+
+  .badge-modern {
+    padding: 0.4rem 0.8rem;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 12px;
+  }
+
+  .stats-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    text-align: center;
+    transition: all 0.3s ease;
+  }
+
+  .stats-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+  }
+
+  .stats-card .icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    font-size: 24px;
+  }
+
+  .modal-header-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+  }
+
+  .form-section-title {
+    color: #667eea;
+    font-weight: 600;
+    border-bottom: 2px solid #667eea;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+  }
+</style>
+
+<!-- Back Button with Modern Styling -->
+<div class="back-button-container">
+    <a href="{% url 'admin_settings' %}" class="back-btn-modern">
+        <i class="fas fa-arrow-left"></i>
+        <span>Back to Admin Settings</span>
+    </a>
+</div>
+
+<div class="container-fluid" style="margin-top: 70px;">
+  <!-- Header Section -->
+  <div class="row mb-4">
+    <div class="col-md-6">
+      <h4 class="mb-0">
+        <i class="fas fa-box-open me-2"></i> Package Templates
+      </h4>
+      <p class="text-muted small mb-0">Create and manage reusable travel packages</p>
+    </div>
+    <div class="col-md-6 text-end">
+      <button 
+        class="btn btn-primary"
+        data-bs-toggle="modal"
+        data-bs-target="#createPackageModal">
+        <i class="fas fa-plus me-2"></i> Create Package
+      </button>
+    </div>
+  </div>
+
+  <!-- Search & Filter Section -->
+  <div class="card mb-4">
+    <div class="card-body">
+      <form method="get" id="filterForm">
+        <div class="row g-3 align-items-end">
+          <div class="col-md-5">
+            <label class="form-label small">Search Packages</label>
+            <input 
+              type="text" 
+              name="search" 
+              class="form-control" 
+              placeholder="Search by name, description, or tags..."
+              value="{{ search }}">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label small">Filter by Theme</label>
+            <select name="theme" class="form-select">
+              <option value="">All Themes</option>
+              {% for theme in themes %}
+              <option value="{{ theme.id }}" {% if selected_theme == theme.id|stringformat:"s" %}selected{% endif %}>
+                {{ theme.package_name }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-2">
+            <div class="form-check">
+              <input 
+                class="form-check-input" 
+                type="checkbox" 
+                name="featured" 
+                value="true" 
+                id="featuredOnly"
+                {% if request.GET.featured %}checked{% endif %}>
+              <label class="form-check-label" for="featuredOnly">
+                Featured Only
+              </label>
+            </div>
+          </div>
+          <div class="col-md-2">
+            <button type="submit" class="btn btn-outline-primary w-100">
+              <i class="fas fa-search me-1"></i> Search
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Statistics -->
+  <div class="alert alert-info mb-3">
+    <i class="fas fa-info-circle me-2"></i>
+    <strong>{{ packages.count }}</strong> package template{{ packages.count|pluralize }} found
+    {% if search %}
+      <span class="ms-2">| Search: <strong>{{ search }}</strong></span>
+    {% endif %}
+  </div>
+
+  <!-- Packages Table -->
+  {% if packages %}
+  <div class="table-responsive">
+    <table class="table package-table mb-0">
+      <thead>
+        <tr>
+          <th style="width: 80px;">Image</th>
+          <th>Package Name</th>
+          <th style="width: 100px;">Days</th>
+          <th style="width: 150px;">Travel Dates</th>
+          <th style="width: 120px;">Pax</th>
+          <th>Destinations</th>
+          <th style="width: 120px;">Price</th>
+          <th style="width: 100px;">Day Plans</th>
+          <th style="width: 80px;">Used</th>
+          <th style="width: 100px;">Status</th>
+          <th style="width: 180px;">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for package in packages %}
+        <tr style="cursor: pointer;" onclick="window.location.href='{% url 'manage_package_day_plans' package.id %}'">
+          <!-- Thumbnail -->
+          <td>
+            {% if package.thumbnail %}
+            <img src="{{ package.thumbnail.url }}" class="package-thumbnail-small" alt="{{ package.name }}">
+            {% else %}
+            <div class="package-thumbnail-small bg-light d-flex align-items-center justify-content-center">
+              <i class="fas fa-image text-muted"></i>
+            </div>
+            {% endif %}
+          </td>
+
+          <!-- Package Name -->
+          <td>
+            <div>
+              <strong>{{ package.name }}</strong>
+              {% if package.is_featured %}
+              <span class="badge bg-warning text-dark ms-2">
+                <i class="fas fa-star"></i> Featured
+              </span>
+              {% endif %}
+              {% if package.description %}
+              <br>
+              <small class="text-muted">{{ package.description|truncatewords:10 }}</small>
+              {% endif %}
+            </div>
+          </td>
+
+          <!-- Days -->
+          <td class="text-center">
+            <span class="badge bg-primary">
+              {{ package.total_days }} Day{{ package.total_days|pluralize }}
+            </span>
+          </td>
+
+          <td>
+            {% if package.from_date and package.to_date %}
+              <small class="text-muted">
+                <i class="fas fa-calendar-alt me-1"></i>
+                {{ package.from_date|date:"d M Y" }}
+                <br>
+                <i class="fas fa-arrow-right me-1"></i>
+                {{ package.to_date|date:"d M Y" }}
+              </small>
+            {% else %}
+              <small class="text-muted fst-italic">Dates not set</small>
+            {% endif %}
+          </td>
+
+          <!-- Pax -->
+          <td class="text-center">
+            <small class="text-muted">
+              <i class="fas fa-users me-1"></i>
+              {{ package.default_adults }}A 
+              {% if package.default_children > 0 %}+ {{ package.default_children }}C{% endif %}
+              {% if package.default_infants > 0 %}+ {{ package.default_infants }}I{% endif %}
+              <br>
+              <span class="badge bg-info">Total: {{ package.total_passengers }}</span>
+            </small>
+          </td>
+
+          <!-- Destinations -->
+          <td>
+            <small class="text-muted">
+              <i class="fas fa-map-marker-alt me-1"></i>
+              {{ package.destination_list|default:"No destinations"|truncatewords:5 }}
+            </small>
+          </td>
+
+          <!-- Price -->
+          <!-- PRICE COLUMN -->
+          <td>
+              {% if package.pricing_options.exists %}
+                  {% with options=package.pricing_options.all %}
+                      {% if options.count == 1 %}
+                          <!-- Single option - just show price -->
+                          <span class="text-success fw-bold">
+                              ₹{{ package.total_package_price|floatformat:0 }}
+                          </span>
+                      {% else %}
+                          <!-- Multiple options - dropdown -->
+                          <div class="dropdown" onclick="event.stopPropagation();">
+                              <button class="btn btn-success btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                  ₹{{ package.total_package_price|floatformat:0 }}
+                                  <small class="d-block" style="font-size: 0.65rem;">{{ options.count }} options</small>
+                              </button>
+                              <ul class="dropdown-menu">
+                                  {% for option in options %}
+                                  <li>
+                                      <a class="dropdown-item" href="#">
+                                          <strong>{{ option.option_name }}</strong>
+                                          <span class="float-end text-success fw-bold">₹{{ option.final_amount|floatformat:0 }}</span>
+                                      </a>
+                                  </li>
+                                  {% endfor %}
+                              </ul>
+                          </div>
+                      {% endif %}
+                  {% endwith %}
+              {% else %}
+                  <span class="text-muted">-</span>
+              {% endif %}
+          </td>
+
+
+          <!-- Day Plans Count -->
+          <td class="text-center">
+            <span class="badge bg-info">
+              {{ package.day_plans.count }}
+            </span>
+          </td>
+
+          <!-- Times Used -->
+          <td class="text-center">
+            <span class="badge bg-secondary">
+              {{ package.times_used }}x
+            </span>
+          </td>
+
+          <!-- Status -->
+          <td class="text-center">
+            {% if package.is_active %}
+            <span class="badge bg-success">Active</span>
+            {% else %}
+            <span class="badge bg-secondary">Inactive</span>
+            {% endif %}
+          </td>
+
+          <!-- Actions - Stop propagation to prevent row click -->
+          <td onclick="event.stopPropagation();">
+            <div class="btn-group btn-group-sm" role="group">
+              <button 
+                class="btn btn-outline-primary action-btn"
+                onclick="openEditModal({{ package.id }})"
+                title="Edit">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button 
+                class="btn btn-outline-danger action-btn"
+                onclick="confirmDelete({{ package.id }}, '{{ package.name|escapejs }}')"
+                title="Delete">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <!-- Empty State -->
+  <div class="empty-state">
+    <i class="fas fa-box-open"></i>
+    <h5 class="text-muted">No Package Templates Found</h5>
+    <p class="text-muted">Create your first package template to get started</p>
+    <button 
+      class="btn btn-primary mt-3"
+      data-bs-toggle="modal"
+      data-bs-target="#createPackageModal">
+      <i class="fas fa-plus me-2"></i> Create Package Template
+    </button>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Create Package Modal -->
+<div class="modal fade" id="createPackageModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title">
+          <i class="fas fa-plus-circle me-2"></i> Create Package Template
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="post" action="{% url 'create_package_template' %}" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="modal-body">
+          <div class="row g-3">
+            <!-- Package Name -->
+            <div class="col-12">
+              <label class="form-label">Package Name *</label>
+              <input 
+                type="text" 
+                name="name" 
+                class="form-control" 
+                placeholder="e.g., Kerala Backwaters 5 Days"
+                required>
+            </div>
+
+            <!-- Description -->
+            <div class="col-12">
+              <label class="form-label">Description</label>
+              <textarea 
+                name="description" 
+                class="form-control" 
+                rows="3"
+                placeholder="Brief overview of the package..."></textarea>
+            </div>
+
+           <!-- Travel From Date -->
+            <div class="col-md-4">
+              <label class="form-label">Travel From Date</label>
+              <input 
+                type="date" 
+                name="from_date" 
+                id="createFromDate"
+                class="form-control">
+              <small class="text-muted">Start date of trip</small>
+            </div>
+
+            <!-- Travel To Date -->
+            <div class="col-md-4">
+              <label class="form-label">Travel To Date</label>
+              <input 
+                type="date" 
+                name="to_date" 
+                id="createToDate"
+                class="form-control">
+              <small class="text-muted">End date of trip</small>
+            </div>
+
+            <!-- Total Days - Auto-calculated -->
+            <div class="col-md-4">
+              <label class="form-label">Total Days * 
+                <i class="fas fa-info-circle text-muted" title="Auto-calculated from dates"></i>
+              </label>
+              <input 
+                type="number" 
+                name="total_days" 
+                id="createTotalDays"
+                class="form-control" 
+                min="1"
+                value="5"
+                required>
+              <small class="text-muted">Auto-calculated from dates</small>
+            </div>
+
+
+            <!-- Default Adults -->
+            <div class="col-md-4">
+              <label class="form-label">Default Adults</label>
+              <input 
+                type="number" 
+                name="default_adults" 
+                class="form-control" 
+                min="1"
+                value="2">
+            </div>
+
+            <!-- Default Children -->
+            <div class="col-md-4">
+              <label class="form-label">Default Children</label>
+              <input 
+                type="number" 
+                name="default_children" 
+                class="form-control" 
+                min="0"
+                value="0">
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label">Default Infants</label>
+              <input 
+                type="number" 
+                name="default_infants" 
+                class="form-control" 
+                min="0"
+                value="0">
+              <small class="text-muted">Number of infants</small>
+            </div>
+
+            <!-- Destinations -->
+            <div class="col-12">
+              <label class="form-label">Destinations</label>
+              <input 
+                type="text" 
+                name="destinations" 
+                class="form-control" 
+                placeholder="Enter comma-separated destinations (e.g., Cochin, Munnar, Thekkady)">
+              <small class="text-muted">Separate multiple destinations with commas</small>
+            </div>
+
+            <!-- Theme -->
+            <div class="col-md-6">
+              <label class="form-label">Theme</label>
+              <select name="theme" class="form-select">
+                <option value="">Select Theme (Optional)</option>
+                {% for theme in themes %}
+                <option value="{{ theme.id }}">{{ theme.package_name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+
+
+            <!-- Thumbnail Image Upload -->
+            <div class="col-md-6">
+              <label class="form-label">Thumbnail Image</label>
+              <input 
+                type="file" 
+                name="thumbnail" 
+                class="form-control" 
+                accept="image/*">
+              <small class="text-muted">Recommended: 300x300px</small>
+            </div>
+
+            <!-- Cover Image Upload -->
+            <div class="col-md-6">
+              <label class="form-label">Cover Image</label>
+              <input 
+                type="file" 
+                name="cover_image" 
+                class="form-control" 
+                accept="image/*">
+              <small class="text-muted">Recommended: 1200x400px</small>
+            </div>
+
+            <!-- Tags -->
+            <div class="col-12">
+              <label class="form-label">Tags</label>
+              <input 
+                type="text" 
+                name="tags" 
+                class="form-control" 
+                placeholder="e.g., honeymoon, family, adventure">
+              <small class="text-muted">Comma-separated tags for categorization</small>
+            </div>
+
+            <!-- Notes -->
+            <div class="col-12">
+              <label class="form-label">Notes</label>
+              <textarea 
+                name="notes" 
+                class="form-control" 
+                rows="2"
+                placeholder="Additional notes..."></textarea>
+            </div>
+
+            <!-- Is Featured -->
+            <div class="col-12">
+              <div class="form-check">
+                <input 
+                  class="form-check-input" 
+                  type="checkbox" 
+                  name="is_featured" 
+                  id="isFeatured">
+                <label class="form-check-label" for="isFeatured">
+                  Mark as Featured Package
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            Cancel
+          </button>
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-save me-1"></i> Create Package
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Package Modal -->
+<div class="modal fade" id="editPackageModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title">
+          <i class="fas fa-edit me-2"></i> Edit Package Template
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="post" id="editPackageForm" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="modal-body">
+          <div id="editPackageContent">
+            <div class="text-center py-4">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+              <p class="mt-2 text-muted">Loading package details...</p>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            Cancel
+          </button>
+          <button type="submit" class="btn btn-success">
+            <i class="fas fa-save me-1"></i> Update Package
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deletePackageModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title">
+          <i class="fas fa-exclamation-triangle me-2"></i> Confirm Delete
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body text-center py-4">
+        <i class="fas fa-trash fa-3x text-danger mb-3"></i>
+        <h5>Are you sure you want to delete this package?</h5>
+        <p class="text-muted mb-0" id="deletePackageName"></p>
+        <div class="alert alert-warning mt-3 small">
+          <i class="fas fa-info-circle me-1"></i>
+          This action cannot be undone. All day plans will be deleted.
+        </div>
+      </div>
+      <div class="modal-footer justify-content-center">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Cancel
+        </button>
+        <form method="post" id="deletePackageForm" style="display: inline;">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger">
+            <i class="fas fa-trash me-1"></i> Yes, Delete
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ==========================================
+// DATE VALIDATION & AUTO-CALCULATE TOTAL DAYS
+// ==========================================
+function setupDateValidation(fromDateId, toDateId, totalDaysId) {
+  const fromDateInput = document.getElementById(fromDateId);
+  const toDateInput = document.getElementById(toDateId);
+  const totalDaysInput = document.getElementById(totalDaysId);
+  
+  if (!fromDateInput || !toDateInput) return;
+  
+  // ✅ FUNCTION TO CALCULATE TOTAL DAYS
+  function calculateTotalDays() {
+    const fromDate = fromDateInput.value;
+    const toDate = toDateInput.value;
+    
+    if (fromDate && toDate) {
+      const from = new Date(fromDate);
+      const to = new Date(toDate);
+      
+      // Calculate difference in days (+1 because both dates are inclusive)
+      const diffTime = Math.abs(to - from);
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+      
+      if (totalDaysInput) {
+        totalDaysInput.value = diffDays;
+        totalDaysInput.readOnly = true; // Make it read-only when auto-calculated
+        totalDaysInput.classList.add('bg-light'); // Visual indication it's auto-filled
+      }
+    } else {
+      if (totalDaysInput) {
+        totalDaysInput.readOnly = false;
+        totalDaysInput.classList.remove('bg-light');
+      }
+    }
+  }
+  
+  // Validate when from_date changes
+  fromDateInput.addEventListener('change', function() {
+    if (this.value) {
+      // Set minimum date for to_date
+      toDateInput.min = this.value;
+      
+      // Reset to_date if it's before from_date
+      if (toDateInput.value && toDateInput.value < this.value) {
+        toDateInput.value = '';
+        alert('End date must be after or equal to start date');
+      }
+    }
+    
+    // ✅ Calculate total days
+    calculateTotalDays();
+  });
+  
+  // Validate when to_date changes
+  toDateInput.addEventListener('change', function() {
+    if (fromDateInput.value && this.value && this.value < fromDateInput.value) {
+      alert('End date must be after or equal to start date');
+      this.value = '';
+    }
+    
+    // ✅ Calculate total days
+    calculateTotalDays();
+  });
+  
+  // ✅ Initial calculation if both dates are already set (for edit mode)
+  calculateTotalDays();
+}
+
+
+// ==========================================
+// DELETE CONFIRMATION
+// ==========================================
+function confirmDelete(packageId, packageName) {
+  document.getElementById('deletePackageName').textContent = packageName;
+  document.getElementById('deletePackageForm').action = `/packages/${packageId}/delete/`;
+  
+  const modal = new bootstrap.Modal(document.getElementById('deletePackageModal'));
+  modal.show();
+}
+
+
+// ==========================================
+// DOCUMENT READY - SETUP CREATE MODAL DATE VALIDATION
+// ==========================================
+document.addEventListener('DOMContentLoaded', function() {
+  // Setup date validation and auto-calculate for Create Modal
+  setupDateValidation('createFromDate', 'createToDate', 'createTotalDays');
+});
+
+
+// ==========================================
+// EDIT PACKAGE MODAL
+// ==========================================
+function openEditModal(packageId) {
+  const modal = new bootstrap.Modal(document.getElementById('editPackageModal'));
+  const content = document.getElementById('editPackageContent');
+  const form = document.getElementById('editPackageForm');
+  
+  // Set form action URL
+  form.action = `/packages/${packageId}/edit/`;
+  form.setAttribute('enctype', 'multipart/form-data');
+  
+  // Show loading spinner
+  content.innerHTML = `
+    <div class="text-center py-4">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <p class="mt-2 text-muted">Loading package details...</p>
+    </div>
+  `;
+  
+  // Fetch package details
+  fetch(`/api/packages/${packageId}/details/`)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      return response.json();
+    })
+    .then(data => {
+      if (data.success) {
+        const pkg = data.package;
+        
+        // Build form content
+        content.innerHTML = `
+          <div class="row g-3">
+            <!-- Package Name -->
+            <div class="col-12">
+              <label class="form-label">Package Name *</label>
+              <input type="text" name="name" class="form-control" value="${pkg.name}" required>
+            </div>
+            
+            <!-- Description -->
+            <div class="col-12">
+              <label class="form-label">Description</label>
+              <textarea name="description" class="form-control" rows="3">${pkg.description || ''}</textarea>
+            </div>
+            
+            <!-- Travel From Date -->
+            <div class="col-md-4">
+              <label class="form-label">Travel From Date</label>
+              <input 
+                type="date" 
+                name="from_date" 
+                id="editFromDate" 
+                class="form-control" 
+                value="${pkg.from_date || ''}">
+              <small class="text-muted">Start date of trip</small>
+            </div>
+            
+            <!-- Travel To Date -->
+            <div class="col-md-4">
+              <label class="form-label">Travel To Date</label>
+              <input 
+                type="date" 
+                name="to_date" 
+                id="editToDate" 
+                class="form-control" 
+                value="${pkg.to_date || ''}">
+              <small class="text-muted">End date of trip</small>
+            </div>
+            
+            <!-- Total Days (Auto-calculated) -->
+            <div class="col-md-4">
+              <label class="form-label">Total Days * 
+                <i class="fas fa-info-circle text-muted" title="Auto-calculated from dates"></i>
+              </label>
+              <input 
+                type="number" 
+                name="total_days" 
+                id="editTotalDays"
+                class="form-control" 
+                min="1" 
+                value="${pkg.total_days}" 
+                required>
+              <small class="text-muted">Auto-calculated from dates</small>
+            </div>
+            
+            <!-- Default Adults -->
+            <div class="col-md-6">
+              <label class="form-label">Default Adults</label>
+              <input type="number" name="default_adults" class="form-control" min="1" value="${pkg.default_adults}">
+            </div>
+            
+            <!-- Default Children -->
+            <div class="col-md-6">
+              <label class="form-label">Default Children</label>
+              <input type="number" name="default_children" class="form-control" min="0" value="${pkg.default_children}">
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label">Default Infants</label>
+              <input type="number" name="default_infants" class="form-control" min="0" value="${pkg.default_infants || 0}">
+              <small class="text-muted">Number of infants</small>
+            </div>
+            
+            <!-- Destinations -->
+            <div class="col-12">
+              <label class="form-label">Destinations</label>
+              <input type="text" name="destinations" class="form-control" value="${pkg.destinations.join(', ')}">
+              <small class="text-muted">Comma-separated destination names</small>
+            </div>
+            
+            <!-- Theme -->
+            <div class="col-md-6">
+              <label class="form-label">Theme</label>
+              <select name="theme" class="form-select">
+                <option value="">Select Theme (Optional)</option>
+                {% for theme in themes %}
+                <option value="{{ theme.id }}" ${pkg.theme === '{{ theme.package_name }}' ? 'selected' : ''}>
+                  {{ theme.package_name }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+            
+
+            
+            <!-- Thumbnail Image -->
+            <div class="col-md-6">
+              <label class="form-label">Thumbnail Image</label>
+              <input type="file" name="thumbnail" class="form-control" accept="image/*">
+              <small class="text-muted">Leave empty to keep current image</small>
+              ${pkg.thumbnail ? `<div class="mt-2"><img src="${pkg.thumbnail}" style="max-width: 100px; max-height: 100px;" class="img-thumbnail"></div>` : ''}
+            </div>
+            
+            <!-- Cover Image -->
+            <div class="col-md-6">
+              <label class="form-label">Cover Image</label>
+              <input type="file" name="cover_image" class="form-control" accept="image/*">
+              <small class="text-muted">Leave empty to keep current image</small>
+              ${pkg.cover_image ? `<div class="mt-2"><img src="${pkg.cover_image}" style="max-width: 100px; max-height: 100px;" class="img-thumbnail"></div>` : ''}
+            </div>
+            
+            <!-- Tags -->
+            <div class="col-12">
+              <label class="form-label">Tags</label>
+              <input type="text" name="tags" class="form-control" value="${pkg.tags || ''}" placeholder="e.g., honeymoon, family, adventure">
+              <small class="text-muted">Comma-separated tags</small>
+            </div>
+            
+            <!-- Notes -->
+            <div class="col-12">
+              <label class="form-label">Notes</label>
+              <textarea name="notes" class="form-control" rows="2">${pkg.notes || ''}</textarea>
+            </div>
+            
+            <!-- Checkboxes -->
+            <div class="col-md-6">
+              <div class="form-check">
+                <input 
+                  class="form-check-input" 
+                  type="checkbox" 
+                  name="is_featured" 
+                  id="editIsFeatured" 
+                  ${pkg.is_featured ? 'checked' : ''}>
+                <label class="form-check-label" for="editIsFeatured">
+                  <i class="fas fa-star text-warning me-1"></i> Featured Package
+                </label>
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <div class="form-check">
+                <input 
+                  class="form-check-input" 
+                  type="checkbox" 
+                  name="is_active" 
+                  id="editIsActive" 
+                  ${pkg.is_active ? 'checked' : ''}>
+                <label class="form-check-label" for="editIsActive">
+                  Active Status
+                </label>
+              </div>
+            </div>
+          </div>
+        `;
+        
+        // Setup date validation and auto-calculate for edit modal after content is loaded
+        setTimeout(() => {
+          setupDateValidation('editFromDate', 'editToDate', 'editTotalDays');
+        }, 100);
+        
+        // Show the modal
+        modal.show();
+        
+      } else {
+        content.innerHTML = `
+          <div class="alert alert-danger">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            Failed to load package details: ${data.message}
+          </div>
+        `;
+      }
+    })
+    .catch(error => {
+      console.error('Error loading package details:', error);
+      content.innerHTML = `
+        <div class="alert alert-danger">
+          <i class="fas fa-exclamation-triangle me-2"></i>
+          Error loading package details: ${error.message}
+        </div>
+      `;
+    });
+}
+
+
+// ==========================================
+// AUTO-SUBMIT FILTER FORM
+// ==========================================
+document.querySelectorAll('#filterForm select, #filterForm input[type="checkbox"]').forEach(el => {
+  el.addEventListener('change', () => {
+    document.getElementById('filterForm').submit();
+  });
+});
+
+
+// ==========================================
+// HELPER: Format currency
+// ==========================================
+function formatCurrency(amount) {
+  return new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: 'INR',
+    maximumFractionDigits: 0
+  }).format(amount);
+}
+
+
+// ==========================================
+// HELPER: Format date
+// ==========================================
+function formatDate(dateString) {
+  if (!dateString) return 'Not set';
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric'
+  });
+}
+</script>
+
+
+{% endblock %}

@@ -1,0 +1,696 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<style>
+  .vehicles-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 2rem;
+    border-radius: 15px;
+    margin-bottom: 2rem;
+    color: white;
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+  }
+
+  .modern-table-container {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+  }
+
+  .modern-table thead {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+  }
+
+  .modern-table thead th {
+    border: none;
+    padding: 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+  }
+
+  .modern-table tbody tr {
+    transition: all 0.3s ease;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .modern-table tbody tr:hover {
+    background: #f5f3ff;
+    transform: scale(1.01);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+  }
+
+  .modern-table tbody td {
+    padding: 1rem;
+    vertical-align: middle;
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .btn-action {
+    padding: 0.4rem 0.8rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    border: none;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .btn-action:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  }
+
+  .modal-header-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+  }
+
+  .form-section-title {
+    color: #667eea;
+    font-weight: 600;
+    border-bottom: 2px solid #764ba2;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .search-box {
+    background: white;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    margin-bottom: 1.5rem;
+  }
+
+  .vehicle-image {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 2px solid #667eea;
+  }
+
+  .vehicle-placeholder {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 20px;
+  }
+
+  /* ✅ SCROLLABLE MODAL FIX */
+  .modal-dialog-scrollable .modal-body {
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
+  }
+
+  .modal-dialog-scrollable {
+    max-height: calc(100vh - 60px);
+  }
+
+  /* Custom scrollbar */
+  .modal-body::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .modal-body::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+  }
+
+  .modal-body::-webkit-scrollbar-thumb {
+    background: #667eea;
+    border-radius: 10px;
+  }
+
+  .modal-body::-webkit-scrollbar-thumb:hover {
+    background: #764ba2;
+  }
+  .suppliers-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 2rem;
+    border-radius: 15px;
+    margin-bottom: 2rem;
+    color: white;
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+  }
+
+  /* Add this new style for back button */
+  .back-button-container {
+    padding: 1.5rem 2rem 0 2rem;
+    margin-bottom: -1rem;
+  }
+
+  .back-btn-modern {
+    padding: 0.6rem 1.2rem;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    border: 2px solid #667eea;
+    color: #667eea;
+    background: white;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .back-btn-modern:hover {
+    background: #667eea;
+    color: white;
+    transform: translateX(-5px);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  }
+
+  .back-btn-modern i {
+    font-size: 16px;
+  }
+
+  .search-filter-bar {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    margin-bottom: 1.5rem;
+  }
+
+  .modern-table {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+  }
+
+  .modern-table thead {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+  }
+
+  .modern-table thead th {
+    border: none;
+    padding: 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+  }
+
+  .modern-table tbody tr {
+    transition: all 0.3s ease;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .modern-table tbody tr:hover {
+    background: #f8f9ff;
+    transform: scale(1.01);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+  }
+
+  .modern-table tbody td {
+    padding: 1rem;
+    vertical-align: middle;
+  }
+
+  .action-btn-group {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .action-btn {
+    padding: 0.4rem 0.8rem;
+    border-radius: 8px;
+    border: none;
+    transition: all 0.3s ease;
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+
+  .badge-modern {
+    padding: 0.4rem 0.8rem;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 12px;
+  }
+
+  .stats-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    text-align: center;
+    transition: all 0.3s ease;
+  }
+
+  .stats-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+  }
+
+  .stats-card .icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    font-size: 24px;
+  }
+
+  .modal-header-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+  }
+
+  .form-section-title {
+    color: #667eea;
+    font-weight: 600;
+    border-bottom: 2px solid #667eea;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+  }
+</style>
+
+<!-- Back Button with Modern Styling -->
+<div class="back-button-container">
+    <a href="{% url 'admin_settings' %}" class="back-btn-modern">
+        <i class="fas fa-arrow-left"></i>
+        <span>Back to Admin Settings</span>
+    </a>
+</div>
+<div class="container-fluid" style="margin-top: 90px; padding: 0 2rem;">
+
+  <!-- Header -->
+  <div class="vehicles-header">
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <h2 class="mb-2">
+          <i class="fas fa-car"></i> Vehicles Management
+        </h2>
+        <p class="mb-0" style="opacity: 0.9;">Manage transportation fleet and vehicles</p>
+      </div>
+      
+      <!-- ✅ PERMISSION CHECK: Add Vehicle Button -->
+      {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.permissions.can_add_vehicle %}
+      <button type="button" class="btn btn-light btn-lg shadow" data-bs-toggle="modal" data-bs-target="#vehicleModal" onclick="resetVehicleForm()">
+        <i class="fas fa-plus-circle me-2"></i>Add Vehicle
+      </button>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Messages -->
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        <i class="fas fa-info-circle me-2"></i>{{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <!-- Search Box -->
+  <div class="search-box">
+    <div class="input-group">
+      <span class="input-group-text bg-transparent border-0">
+        <i class="fas fa-search text-muted"></i>
+      </span>
+      <input type="text" class="form-control border-0" id="searchInput" placeholder="Search vehicles..." onkeyup="filterVehicles()">
+      <button class="btn btn-outline-secondary" onclick="resetSearch()">
+        <i class="fas fa-redo me-1"></i>Reset
+      </button>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="modern-table-container">
+    <div class="table-responsive">
+      <table class="table modern-table mb-0" id="vehiclesTable">
+        <thead>
+          <tr>
+            <th><i class="fas fa-image me-2"></i>Image</th>
+            <th><i class="fas fa-car me-2"></i>Vehicle Name</th>
+            <th><i class="fas fa-tag me-2"></i>Type</th>
+            <th><i class="fas fa-map-marker-alt me-2"></i>Destination</th>
+            <th><i class="fas fa-truck me-2"></i>Supplier</th>
+            <th><i class="fas fa-users me-2"></i>Capacity</th>
+            <th class="text-center"><i class="fas fa-toggle-on me-2"></i>Status</th>
+            <th class="text-center"><i class="fas fa-cogs me-2"></i>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for vehicle in vehicles %}
+          <tr>
+            <td>
+              {% if vehicle.photo %}
+                <img src="{{ vehicle.photo.url }}" alt="{{ vehicle.name }}" class="vehicle-image">
+              {% else %}
+                <div class="vehicle-placeholder">
+                  {{ vehicle.name|first|upper }}
+                </div>
+              {% endif %}
+            </td>
+            <td>
+              <div class="fw-bold">{{ vehicle.name }}</div>
+              <small class="text-muted">ID: #VEH{{ vehicle.id }}</small>
+            </td>
+            <td>
+              <span class="badge bg-info" style="padding: 0.5rem 0.8rem;">
+                {{ vehicle.get_vehicle_type_display }}
+              </span>
+            </td>
+            <td>{{ vehicle.destination.name }}</td>
+            <td>
+              {% if vehicle.supplier %}
+                <span class="badge bg-warning text-dark" style="padding: 0.5rem 0.8rem;">
+                  {{ vehicle.supplier.company_name }}
+                </span>
+              {% else %}
+                <span class="text-muted"><em>No Supplier</em></span>
+              {% endif %}
+            </td>
+            <td>
+              <strong>{{ vehicle.capacity }}</strong> seats
+            </td>
+            <td class="text-center">
+              {% if vehicle.status %}
+                <span class="badge bg-success" style="padding: 0.5rem 1rem;">
+                  <i class="fas fa-check-circle me-1"></i>Active
+                </span>
+              {% else %}
+                <span class="badge bg-danger" style="padding: 0.5rem 1rem;">
+                  <i class="fas fa-times-circle me-1"></i>Inactive
+                </span>
+              {% endif %}
+            </td>
+            <td>
+              <div class="action-buttons">
+                
+                <!-- ✅ PERMISSION CHECK: Edit Button -->
+                {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.permissions.can_edit_vehicle %}
+                <button type="button" class="btn btn-warning btn-action" onclick="editVehicle(this)"
+                        data-bs-toggle="modal" data-bs-target="#vehicleModal"
+                        data-id="{{ vehicle.id }}"
+                        data-name="{{ vehicle.name }}"
+                        data-vehicle-type="{{ vehicle.vehicle_type }}"
+                        data-destination="{{ vehicle.destination.id }}"
+                        data-supplier="{{ vehicle.supplier.id|default:'' }}"
+                        data-capacity="{{ vehicle.capacity }}"
+                        data-registration-number="{{ vehicle.registration_number|default:'' }}"
+                        data-contact-person="{{ vehicle.contact_person|default:'' }}"
+                        data-contact-phone="{{ vehicle.contact_phone|default:'' }}"
+                        data-details="{{ vehicle.details|default:'' }}"
+                        data-status="{{ vehicle.status|yesno:'true,false' }}">
+                  <i class="fas fa-edit me-1"></i>Edit
+                </button>
+                {% endif %}
+                
+                <!-- ✅ PERMISSION CHECK: Delete Button -->
+                {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.permissions.can_delete_vehicle %}
+                <button type="button" class="btn btn-danger btn-action"
+                        data-bs-toggle="modal"
+                        data-bs-target="#deleteModal"
+                        data-delete-url="{% url 'delete_vehicle' vehicle.id %}"
+                        data-delete-name="{{ vehicle.name }}">
+                  <i class="fas fa-trash me-1"></i>Delete
+                </button>
+                {% endif %}
+                
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="8" class="text-center py-5">
+              <i class="fas fa-car fa-3x text-muted mb-3"></i>
+              <h5 class="text-muted">No vehicles found</h5>
+              <p class="text-muted">Start by adding your first vehicle</p>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ✅ SCROLLABLE Vehicle Modal -->
+<div class="modal fade" id="vehicleModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+      <form method="POST" id="vehicleForm" action="{% url 'add_vehicle' %}" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <!-- Modal Header (FIXED) -->
+        <div class="modal-header modal-header-gradient">
+          <h5 class="modal-title" id="vehicleModalLabel">
+            <i class="fas fa-car me-2"></i>Add New Vehicle
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        
+        <!-- Modal Body (SCROLLABLE) -->
+        <div class="modal-body">
+          
+          <!-- Basic Information -->
+          <div class="mb-4">
+            <h6 class="form-section-title">
+                <i class="fas fa-info-circle me-2"></i>Basic Information
+            </h6>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                <label for="name" class="form-label fw-bold">Vehicle Name *</label>
+                <input type="text" class="form-control" id="name" name="name" required placeholder="Enter vehicle name">
+                </div>
+                <div class="col-md-6 mb-3">
+                <label for="vehicle_type" class="form-label fw-bold">Vehicle Type *</label>
+                <select class="form-select" id="vehicle_type" name="vehicle_type" required>
+                    <option value="">Select Type</option>
+                    <option value="car">Car</option>
+                    <option value="suv">SUV</option>
+                    <option value="van">Van</option>
+                    <option value="bus">Bus</option>
+                    <option value="truck">Truck</option>
+                    <option value="tempo">Tempo</option>
+                    <option value="auto">Auto</option>
+                </select>
+                </div>
+            </div>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="destination" class="form-label fw-bold">Destination *</label>
+                <select class="form-select" id="destination" name="destination" required>
+                  <option value="">Select Destination</option>
+                  {% for dest in destinations %}
+                    <option value="{{ dest.id }}">{{ dest.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="supplier" class="form-label fw-bold">Supplier</label>
+                <select class="form-select" id="supplier" name="supplier">
+                  <option value="">Select Supplier (Optional)</option>
+                  {% for sup in suppliers %}
+                    <option value="{{ sup.id }}">{{ sup.company_name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <hr>
+
+          <!-- Vehicle Details -->
+          <div class="mb-4">
+            <h6 class="form-section-title">
+              <i class="fas fa-car-side me-2"></i>Vehicle Details
+            </h6>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="capacity" class="form-label fw-bold">Capacity *</label>
+                <input type="number" class="form-control" id="capacity" name="capacity" min="1" required placeholder="Enter capacity">
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="registration_number" class="form-label fw-bold">Registration Number</label>
+                <input type="text" class="form-control" id="registration_number" name="registration_number" placeholder="e.g., KL-01-AB-1234">
+              </div>
+            </div>
+            <div class="mb-3">
+              <label for="details" class="form-label fw-bold">Details</label>
+              <textarea class="form-control" id="details" name="details" rows="3" placeholder="Vehicle details and description"></textarea>
+            </div>
+          </div>
+
+          <hr>
+
+          <!-- Contact Information -->
+          <div class="mb-4">
+            <h6 class="form-section-title">
+              <i class="fas fa-phone me-2"></i>Contact Information
+            </h6>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="contact_person" class="form-label fw-bold">Contact Person</label>
+                <input type="text" class="form-control" id="contact_person" name="contact_person" placeholder="Driver or contact person name">
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="contact_phone" class="form-label fw-bold">Contact Phone</label>
+                <input type="text" class="form-control" id="contact_phone" name="contact_phone" placeholder="+91 XXXXX XXXXX">
+              </div>
+            </div>
+          </div>
+
+          <hr>
+
+          <!-- Vehicle Photo -->
+          <div class="mb-4">
+            <h6 class="form-section-title">
+              <i class="fas fa-image me-2"></i>Vehicle Photo
+            </h6>
+            <div class="mb-3">
+              <label for="photo" class="form-label fw-bold">Upload Photo</label>
+              <input type="file" class="form-control" id="photo" name="photo" accept="image/*">
+              <small class="text-muted">Upload vehicle photo (optional)</small>
+            </div>
+          </div>
+
+          <hr>
+
+          <!-- Status -->
+          <div class="mb-3">
+            <h6 class="form-section-title">
+              <i class="fas fa-toggle-on me-2"></i>Status
+            </h6>
+            <div class="form-check form-switch">
+              <input type="checkbox" class="form-check-input" id="status" name="status" checked style="width: 48px; height: 24px; cursor: pointer;">
+              <label class="form-check-label ms-2 fw-bold" for="status">Active Status</label>
+            </div>
+          </div>
+
+        </div>
+        
+        <!-- Modal Footer (FIXED - ALWAYS VISIBLE) -->
+        <div class="modal-footer border-0 pt-3 bg-light">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            <i class="fas fa-times me-1"></i>Close
+          </button>
+          <button type="submit" class="btn btn-lg" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: 600;">
+            <i class="fas fa-save me-2"></i>Save Vehicle
+          </button>
+        </div>
+        
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title">
+          <i class="fas fa-exclamation-triangle me-2"></i>Confirm Delete
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body text-center py-4">
+        <i class="fas fa-trash-alt fa-3x text-danger mb-3"></i>
+        <p class="mb-2">Are you sure you want to delete this vehicle?</p>
+        <h5 class="text-danger" id="deleteModalItemName"></h5>
+        <p class="text-muted small mb-0">This action cannot be undone.</p>
+      </div>
+      <div class="modal-footer border-0">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          <i class="fas fa-times me-1"></i>Cancel
+        </button>
+        <form method="post" action="" id="deleteModalForm" class="d-inline">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger">
+            <i class="fas fa-trash me-1"></i>Delete
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function resetVehicleForm() {
+  const form = document.getElementById('vehicleForm');
+  form.reset();
+  form.action = "{% url 'add_vehicle' %}";
+  document.getElementById('vehicleModalLabel').innerHTML = '<i class="fas fa-car me-2"></i>Add New Vehicle';
+  document.getElementById('status').checked = true;
+}
+
+function editVehicle(button) {
+  const form = document.getElementById('vehicleForm');
+  const vehicleId = button.getAttribute('data-id');
+  
+  form.action = `/vehicles/edit/${vehicleId}/`;
+  document.getElementById('vehicleModalLabel').innerHTML = '<i class="fas fa-edit me-2"></i>Edit Vehicle';
+  
+  document.getElementById('name').value = button.getAttribute('data-name') || '';
+  document.getElementById('vehicle_type').value = button.getAttribute('data-vehicle-type') || '';
+  document.getElementById('destination').value = button.getAttribute('data-destination') || '';
+  document.getElementById('supplier').value = button.getAttribute('data-supplier') || '';
+  document.getElementById('capacity').value = button.getAttribute('data-capacity') || '';
+  document.getElementById('registration_number').value = button.getAttribute('data-registration-number') || '';
+  document.getElementById('contact_person').value = button.getAttribute('data-contact-person') || '';
+  document.getElementById('contact_phone').value = button.getAttribute('data-contact-phone') || '';
+  document.getElementById('details').value = button.getAttribute('data-details') || '';
+  
+  document.getElementById('status').checked = button.getAttribute('data-status') === 'true';
+}
+
+// Delete Modal
+const deleteModal = document.getElementById('deleteModal');
+if (deleteModal) {
+  deleteModal.addEventListener('show.bs.modal', function (event) {
+    const button = event.relatedTarget;
+    document.getElementById('deleteModalForm').action = button.getAttribute('data-delete-url');
+    document.getElementById('deleteModalItemName').textContent = button.getAttribute('data-delete-name');
+  });
+}
+
+// Search/Filter
+function filterVehicles() {
+  const searchValue = document.getElementById('searchInput').value.toLowerCase();
+  const table = document.getElementById('vehiclesTable');
+  const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i];
+    const text = row.textContent.toLowerCase();
+    row.style.display = text.includes(searchValue) ? '' : 'none';
+  }
+}
+
+function resetSearch() {
+  document.getElementById('searchInput').value = '';
+  filterVehicles();
+}
+</script>
+
+{% endblock %}

@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Itinerary Day Plans</h2>
+
+    <!-- Search Form -->
+    <form method="get" class="mb-3">
+        <input type="text" name="q" value="{{ search_query }}" class="form-control" placeholder="Search by itinerary, destination, notes, hotel, activity...">
+    </form>
+
+    <!-- Day Plan List -->
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Itinerary</th>
+                <th>Day</th>
+                <th>Destination</th>
+                <th>Hotels</th>
+                <th>Activities</th>
+                <th>Meal Plans</th>
+                <th>Vehicles</th>
+                <th>Inclusions</th>
+                <th>Notes</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for plan in day_plans %}
+                <tr>
+                <td>{{ plan.itinerary.name }}</td>
+                <td>{{ plan.day_number }}</td>
+                <td>
+                    {% if plan.destination %}
+                        {{ plan.destination.name }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                <td>
+                    {% for h in plan.hotels.all %}
+                        {{ h.name }}{% if not forloop.last %}, {% endif %}
+                    {% empty %}
+                        -
+                    {% endfor %}
+                </td>
+                <td>
+                    {% for a in plan.activities.all %}
+                        {{ a.name }}{% if not forloop.last %}, {% endif %}
+                    {% empty %}
+                        -
+                    {% endfor %}
+                </td>
+                <td>
+                    {% for m in plan.meal_plans.all %}
+                        {{ m.name }}{% if not forloop.last %}, {% endif %}
+                    {% empty %}
+                        -
+                    {% endfor %}
+                </td>
+                <td>
+                    {% for v in plan.vehicles.all %}
+                        {{ v.name }}{% if not forloop.last %}, {% endif %}
+                    {% empty %}
+                        -
+                    {% endfor %}
+                </td>
+                <td>
+                    {% for inc in plan.inclusions.all %}
+                        {{ inc.name }}{% if not forloop.last %}, {% endif %}
+                    {% empty %}
+                        -
+                    {% endfor %}
+                </td>
+                <td>{{ plan.notes|default:"-" }}</td>
+            </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="9" class="text-center">No Day Plans Found</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

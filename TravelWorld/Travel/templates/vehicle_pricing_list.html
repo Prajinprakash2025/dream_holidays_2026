@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+{% load widget_tweaks %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card shadow-lg rounded">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h4 class="card-title m-0">Pricing for {{ vehicle.name }}</h4>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#priceModal">
+                <i class="fas fa-plus"></i> Add Price
+            </button>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>From</th>
+                            <th>To</th>
+                            <th>Type</th>
+                            <th>Base Fee (100km)</th>
+                            <th>Extra Fee/km</th>
+                            <th class="text-center">Status</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for price in pricings %}
+                        <tr>
+                            <td>{{ price.from_date|date:"d M Y" }}</td>
+                            <td>{{ price.to_date|date:"d M Y" }}</td>
+                            <td>{{ price.get_type_display }}</td>
+                            <td>{{ price.total_fee_100km }}</td>
+                            <td>{{ price.extra_fee_per_km }}</td>
+                            <td class="text-center">
+                                {% if price.is_active %}<span class="badge bg-success">Active</span>{% else %}<span class="badge bg-danger">Inactive</span>{% endif %}
+                            </td>
+                            <td class="text-center">
+                                <button type="button" class="btn btn-sm btn-warning"
+                                        data-bs-toggle="modal" data-bs-target="#priceModal"
+                                        data-price-id="{{ price.id }}"
+                                        data-from-date="{{ price.from_date|date:'Y-m-d' }}"
+                                        data-to-date="{{ price.to_date|date:'Y-m-d' }}"
+                                        data-type="{{ price.type }}"
+                                        data-total-fee="{{ price.total_fee_100km }}"
+                                        data-extra-fee="{{ price.extra_fee_per_km }}"
+                                        data-is-active="{{ price.is_active|yesno:'true,false' }}">
+                                    <i class="fas fa-edit"></i> Edit
+                                </button>
+                                <button type="button" class="btn btn-sm btn-danger" 
+                                        data-bs-toggle="modal" data-bs-target="#deleteModal"
+                                        data-delete-url="{% url 'delete_vehicle_pricing' vehicle.id price.id %}"
+                                        data-delete-name="Price from {{ price.from_date|date:'d M Y' }}">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="7" class="text-center text-muted">No prices found.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="priceModal" tabindex="-1" aria-hidden="true" data-url-edit-prototype="{% url 'edit_vehicle_pricing' vehicle.id 9999 %}">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header"><h5 class="modal-title" id="priceModalLabel">Add New Price</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body">
+                <form method="POST" action="" id="priceForm">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-6 mb-3"><label class="form-label">{{ form.from_date.label }}</label>{{ form.from_date|add_class:"form-control" }}</div>
+                        <div class="col-md-6 mb-3"><label class="form-label">{{ form.to_date.label }}</label>{{ form.to_date|add_class:"form-control" }}</div>
+                    </div>
+                    <div class="mb-3"><label class="form-label">{{ form.type.label }}</label>{{ form.type|add_class:"form-select" }}</div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3"><label class="form-label">{{ form.total_fee_100km.label }}</label>{{ form.total_fee_100km|add_class:"form-control" }}</div>
+                        <div class="col-md-6 mb-3"><label class="form-label">{{ form.extra_fee_per_km.label }}</label>{{ form.extra_fee_per_km|add_class:"form-control" }}</div>
+                    </div>
+                    <div class="mb-3 form-check">{{ form.is_active|add_class:"form-check-input" }}<label class="form-check-label ms-2">{{ form.is_active.label }}</label></div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white"><h5 class="modal-title">Confirm Delete</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body">Are you sure you want to delete <strong id="deleteModalItemName"></strong>?</div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="post" action="" id="deleteModalForm">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const priceModal = document.getElementById('priceModal');
+    if (priceModal) {
+        const modalTitle = document.getElementById('priceModalLabel');
+        const priceForm = document.getElementById('priceForm');
+        const editUrlPrototype = priceModal.getAttribute('data-url-edit-prototype');
+        const createUrl = "{% url 'add_vehicle_pricing' vehicle.id %}";
+
+        priceModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const priceId = button.getAttribute('data-price-id');
+
+            if (priceId) { // EDIT MODE
+                modalTitle.textContent = 'Edit Price';
+                priceForm.action = editUrlPrototype.replace('9999', priceId);
+                priceForm.querySelector('[name="from_date"]').value = button.getAttribute('data-from-date');
+                priceForm.querySelector('[name="to_date"]').value = button.getAttribute('data-to-date');
+                priceForm.querySelector('[name="type"]').value = button.getAttribute('data-type');
+                priceForm.querySelector('[name="total_fee_100km"]').value = button.getAttribute('data-total-fee');
+                priceForm.querySelector('[name="extra_fee_per_km"]').value = button.getAttribute('data-extra-fee');
+                priceForm.querySelector('[name="is_active"]').checked = (button.getAttribute('data-is-active') === 'true');
+            } else { // ADD NEW MODE
+                modalTitle.textContent = 'Add New Price';
+                priceForm.action = createUrl;
+                priceForm.reset();
+            }
+        });
+    }
+
+    const deleteModal = document.getElementById('deleteModal');
+    if (deleteModal) {
+        const deleteModalForm = document.getElementById('deleteModalForm');
+        const deleteModalItemName = document.getElementById('deleteModalItemName');
+        deleteModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            deleteModalForm.action = button.getAttribute('data-delete-url');
+            deleteModalItemName.textContent = `"${button.getAttribute('data-delete-name')}"`;
+        });
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,585 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<!-- Messages Container (Top Right) -->
+{% if messages %}
+  <div class="messages-container">
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        <strong>
+          {% if message.tags == 'success' %}
+            ✅ Success
+          {% elif message.tags == 'warning' %}
+            ⚠️ Warning
+          {% elif message.tags == 'error' %}
+            ❌ Error
+          {% else %}
+            ℹ️ Info
+          {% endif %}
+        </strong>
+        <div style="margin-top: 10px; white-space: pre-wrap;">{{ message }}</div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    {% endfor %}
+  </div>
+
+  <style>
+    .messages-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+      max-width: 500px;
+    }
+    .messages-container .alert {
+      margin-bottom: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    .alert-success {
+      background-color: #d4edda;
+      border: 1px solid #c3e6cb;
+      color: #155724;
+    }
+    .alert-warning {
+      background-color: #fff3cd;
+      border: 1px solid #ffeeba;
+      color: #856404;
+    }
+    .alert-error, .alert-danger {
+      background-color: #f8d7da;
+      border: 1px solid #f5c6cb;
+      color: #721c24;
+    }
+  </style>
+{% endif %}
+
+<div class="container mt-4">
+    <div class="mb-4">
+        <h2>
+            <i class="fas fa-box-open me-2"></i>Insert Package Template
+        </h2>
+        <p class="text-muted">
+            Select a package template for <strong>{{ query.client_name }}</strong>
+            <br>
+            <small>
+                <i class="fas fa-calendar me-1"></i>
+                Travel: {{ query.from_date|date:"d M Y" }} - {{ query.to_date|date:"d M Y" }}
+                ({{ query.total_days }} days)
+            </small>
+        </p>
+    </div>
+
+    {% if packages %}
+        <div class="row">
+            {% for package in packages %}
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <form method="POST" 
+                          action="{% url 'insert_package_to_itinerary' query.id %}" 
+                          class="package-form h-100"
+                          data-package-id="{{ package.id }}"
+                          data-package-name="{{ package.name }}"
+                          data-package-days="{{ package.total_days }}"
+                          data-query-id="{{ query.id }}">
+                        {% csrf_token %}
+                        <input type="hidden" name="package_id" value="{{ package.id }}">
+                        
+                        <div class="card h-100 package-card {% if package.is_featured %}border-warning{% endif %}">
+                            {% if package.thumbnail %}
+                                <img src="{{ package.thumbnail.url }}" 
+                                     class="card-img-top" 
+                                     alt="{{ package.name }}"
+                                     loading="lazy"
+                                     style="height: 200px; object-fit: cover;">
+                            {% else %}
+                                <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" 
+                                     style="height: 200px;">
+                                    <i class="fas fa-image fa-3x text-white"></i>
+                                </div>
+                            {% endif %}
+
+                            {% if package.is_featured %}
+                                <div class="position-absolute top-0 end-0 m-2">
+                                    <span class="badge bg-warning text-dark">
+                                        <i class="fas fa-star me-1"></i>Featured
+                                    </span>
+                                </div>
+                            {% endif %}
+
+                            <div class="card-body">
+                                <h5 class="card-title">{{ package.name }}</h5>
+                                
+                                <div class="mb-3">
+                                    <small class="text-muted d-block">
+                                        <i class="fas fa-calendar-alt me-1"></i>
+                                        {{ package.total_days }} Days
+                                    </small>
+                                    
+                                    {% if package.destinations.all %}
+                                        <small class="text-muted d-block">
+                                            <i class="fas fa-map-marker-alt me-1"></i>
+                                            {% for dest in package.destinations.all %}
+                                                {{ dest.name }}{% if not forloop.last %}, {% endif %}
+                                            {% endfor %}
+                                        </small>
+                                    {% endif %}
+                                    
+                                    {% if package.times_used > 0 %}
+                                        <small class="text-success d-block">
+                                            <i class="fas fa-check-circle me-1"></i>
+                                            Used {{ package.times_used }} time{{ package.times_used|pluralize }}
+                                        </small>
+                                    {% endif %}
+                                </div>
+
+                                {% if package.notes %}
+                                    <p class="card-text text-muted small">
+                                        {{ package.notes|truncatewords:20 }}
+                                    </p>
+                                {% endif %}
+
+                                {% if package.pricing_options.all %}
+                                    <div class="mb-3">
+                                        <small class="fw-bold d-block mb-2">Pricing Options:</small>
+                                        {% for option in package.pricing_options.all|slice:":3" %}
+                                            <div class="d-flex justify-content-between mb-1">
+                                                <small>{{ option.option_name }}</small>
+                                                <small class="text-success fw-bold">
+                                                    ₹{{ option.final_amount|floatformat:0 }}
+                                                </small>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+
+                                <div class="d-grid">
+                                    <button type="button" 
+                                            class="btn btn-primary insert-btn"
+                                            data-package-name="{{ package.name }}"
+                                            data-package-days="{{ package.total_days }}">
+                                        <i class="fas fa-check me-2"></i>Insert This Package
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="card-footer bg-light">
+                                <div class="d-flex justify-content-between">
+                                    <a href="{% url 'manage_package_day_plans' package.id %}" 
+                                       class="btn btn-sm btn-outline-secondary"
+                                       target="_blank">
+                                        <i class="fas fa-eye"></i> Preview
+                                    </a>
+                                    <a href="{% url 'package_template_pricing' package.id %}" 
+                                       class="btn btn-sm btn-outline-success"
+                                       target="_blank">
+                                        <i class="fas fa-dollar-sign"></i> Pricing
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-warning">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            No package templates available for {{ query.total_days }} days.
+            <br>
+            <a href="{% url 'create_package_template' %}" class="alert-link">Create a new package template</a>
+        </div>
+    {% endif %}
+
+    <div class="mt-4">
+        <a href="{% url 'query_proposals' query.id %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back to Query
+        </a>
+    </div>
+</div>
+
+<!-- ✅ CONFIRMATION MODAL -->
+<div class="modal fade" id="confirmInsertModal" tabindex="-1" aria-labelledby="confirmInsertModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="confirmInsertModalLabel">
+          <i class="fas fa-question-circle me-2"></i>Confirm Package Insertion
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="text-center mb-3">
+          <i class="fas fa-box-open fa-4x text-primary mb-3"></i>
+        </div>
+        <h6 class="text-center mb-3" id="packageNameDisplay"></h6>
+        <p class="text-center text-muted mb-4">
+          Are you sure you want to insert this package into the itinerary?
+        </p>
+        <div class="alert alert-info mb-0">
+          <strong><i class="fas fa-info-circle me-2"></i>Note:</strong>
+          <ul class="mb-0 mt-2">
+            <li>Items with available pricing will be inserted</li>
+            <li>Items without pricing will be automatically skipped</li>
+            <li>You'll see a detailed summary after insertion</li>
+          </ul>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          <i class="fas fa-times me-2"></i>Cancel
+        </button>
+        <button type="button" class="btn btn-success" id="confirmInsertBtn">
+          <i class="fas fa-check me-2"></i>Yes, Insert Package
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 🔥 NEW: RESULTS MODAL - Shows skipped items -->
+<div class="modal fade" id="insertionResultsModal" tabindex="-1" aria-labelledby="insertionResultsModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header" id="resultsModalHeader">
+        <h5 class="modal-title" id="insertionResultsModalLabel">
+          <i class="fas fa-box-open me-2"></i>Package Insertion Complete
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="resultsModalBody">
+        <!-- Results will be dynamically inserted here by JavaScript -->
+        <div class="text-center">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="closeResultsBtn">
+          <i class="fas fa-check me-2"></i>View Proposal with Pricing
+        </button>
+        <a href="#" id="viewItineraryBtn" class="btn btn-success">
+          <i class="fas fa-edit me-2"></i>View Itinerary
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+    .package-card {
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .package-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    }
+
+    .package-card.border-warning {
+        border: 2px solid #ffc107;
+    }
+
+    .package-card .btn-primary {
+        transition: all 0.2s ease;
+    }
+
+    .package-card:hover .btn-primary {
+        transform: scale(1.05);
+    }
+
+    /* Modal animation */
+    .modal.fade .modal-dialog {
+        transition: transform 0.3s ease-out;
+        transform: translateY(-50px);
+    }
+
+    .modal.show .modal-dialog {
+        transform: translateY(0);
+    }
+
+    /* Results modal specific styles */
+    #resultsModalHeader.bg-success {
+        background-color: #198754 !important;
+        color: white !important;
+    }
+
+    #resultsModalHeader.bg-warning {
+        background-color: #ffc107 !important;
+        color: #000 !important;
+    }
+
+    .accordion-button:not(.collapsed) {
+        background-color: #e7f3ff;
+        color: #0d6efd;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const confirmModal = new bootstrap.Modal(document.getElementById('confirmInsertModal'));
+    const resultsModal = new bootstrap.Modal(document.getElementById('insertionResultsModal'));
+    let currentForm = null;
+    let currentQueryId = "{{ query.id }}";  // 🔥 Get query ID from Django template
+    
+    // Handle "Insert This Package" button clicks
+    document.querySelectorAll('.insert-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const packageName = this.dataset.packageName;
+            currentForm = this.closest('form');
+            
+            // Update modal content
+            document.getElementById('packageNameDisplay').textContent = packageName;
+            
+            // Show confirmation modal
+            confirmModal.show();
+        });
+    });
+    
+    // Handle confirm button in modal
+    document.getElementById('confirmInsertBtn').addEventListener('click', function() {
+        if (currentForm) {
+            const originalBtn = currentForm.querySelector('.insert-btn');
+            const packageName = originalBtn.dataset.packageName;
+            
+            // Disable and show loading
+            originalBtn.disabled = true;
+            originalBtn.innerHTML = `
+                <span class="spinner-border spinner-border-sm me-2"></span>
+                Inserting ${packageName}...
+            `;
+            
+            // Update modal button
+            this.disabled = true;
+            this.innerHTML = `
+                <span class="spinner-border spinner-border-sm me-2"></span>
+                Processing...
+            `;
+            
+            // Hide confirmation modal
+            confirmModal.hide();
+            
+            // Submit form via AJAX
+            const formData = new FormData(currentForm);
+            
+            fetch(currentForm.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Re-enable button
+                originalBtn.disabled = false;
+                originalBtn.innerHTML = `<i class="fas fa-check me-2"></i>Insert This Package`;
+                
+                if (data.success) {
+                    // Show results in modal
+                    displayResults(data);
+                    resultsModal.show();
+                } else {
+                    // Show error
+                    alert('Error: ' + (data.error || 'Unknown error occurred'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while inserting the package. Please try again.');
+                originalBtn.disabled = false;
+                originalBtn.innerHTML = `<i class="fas fa-check me-2"></i>Insert This Package`;
+            });
+        }
+    });
+    
+    // Function to display results in modal
+    function displayResults(data) {
+        const modalHeader = document.getElementById('resultsModalHeader');
+        const modalBody = document.getElementById('resultsModalBody');
+        
+        // Update header color based on results
+        modalHeader.classList.remove('bg-success', 'bg-warning', 'text-white', 'text-dark');
+        if (data.has_skipped_items) {
+            modalHeader.classList.add('bg-warning', 'text-dark');
+        } else {
+            modalHeader.classList.add('bg-success', 'text-white');
+        }
+        
+        // Build results HTML
+        let html = `
+            <div class="text-center mb-4">
+                ${data.has_skipped_items ? 
+                    '<i class="fas fa-exclamation-triangle fa-4x text-warning mb-3"></i>' :
+                    '<i class="fas fa-check-circle fa-4x text-success mb-3"></i>'
+                }
+                <h5 class="mb-1">${data.package_name}</h5>
+                <p class="text-muted mb-0">
+                    ${data.has_skipped_items ? 
+                        'Package inserted with some items skipped' : 
+                        'Package inserted successfully'
+                    }
+                </p>
+            </div>
+            
+            <!-- Stats Cards -->
+            <div class="row mb-4">
+                <div class="col-6">
+                    <div class="card bg-success text-white text-center">
+                        <div class="card-body py-3">
+                            <i class="fas fa-check-circle fa-2x mb-2"></i>
+                            <h3 class="mb-0">${data.total_inserted}</h3>
+                            <small>Items Inserted</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="card ${data.has_skipped_items ? 'bg-danger' : 'bg-secondary'} text-white text-center">
+                        <div class="card-body py-3">
+                            <i class="fas fa-times-circle fa-2x mb-2"></i>
+                            <h3 class="mb-0">${data.skipped_count}</h3>
+                            <small>Items Skipped</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Inserted Breakdown -->
+            <div class="alert alert-success">
+                <strong><i class="fas fa-check-circle me-2"></i>Successfully Inserted:</strong>
+                <ul class="mb-0 mt-2">
+                    ${data.hotels_inserted > 0 ? `<li><i class="fas fa-hotel me-1"></i>Hotels: <strong>${data.hotels_inserted}</strong></li>` : ''}
+                    ${data.activities_inserted > 0 ? `<li><i class="fas fa-ticket-alt me-1"></i>Activities: <strong>${data.activities_inserted}</strong></li>` : ''}
+                    ${data.vehicles_inserted > 0 ? `<li><i class="fas fa-car me-1"></i>Vehicles: <strong>${data.vehicles_inserted}</strong></li>` : ''}
+                    ${data.houseboats_inserted > 0 ? `<li><i class="fas fa-ship me-1"></i>Houseboats: <strong>${data.houseboats_inserted}</strong></li>` : ''}
+                    ${data.total_inserted === 0 ? '<li class="text-muted">No items were inserted</li>' : ''}
+                </ul>
+            </div>
+        `;
+        
+        // Skipped items section
+        if (data.has_skipped_items) {
+            html += `
+                <div class="alert alert-warning mb-3">
+                    <strong><i class="fas fa-exclamation-triangle me-2"></i>Items Skipped (No Pricing):</strong>
+                    <p class="small mb-0 mt-2">
+                        The following <strong>${data.skipped_count}</strong> item(s) were not inserted because pricing is not available for the selected dates.
+                    </p>
+                </div>
+                
+                <div class="accordion" id="skippedItemsAccordion">
+            `;
+            
+            // Group by type
+            let accordionIndex = 0;
+            for (const [itemType, items] of Object.entries(data.skipped_by_type)) {
+                const isFirst = accordionIndex === 0;
+                const accordionId = `collapse${accordionIndex}`;
+                
+                let icon = 'fa-box';
+                let iconColor = 'text-secondary';
+                if (itemType === 'Hotel') {
+                    icon = 'fa-hotel';
+                    iconColor = 'text-primary';
+                } else if (itemType === 'Activity') {
+                    icon = 'fa-ticket-alt';
+                    iconColor = 'text-success';
+                } else if (itemType === 'Vehicle') {
+                    icon = 'fa-car';
+                    iconColor = 'text-info';
+                } else if (itemType === 'Houseboat') {
+                    icon = 'fa-ship';
+                    iconColor = 'text-warning';
+                }
+                
+                html += `
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button ${!isFirst ? 'collapsed' : ''}" type="button" 
+                                    data-bs-toggle="collapse" data-bs-target="#${accordionId}">
+                                <i class="fas ${icon} ${iconColor} me-2"></i>
+                                <strong>${itemType}s</strong>
+                                <span class="badge bg-danger ms-2">${items.length}</span>
+                            </button>
+                        </h2>
+                        <div id="${accordionId}" class="accordion-collapse collapse ${isFirst ? 'show' : ''}" 
+                             data-bs-parent="#skippedItemsAccordion">
+                            <div class="accordion-body p-0">
+                                <div class="list-group list-group-flush">
+                `;
+                
+                items.forEach(item => {
+                    html += `
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <div class="fw-bold">${item.name}</div>
+                                    <small class="text-muted">
+                                        <i class="fas fa-calendar-day me-1"></i>Day ${item.day}
+                                        <span class="mx-2">•</span>
+                                        <i class="fas fa-clock me-1"></i>${item.date}
+                                    </small>
+                                </div>
+                                <span class="badge bg-warning text-dark">
+                                    <i class="fas fa-dollar-sign me-1"></i>No Pricing
+                                </span>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += `
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                accordionIndex++;
+            }
+            
+            html += `</div>`;
+            
+            // Add tip
+            html += `
+                <div class="alert alert-info mt-3 mb-0">
+                    <i class="fas fa-lightbulb me-2"></i>
+                    <strong>Tip:</strong> Add pricing for the skipped items and insert the package again to include them.
+                </div>
+            `;
+        } else {
+            html += `
+                <div class="alert alert-success mb-0">
+                    <i class="fas fa-check-circle me-2"></i>
+                    All items from the package were successfully inserted into the itinerary!
+                </div>
+            `;
+        }
+        
+        modalBody.innerHTML = html;
+        
+        // Update itinerary link
+        document.getElementById('viewItineraryBtn').href = data.itinerary_url || '#';
+    }
+    
+    // Reset on confirmation modal close
+    document.getElementById('confirmInsertModal').addEventListener('hidden.bs.modal', function () {
+        document.getElementById('confirmInsertBtn').disabled = false;
+        document.getElementById('confirmInsertBtn').innerHTML = `
+            <i class="fas fa-check me-2"></i>Yes, Insert Package
+        `;
+    });
+    
+    // 🔥 FIXED: Handle close button - redirect to proposals using Django URL
+    document.getElementById('closeResultsBtn').addEventListener('click', function(e) {
+        e.preventDefault();
+        // Use Django URL template tag
+        const proposalsUrl = `{% url 'query_proposals' query.id %}`;
+        window.location.href = proposalsUrl;
+    });
+});
+</script>
+
+{% endblock %}

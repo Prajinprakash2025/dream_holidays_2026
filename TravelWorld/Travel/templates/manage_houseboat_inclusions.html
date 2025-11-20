@@ -1,0 +1,588 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<br><br>
+
+<div class="container-fluid" style="margin-top: 70px;">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'houseboat_list' %}">
+                            <i class="fas fa-ship"></i> Houseboats
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item active">{{ houseboat.name }} - Inclusions</li>
+                </ol>
+            </nav>
+            <h2 class="fw-bold text-primary">
+                <i class="bi bi-star-fill"></i> Manage Houseboat Inclusions
+            </h2>
+            <p class="text-muted">
+                <strong>{{ houseboat.name }}</strong> | {{ houseboat.destination.name }}
+            </p>
+        </div>
+        <div class="col-md-4 text-end">
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addInclusionModal">
+                <i class="bi bi-plus-circle me-2"></i> Add Inclusion
+            </button>
+            <a href="{% url 'houseboat_list' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-2"></i> Back
+            </a>
+        </div>
+    </div>
+
+    <!-- Messages -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Existing Inclusions List -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">
+                <i class="bi bi-list-ul me-2"></i>
+                Available Inclusions ({{ inclusions.count }})
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            {% if inclusions %}
+                <div class="table-responsive">
+                    <table class="table table-hover table-bordered mb-0 align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 25%;">Inclusion</th>
+                                <th style="width: 15%;">Pricing Type</th>
+                                <th style="width: 18%;">Adult Price</th>
+                                <th style="width: 18%;">Child Price</th>
+                                <th style="width: 10%;">Status</th>
+                                <th style="width: 14%;" class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for inclusion in inclusions %}
+                            <tr>
+                                <td>
+                                    <strong>{{ inclusion.name }}</strong>
+                                    {% if inclusion.details %}
+                                        <br><small class="text-muted">{{ inclusion.details|truncatewords:10 }}</small>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary">{{ inclusion.get_pricing_type_display }}</span>
+                                </td>
+                                <td>
+                                    {% if inclusion.pricing_type == 'free' %}
+                                        <span class="badge bg-success">FREE</span>
+                                    {% else %}
+                                        <strong class="text-primary">₹{{ inclusion.adult_price|floatformat:2 }}</strong>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if inclusion.child_pricing_type == 'same' %}
+                                        <small class="text-muted">Same as Adult</small>
+                                    {% elif inclusion.child_pricing_type == 'percentage' %}
+                                        <span class="badge bg-info">{{ inclusion.child_price_value }}%</span>
+                                        <small class="text-muted">(₹{{ inclusion.get_child_price|floatformat:2 }})</small>
+                                    {% elif inclusion.child_pricing_type == 'fixed' %}
+                                        <strong class="text-warning">₹{{ inclusion.child_price_value|floatformat:2 }}</strong>
+                                    {% elif inclusion.child_pricing_type == 'free' %}
+                                        <span class="badge bg-success">FREE</span>
+                                    {% endif %}
+                                    {% if inclusion.max_age %}
+                                        <br><small class="text-muted">Up to {{ inclusion.max_age }} yrs</small>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if inclusion.is_available %}
+                                        <span class="badge bg-success">Active</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Inactive</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    <!-- Edit Button -->
+                                    <button type="button" class="btn btn-sm btn-warning" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#editInclusionModal"
+                                            data-inclusion-id="{{ inclusion.id }}"
+                                            data-name="{{ inclusion.name }}"
+                                            data-pricing-type="{{ inclusion.pricing_type }}"
+                                            data-adult-price="{{ inclusion.adult_price }}"
+                                            data-child-pricing-type="{{ inclusion.child_pricing_type }}"
+                                            data-child-price-value="{{ inclusion.child_price_value }}"
+                                            data-min-age="{{ inclusion.min_age|default:'' }}"
+                                            data-max-age="{{ inclusion.max_age|default:'' }}"
+                                            data-details="{{ inclusion.details }}"
+                                            data-is-available="{{ inclusion.is_available|yesno:'true,false' }}">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </button>
+                                    
+                                    <!-- Delete Button -->
+                                    <form action="{% url 'delete_houseboat_inclusion' inclusion.id %}" method="post" class="d-inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" 
+                                                onclick="return confirm('Are you sure you want to delete {{ inclusion.name }}?');">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-inbox" style="font-size: 4rem; color: #ccc;"></i>
+                    <h5 class="text-muted mt-3">No Inclusions Added Yet</h5>
+                    <p class="text-muted">Click "Add Inclusion" to start adding special services</p>
+                    <button class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#addInclusionModal">
+                        <i class="bi bi-plus-circle me-2"></i> Add First Inclusion
+                    </button>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Add Inclusion Modal -->
+<div class="modal fade" id="addInclusionModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form method="post" action="{% url 'add_houseboat_inclusion' houseboat.id %}">
+                {% csrf_token %}
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">
+                        <i class="bi bi-plus-circle me-2"></i> Add Special Inclusion
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <!-- Inclusion Name -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Inclusion Name *</label>
+                        <input type="text" name="name" class="form-control" placeholder="e.g., Traditional Fishing, Canoe Ride" required>
+                        <small class="text-muted">Enter the name of the special service or amenity</small>
+                    </div>
+
+                    <!-- Adult Pricing Section -->
+                    <div class="card border-primary mb-3">
+                        <div class="card-header bg-primary text-white">
+                            <strong><i class="bi bi-person-fill me-2"></i> Adult Pricing</strong>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Pricing Type *</label>
+                                    <select name="pricing_type" class="form-select" id="pricingTypeSelect" onchange="updatePriceField()">
+                                        <option value="free">Complimentary (Free)</option>
+                                        <option value="per_person">Per Person</option>
+                                        <option value="per_boat">Per Boat</option>
+                                        <option value="per_booking">Per Booking</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">
+                                        Adult Price <span id="adultPriceHint" class="text-muted">(₹)</span>
+                                    </label>
+                                    <input type="number" name="adult_price" id="adultPriceInput" class="form-control" step="0.01" min="0" value="0">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Child Pricing Section -->
+                    <div class="card border-warning mb-3">
+                        <div class="card-header bg-warning">
+                            <strong><i class="bi bi-emoji-smile me-2"></i> Child Pricing</strong>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Child Pricing Type *</label>
+                                    <select name="child_pricing_type" class="form-select" id="childPricingTypeSelect" onchange="updateChildPriceField()">
+                                        <option value="same">Same as Adult</option>
+                                        <option value="percentage">Percentage of Adult Price</option>
+                                        <option value="fixed">Fixed Price</option>
+                                        <option value="free">Free for Children</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">
+                                        <span id="childPriceLabel">Value</span>
+                                        <span id="childPriceHint" class="text-muted"></span>
+                                    </label>
+                                    <input type="number" name="child_price_value" id="childPriceInput" class="form-control" step="0.01" min="0" value="0">
+                                    <small class="text-muted fw-bold" id="childPriceExample"></small>
+                                </div>
+                            </div>
+
+                            <!-- Age Restrictions -->
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Minimum Age (Optional)</label>
+                                    <input type="number" name="min_age" class="form-control" min="0" placeholder="e.g., 3">
+                                    <small class="text-muted">Leave empty if no minimum age</small>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Maximum Age for Child Rate</label>
+                                    <input type="number" name="max_age" class="form-control" min="0" value="12" placeholder="e.g., 12">
+                                    <small class="text-muted">Children above this age pay adult rate</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Details -->
+                    <div class="mb-3">
+                        <label class="form-label">Details & Terms</label>
+                        <textarea name="details" class="form-control" rows="3" placeholder="Describe this inclusion, terms and conditions..."></textarea>
+                    </div>
+
+                    <!-- Status -->
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="is_available" id="isAvailable" checked>
+                        <label class="form-check-label" for="isAvailable">
+                            <strong>Active/Available</strong>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle me-1"></i> Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save me-1"></i> Save Inclusion
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Inclusion Modal -->
+<div class="modal fade" id="editInclusionModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form method="post" action="" id="editInclusionForm">
+                {% csrf_token %}
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title">
+                        <i class="bi bi-pencil-square me-2"></i> Edit Inclusion
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <!-- Inclusion Name -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Inclusion Name *</label>
+                        <input type="text" name="name" id="edit_name" class="form-control" required>
+                    </div>
+
+                    <!-- Adult Pricing Section -->
+                    <div class="card border-primary mb-3">
+                        <div class="card-header bg-primary text-white">
+                            <strong><i class="bi bi-person-fill me-2"></i> Adult Pricing</strong>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Pricing Type *</label>
+                                    <select name="pricing_type" class="form-select" id="edit_pricingTypeSelect" onchange="editUpdatePriceField()">
+                                        <option value="free">Complimentary (Free)</option>
+                                        <option value="per_person">Per Person</option>
+                                        <option value="per_boat">Per Boat</option>
+                                        <option value="per_booking">Per Booking</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">
+                                        Adult Price <span id="edit_adultPriceHint" class="text-muted">(₹)</span>
+                                    </label>
+                                    <input type="number" name="adult_price" id="edit_adultPriceInput" class="form-control" step="0.01" min="0">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Child Pricing Section -->
+                    <div class="card border-warning mb-3">
+                        <div class="card-header bg-warning">
+                            <strong><i class="bi bi-emoji-smile me-2"></i> Child Pricing</strong>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Child Pricing Type *</label>
+                                    <select name="child_pricing_type" class="form-select" id="edit_childPricingTypeSelect" onchange="editUpdateChildPriceField()">
+                                        <option value="same">Same as Adult</option>
+                                        <option value="percentage">Percentage of Adult Price</option>
+                                        <option value="fixed">Fixed Price</option>
+                                        <option value="free">Free for Children</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">
+                                        <span id="edit_childPriceLabel">Value</span>
+                                        <span id="edit_childPriceHint" class="text-muted"></span>
+                                    </label>
+                                    <input type="number" name="child_price_value" id="edit_childPriceInput" class="form-control" step="0.01" min="0">
+                                    <small class="text-muted fw-bold" id="edit_childPriceExample"></small>
+                                </div>
+                            </div>
+
+                            <!-- Age Restrictions -->
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Minimum Age (Optional)</label>
+                                    <input type="number" name="min_age" id="edit_min_age" class="form-control" min="0" placeholder="e.g., 3">
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Maximum Age for Child Rate</label>
+                                    <input type="number" name="max_age" id="edit_max_age" class="form-control" min="0" placeholder="e.g., 12">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Details -->
+                    <div class="mb-3">
+                        <label class="form-label">Details & Terms</label>
+                        <textarea name="details" id="edit_details" class="form-control" rows="3"></textarea>
+                    </div>
+
+                    <!-- Status -->
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="is_available" id="edit_isAvailable">
+                        <label class="form-check-label" for="edit_isAvailable">
+                            <strong>Active/Available</strong>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle me-1"></i> Cancel
+                    </button>
+                    <button type="submit" class="btn btn-warning">
+                        <i class="bi bi-save me-1"></i> Update Inclusion
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// ==========================================
+// ADD MODAL FUNCTIONS
+// ==========================================
+function updatePriceField() {
+    const pricingType = document.getElementById('pricingTypeSelect').value;
+    const priceInput = document.getElementById('adultPriceInput');
+    const priceHint = document.getElementById('adultPriceHint');
+    
+    const hints = {
+        'free': '(No charge)',
+        'per_person': '(₹ per person)',
+        'per_boat': '(₹ per boat)',
+        'per_booking': '(₹ one-time)'
+    };
+    
+    priceHint.textContent = hints[pricingType] || '(₹)';
+    
+    if (pricingType === 'free') {
+        priceInput.value = '0';
+        priceInput.disabled = true;
+    } else {
+        priceInput.disabled = false;
+    }
+    
+    updateChildPriceExample();
+}
+
+function updateChildPriceField() {
+    const childPricingType = document.getElementById('childPricingTypeSelect').value;
+    const childPriceInput = document.getElementById('childPriceInput');
+    const childPriceLabel = document.getElementById('childPriceLabel');
+    const childPriceHint = document.getElementById('childPriceHint');
+    
+    if (childPricingType === 'same') {
+        childPriceInput.value = '0';
+        childPriceInput.disabled = true;
+        childPriceLabel.textContent = 'Value';
+        childPriceHint.textContent = '(Same as adult)';
+    } else if (childPricingType === 'percentage') {
+        childPriceInput.value = '50';
+        childPriceInput.disabled = false;
+        childPriceLabel.textContent = 'Percentage';
+        childPriceHint.textContent = '(%)';
+    } else if (childPricingType === 'fixed') {
+        childPriceInput.value = '0';
+        childPriceInput.disabled = false;
+        childPriceLabel.textContent = 'Fixed Price';
+        childPriceHint.textContent = '(₹)';
+    } else if (childPricingType === 'free') {
+        childPriceInput.value = '0';
+        childPriceInput.disabled = true;
+        childPriceLabel.textContent = 'Value';
+        childPriceHint.textContent = '(Free)';
+    }
+    
+    updateChildPriceExample();
+}
+
+function updateChildPriceExample() {
+    const adultPrice = parseFloat(document.getElementById('adultPriceInput').value) || 0;
+    const childPricingType = document.getElementById('childPricingTypeSelect').value;
+    const childPriceValue = parseFloat(document.getElementById('childPriceInput').value) || 0;
+    const exampleElement = document.getElementById('childPriceExample');
+    
+    if (childPricingType === 'same') {
+        exampleElement.textContent = `✓ Child pays: ₹${adultPrice.toFixed(2)}`;
+    } else if (childPricingType === 'percentage') {
+        const childPrice = (adultPrice * childPriceValue) / 100;
+        exampleElement.textContent = `✓ Child pays: ₹${childPrice.toFixed(2)}`;
+    } else if (childPricingType === 'fixed') {
+        exampleElement.textContent = `✓ Child pays: ₹${childPriceValue.toFixed(2)}`;
+    } else if (childPricingType === 'free') {
+        exampleElement.textContent = `✓ Child pays: ₹0.00 (FREE)`;
+    }
+}
+
+// ==========================================
+// EDIT MODAL FUNCTIONS
+// ==========================================
+document.addEventListener('DOMContentLoaded', function() {
+    updatePriceField();
+    updateChildPriceField();
+    
+    document.getElementById('adultPriceInput').addEventListener('input', updateChildPriceExample);
+    document.getElementById('childPriceInput').addEventListener('input', updateChildPriceExample);
+    
+    const editModal = document.getElementById('editInclusionModal');
+    const editForm = document.getElementById('editInclusionForm');
+    
+    if (editModal && editForm) {
+        editModal.addEventListener('show.bs.modal', function(event) {
+            const button = event.relatedTarget;
+            
+            const inclusionId = button.getAttribute('data-inclusion-id');
+            const name = button.getAttribute('data-name');
+            const pricingType = button.getAttribute('data-pricing-type');
+            const adultPrice = button.getAttribute('data-adult-price');
+            const childPricingType = button.getAttribute('data-child-pricing-type');
+            const childPriceValue = button.getAttribute('data-child-price-value');
+            const minAge = button.getAttribute('data-min-age');
+            const maxAge = button.getAttribute('data-max-age');
+            const details = button.getAttribute('data-details');
+            const isAvailable = button.getAttribute('data-is-available') === 'true';
+            
+            // ✅ FIXED: Use houseboat inclusion URL
+            editForm.action = `/houseboat-inclusions/${inclusionId}/edit/`;
+            
+            document.getElementById('edit_name').value = name;
+            document.getElementById('edit_pricingTypeSelect').value = pricingType;
+            document.getElementById('edit_adultPriceInput').value = adultPrice;
+            document.getElementById('edit_childPricingTypeSelect').value = childPricingType;
+            document.getElementById('edit_childPriceInput').value = childPriceValue;
+            document.getElementById('edit_min_age').value = minAge;
+            document.getElementById('edit_max_age').value = maxAge;
+            document.getElementById('edit_details').value = details;
+            document.getElementById('edit_isAvailable').checked = isAvailable;
+            
+            editUpdatePriceField();
+            editUpdateChildPriceField();
+        });
+    }
+    
+    const editAdultInput = document.getElementById('edit_adultPriceInput');
+    const editChildInput = document.getElementById('edit_childPriceInput');
+    
+    if (editAdultInput) editAdultInput.addEventListener('input', editUpdateChildPriceExample);
+    if (editChildInput) editChildInput.addEventListener('input', editUpdateChildPriceExample);
+});
+
+function editUpdatePriceField() {
+    const pricingType = document.getElementById('edit_pricingTypeSelect').value;
+    const priceInput = document.getElementById('edit_adultPriceInput');
+    const priceHint = document.getElementById('edit_adultPriceHint');
+    
+    const hints = {
+        'free': '(No charge)',
+        'per_person': '(₹ per person)',
+        'per_boat': '(₹ per boat)',
+        'per_booking': '(₹ one-time)'
+    };
+    
+    priceHint.textContent = hints[pricingType] || '(₹)';
+    priceInput.disabled = (pricingType === 'free');
+    
+    editUpdateChildPriceExample();
+}
+
+function editUpdateChildPriceField() {
+    const childPricingType = document.getElementById('edit_childPricingTypeSelect').value;
+    const childPriceInput = document.getElementById('edit_childPriceInput');
+    const childPriceLabel = document.getElementById('edit_childPriceLabel');
+    const childPriceHint = document.getElementById('edit_childPriceHint');
+    
+    if (childPricingType === 'same') {
+        childPriceInput.disabled = true;
+        childPriceLabel.textContent = 'Value';
+        childPriceHint.textContent = '(Same as adult)';
+    } else if (childPricingType === 'percentage') {
+        childPriceInput.disabled = false;
+        childPriceLabel.textContent = 'Percentage';
+        childPriceHint.textContent = '(%)';
+    } else if (childPricingType === 'fixed') {
+        childPriceInput.disabled = false;
+        childPriceLabel.textContent = 'Fixed Price';
+        childPriceHint.textContent = '(₹)';
+    } else if (childPricingType === 'free') {
+        childPriceInput.disabled = true;
+        childPriceLabel.textContent = 'Value';
+        childPriceHint.textContent = '(Free)';
+    }
+    
+    editUpdateChildPriceExample();
+}
+
+function editUpdateChildPriceExample() {
+    const adultPrice = parseFloat(document.getElementById('edit_adultPriceInput').value) || 0;
+    const childPricingType = document.getElementById('edit_childPricingTypeSelect').value;
+    const childPriceValue = parseFloat(document.getElementById('edit_childPriceInput').value) || 0;
+    const exampleElement = document.getElementById('edit_childPriceExample');
+    
+    if (childPricingType === 'same') {
+        exampleElement.textContent = `✓ Child pays: ₹${adultPrice.toFixed(2)}`;
+    } else if (childPricingType === 'percentage') {
+        const childPrice = (adultPrice * childPriceValue) / 100;
+        exampleElement.textContent = `✓ Child pays: ₹${childPrice.toFixed(2)}`;
+    } else if (childPricingType === 'fixed') {
+        exampleElement.textContent = `✓ Child pays: ₹${childPriceValue.toFixed(2)}`;
+    } else if (childPricingType === 'free') {
+        exampleElement.textContent = `✓ Child pays: ₹0.00 (FREE)`;
+    }
+}
+</script>
+
+
+{% endblock %}

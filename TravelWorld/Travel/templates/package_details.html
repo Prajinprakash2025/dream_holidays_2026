@@ -1,0 +1,145 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Package Terms - TravelHope</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px 0;
+        }
+        .form-container {
+            background: #fff;
+            padding: 2.5rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            margin: 30px auto;
+            max-width: 1200px;
+        }
+        h2 {
+            font-weight: 700;
+            margin-bottom: 2rem;
+            color: #333;
+        }
+        .section-label {
+            background: #667eea;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-weight: 600;
+            margin-top: 1.5rem;
+            margin-bottom: 0.8rem;
+            display: block;
+        }
+        .ckeditor-wrapper {
+            margin-bottom: 2rem;
+        }
+        button[type="submit"] {
+            margin-top: 2rem;
+            padding: 12px 30px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        .alert {
+            margin-bottom: 20px;
+        }
+        .form-check {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="form-container">
+        <h2 class="text-center">📝 Edit Package Terms & Conditions</h2>
+        
+        <!-- Success/Error Messages -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+        
+        <form method="POST">
+            {% csrf_token %}
+
+            <!-- Special Inclusion -->
+            <div class="ckeditor-wrapper">
+                <label class="section-label">🌟 Special Inclusion</label>
+                {{ form.special_inclusion }}
+            </div>
+
+            <!-- Package Inclusion -->
+            <div class="ckeditor-wrapper">
+                <label class="section-label">✅ Package Inclusion</label>
+                {{ form.package_inclusion }}
+            </div>
+
+            <!-- Package Exclusion -->
+            <div class="ckeditor-wrapper">
+                <label class="section-label">❌ Package Exclusion</label>
+                {{ form.package_exclusion }}
+            </div>
+
+            <!-- Terms and Conditions -->
+            <div class="ckeditor-wrapper">
+                <label class="section-label">📋 Terms and Conditions</label>
+                {{ form.terms_and_conditions }}
+            </div>
+
+            <!-- Payment Policy -->
+            <div class="ckeditor-wrapper">
+                <label class="section-label">💳 Payment Policy</label>
+                {{ form.payment_policy }}
+            </div>
+
+            <!-- Cancellation Policy -->
+            <div class="ckeditor-wrapper">
+                <label class="section-label">🚫 Cancellation Policy</label>
+                {{ form.cancellation_policy }}
+            </div>
+
+            <!-- Refund Policy -->
+            <div class="ckeditor-wrapper">
+                <label class="section-label">💰 Refund After Cancellation</label>
+                {{ form.refund_policy }}
+            </div>
+
+            <!-- List of Documents -->
+            <div class="ckeditor-wrapper">
+                <label class="section-label">📄 List of Required Documents</label>
+                {{ form.list_of_documents }}
+            </div>
+
+            <!-- Active Status -->
+            <div class="form-check">
+                {{ form.is_active }}
+                <label class="form-check-label ms-2" for="id_is_active">
+                    <strong>🟢 Set as Active (Will be used in all quotations)</strong>
+                </label>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn btn-primary w-100 btn-lg">
+                💾 Save Package Terms
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- ✅ CRITICAL: Load CKEditor Media Files -->
+{{ form.media }}
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-9">
+    <h2>Add Price for {{ inclusion.name }}</h2>
+    <form method="POST">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="id_from_date" class="form-label">From Date</label>
+            {{ form.from_date }}
+        </div>
+
+        <div class="mb-3">
+            <label for="id_to_date" class="form-label">To Date</label>
+            {{ form.to_date }}
+        </div>
+
+        <div class="mb-3">
+            <label for="id_per_person_price" class="form-label">Per Person Price</label>
+            {{ form.per_person_price }}
+        </div>
+
+        <button type="submit" class="btn btn-success">Save</button>
+        <a href="{% url 'inclusion_price_list' inclusion.id %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}

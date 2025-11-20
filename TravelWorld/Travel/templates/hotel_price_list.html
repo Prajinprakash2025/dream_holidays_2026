@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block content %}
+<br><br>
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">Price List for {{ hotel.name }}</h2>
+        
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#priceModal">
+            Add Price
+        </button>
+    </div>
+
+    <table class="table table-bordered table-striped">
+        <thead class="thead-dark">
+            <tr>
+                <th>#</th>
+                <th>From Date</th>
+                <th>To Date</th>
+                <th>Room Type</th>
+                <th>Meal Plan</th>
+                <th>Double Bed</th>
+                <th>Child w/o Bed</th>
+                <th>Child w/ Bed</th>
+                <th>Extra Bed</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for price in prices %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ price.from_date|date:"d M Y" }}</td>
+                <td>{{ price.to_date|date:"d M Y" }}</td>
+                <td>{{ price.room_type }}</td>
+                <td>{{ price.meal_plan }}</td>
+                <td>${{ price.double_bed }}</td>
+                <td>${{ price.child_without_bed }}</td>
+                <td>${{ price.child_with_bed }}</td>
+                <td>${{ price.extra_bed }}</td>
+                <td>
+                    <button type="button" class="btn btn-sm btn-warning"
+                            data-bs-toggle="modal"
+                            data-bs-target="#priceModal"
+                            data-price-id="{{ price.id }}"
+                            data-from-date="{{ price.from_date|date:'Y-m-d' }}"
+                            data-to-date="{{ price.to_date|date:'Y-m-d' }}"
+                            data-room-type-id="{{ price.room_type.id }}"
+                            data-meal-plan-id="{{ price.meal_plan.id }}"
+                            data-double-bed="{{ price.double_bed }}"
+                            data-child-with-bed="{{ price.child_with_bed }}"
+                            data-child-without-bed="{{ price.child_without_bed }}"
+                            data-extra-bed="{{ price.extra_bed }}">
+                        Edit
+                    </button>
+                       <form action="{% url 'delete_price' hotel.id price.id %}" method="post" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-danger"
+                                    onclick="return confirm('Are you sure you want to delete this price record?');">
+                                Delete
+                            </button>
+                        </form>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="8" class="text-center">No prices available.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{% url 'hotel_list' %}" class="btn btn-secondary">Back to Hotels</a>
+</div>
+
+<div class="modal fade" id="priceModal" tabindex="-1" aria-labelledby="priceModalLabel" aria-hidden="true"
+     data-url-edit-prototype="{% url 'edit_price' hotel.id 9999 %}">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="priceModalLabel">Add New Price</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action=""> {% csrf_token %}
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3"><label class="form-label">{{ form.from_date.label }}</label>{{ form.from_date|add_class:"form-control" }}</div>
+                        <div class="col-md-6 mb-3"><label class="form-label">{{ form.to_date.label }}</label>{{ form.to_date|add_class:"form-control" }}</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3"><label class="form-label">{{ form.room_type.label }}</label>{{ form.room_type|add_class:"form-select" }}</div>
+                        <div class="col-md-6 mb-3"><label class="form-label">{{ form.meal_plan.label }}</label>{{ form.meal_plan|add_class:"form-select" }}</div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-md-3 mb-3"><label class="form-label">{{ form.double_bed.label }}</label>{{ form.double_bed|add_class:"form-control" }}</div>
+                        <div class="col-md-3 mb-3"><label class="form-label">{{ form.child_with_bed.label }}</label>{{ form.child_with_bed|add_class:"form-control" }}</div>
+                        <div class="col-md-3 mb-3"><label class="form-label">{{ form.child_without_bed.label }}</label>{{ form.child_without_bed|add_class:"form-control" }}</div>
+                        <div class="col-md-3 mb-3"><label class="form-label">{{ form.extra_bed.label }}</label>{{ form.extra_bed|add_class:"form-control" }}</div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Save Price</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const priceModal = document.getElementById('priceModal');
+    if (priceModal) {
+        const modalTitle = document.getElementById('priceModalLabel');
+        const priceForm = priceModal.querySelector('form');
+        const editUrlPrototype = priceModal.getAttribute('data-url-edit-prototype');
+        const createUrl = "{% url 'add_price' hotel.id %}";
+
+        priceModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const priceId = button.getAttribute('data-price-id');
+
+            if (priceId) {
+                // --- EDIT MODE ---
+                modalTitle.textContent = 'Edit Price for {{ hotel.name }}';
+                priceForm.action = editUrlPrototype.replace('9999', priceId);
+
+                // Pre-fill the form fields from the button's data attributes
+                priceForm.querySelector('[name="from_date"]').value = button.getAttribute('data-from-date');
+                priceForm.querySelector('[name="to_date"]').value = button.getAttribute('data-to-date');
+                priceForm.querySelector('[name="room_type"]').value = button.getAttribute('data-room-type-id');
+                priceForm.querySelector('[name="meal_plan"]').value = button.getAttribute('data-meal-plan-id');
+                priceForm.querySelector('[name="double_bed"]').value = button.getAttribute('data-double-bed');
+                priceForm.querySelector('[name="child_with_bed"]').value = button.getAttribute('data-child-with-bed');
+                priceForm.querySelector('[name="child_without_bed"]').value = button.getAttribute('data-child-without-bed');
+                priceForm.querySelector('[name="extra_bed"]').value = button.getAttribute('data-extra-bed');
+
+            } else {
+                // --- ADD NEW MODE ---
+                modalTitle.textContent = 'Add New Price for {{ hotel.name }}';
+                priceForm.action = createUrl;
+                priceForm.reset(); // Clear the form for a new entry
+            }
+        });
+    }
+});
+</script>
+
+{% endblock %}

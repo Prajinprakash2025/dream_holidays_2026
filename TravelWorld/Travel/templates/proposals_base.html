@@ -1,0 +1,454 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Proposals{% endblock %}</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            overflow-x: hidden;
+        }
+
+        /* Navbar Styling - HIGHEST Z-INDEX */
+        .navbar {
+            background: #1a2035;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            z-index: 2000;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+        }
+
+        .navbar-brand {
+            color: #fff !important;
+            font-weight: bold;
+            font-size: 1.3rem;
+        }
+
+        .navbar-nav .nav-link {
+            color: rgba(255,255,255,0.85) !important;
+            margin: 0 8px;
+            transition: all 0.3s;
+        }
+
+        .navbar-nav .nav-link:hover {
+            color: #fff !important;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+        }
+
+        .dropdown-menu {
+            border: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 2100;
+        }
+
+        /* ==== MODAL Z-INDEX & MARGIN FIXES ===== */
+        .modal-backdrop {
+            z-index: 3000 !important;
+        }
+        .modal {
+            z-index: 3050 !important;
+        }
+        .modal-dialog {
+            margin-top: 90px !important;  /* Change 90px if your navbar is taller */
+        }
+
+        /* Collapsible Sidebar - BELOW NAVBAR */
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1040;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .sidebar-wrapper {
+            position: fixed;
+            top: 56px; /* Below navbar */
+            left: -280px;
+            width: 280px;
+            height: calc(100vh - 56px);
+            background: #2b4c7e;
+            z-index: 1045;
+            transition: left 0.3s ease;
+            overflow-y: auto;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+        }
+
+        .sidebar-wrapper.active {
+            left: 0;
+        }
+
+        .sidebar-header {
+            background: #1a2f4f;
+            padding: 20px 15px;
+            color: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            border-bottom: 2px solid rgba(255,255,255,0.1);
+        }
+
+        .sidebar-close {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+
+        .sidebar-close:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .menu-sidebar {
+            padding: 15px;
+        }
+
+        .menu-sidebar a {
+            color: #fff;
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            margin-bottom: 5px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+        }
+
+        .menu-sidebar a:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateX(5px);
+        }
+
+        .menu-sidebar a.active {
+            background: rgba(255, 255, 255, 0.25);
+            font-weight: 600;
+        }
+
+        .menu-sidebar a i {
+            min-width: 25px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        .query-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 5px 12px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        /* Menu Toggle Button - BELOW NAVBAR */
+        .menu-toggle-btn {
+            position: fixed;
+            top: 70px;
+            left: 20px;
+            width: 50px;
+            height: 50px;
+            background: #2b4c7e;
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            cursor: pointer;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+        }
+
+        .menu-toggle-btn:hover {
+            background: #1a2f4f;
+            transform: scale(1.1);
+        }
+
+        .menu-toggle-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Content Area */
+        .main-content {
+            padding: 20px 40px;
+            margin-top: 70px;
+            margin-left: 0;
+            max-width: 100%;
+            transition: margin-left 0.3s ease;
+        }
+
+        .content-wrapper {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Scrollbar for sidebar */
+        .sidebar-wrapper::-webkit-scrollbar {
+            width: 6px;
+        }
+        .sidebar-wrapper::-webkit-scrollbar-track {
+            background: #1a2f4f;
+        }
+        .sidebar-wrapper::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.3);
+            border-radius: 10px;
+        }
+        .sidebar-wrapper::-webkit-scrollbar-thumb:hover {
+            background: rgba(255,255,255,0.5);
+        }
+
+        /* Prevent body scroll when sidebar open */
+        body.sidebar-open {
+            overflow: hidden;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 992px) {
+            .main-content {
+                padding: 20px 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar-wrapper {
+                width: 260px;
+                left: -260px;
+            }
+            .main-content {
+                padding: 15px;
+            }
+            .menu-toggle-btn {
+                width: 45px;
+                height: 45px;
+                font-size: 1.1rem;
+            }
+        }
+
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    
+    <!-- NAVBAR - TOP PRIORITY -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'query_list' %}">
+                <i class="fas fa-plane me-2"></i>Dream holiders
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'team_member:dashboard' %}">
+                            <i class="fas fa-home me-1"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'query_list' %}">
+                            <i class="fas fa-list me-1"></i>Queries
+                        </a>
+                    </li>
+                </ul>
+                
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user-circle me-1"></i>
+                            {{ current_user.get_full_name|default:"User" }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li>
+                                <a class="dropdown-item" href="{% url 'team_member:dashboard' %}">
+                                    <i class="fas fa-user me-2"></i>My Profile
+                                </a>
+                            </li>
+                            {% if user_type == 'superuser' or current_user.role == 'admin' %}
+                            <li>
+                                <a class="dropdown-item" href="{% url 'team_member:manage_permissions' %}">
+                                    <i class="fas fa-user-shield me-2"></i>Manage Permissions
+                                </a>
+                            </li>
+                            {% endif %}
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'team_member:logout' %}">
+                                    <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- MENU TOGGLE BUTTON -->
+    <button class="menu-toggle-btn" id="menuToggle" title="Open Menu">
+        <i class="fas fa-bars"></i>
+    </button>
+    
+    <!-- SIDEBAR OVERLAY -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    
+    <!-- COLLAPSIBLE SIDEBAR -->
+    <div class="sidebar-wrapper" id="sidebar">
+        <div class="sidebar-header">
+            <div>
+                <div class="fw-bold mb-1">
+                    <i class="fas fa-list-ul me-2"></i>Menu
+                </div>
+                <div class="query-badge">
+                    Query #{{ query.id }}
+                </div>
+            </div>
+            <button class="sidebar-close" id="sidebarClose" title="Close Menu">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="menu-sidebar">
+            <a href="#" 
+               class="{% if request.resolver_match.url_name == 'query_details' %}active{% endif %}">
+                <i class="fas fa-file-invoice me-2"></i> Query Details
+            </a>
+            
+            <a href="{% url 'query_proposals' query.id %}" 
+               class="{% if request.resolver_match.url_name == 'query_proposals' %}active{% endif %}">
+                <i class="fas fa-file-alt me-2"></i> Proposals
+            </a>
+            
+            <a href="#">
+                <i class="fas fa-envelope me-2"></i> Mails
+            </a>
+            
+            <a href="#">
+                <i class="fas fa-calendar-check me-2"></i> Follow-up's
+            </a>
+            
+            <!-- SUPPLIER COMMUNICATION - PERMISSION BASED -->
+            {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.role == 'manager' or current_user.permissions.can_supplier_communication %}
+            <a href="{% url 'supplier_communication' query.id %}"
+               class="{% if request.resolver_match.url_name == 'supplier_communication' %}active{% endif %}">
+                <i class="fas fa-users me-2"></i> Suppliers Communication
+            </a>
+            {% endif %}
+            
+            <a href="#">
+                <i class="fas fa-truck me-2"></i> Post Sales Supplier
+            </a>
+            
+            <a href="#">
+                <i class="fas fa-ticket-alt me-2"></i> Voucher
+            </a>
+            
+            <a href="#">
+                <i class="fas fa-file-invoice-dollar me-2"></i> Billing
+            </a>
+            
+            <a href="#">
+                <i class="fas fa-users-cog me-2"></i> Guest Documents
+            </a>
+            
+            <a href="#">
+                <i class="fas fa-history me-2"></i> History
+            </a>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT AREA -->
+    <div class="main-content">
+        <div class="content-wrapper">
+            {% block proposals_content %}{% endblock %}
+        </div>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Sidebar Toggle Script -->
+    <script>
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        const sidebarClose = document.getElementById('sidebarClose');
+        
+        // Open sidebar
+        menuToggle.addEventListener('click', function() {
+            sidebar.classList.add('active');
+            sidebarOverlay.classList.add('active');
+            document.body.classList.add('sidebar-open');
+        });
+        
+        // Close sidebar
+        function closeSidebar() {
+            sidebar.classList.remove('active');
+            sidebarOverlay.classList.remove('active');
+            document.body.classList.remove('sidebar-open');
+        }
+        
+        sidebarClose.addEventListener('click', closeSidebar);
+        sidebarOverlay.addEventListener('click', closeSidebar);
+        
+        // Close on ESC key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && sidebar.classList.contains('active')) {
+                closeSidebar();
+            }
+        });
+        
+        // Prevent clicks inside sidebar from closing it
+        sidebar.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

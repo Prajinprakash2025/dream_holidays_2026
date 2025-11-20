@@ -1,0 +1,823 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block content %}
+
+
+<style>
+  .suppliers-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 2rem;
+    border-radius: 15px;
+    margin-bottom: 2rem;
+    color: white;
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+  }
+
+
+  .search-filter-bar {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    margin-bottom: 1.5rem;
+  }
+
+
+  .modern-table {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+  }
+
+
+  .modern-table thead {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+  }
+
+
+  .modern-table thead th {
+    border: none;
+    padding: 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+  }
+
+
+  .modern-table tbody tr {
+    transition: all 0.3s ease;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+
+  .modern-table tbody tr:hover {
+    background: #f8f9ff;
+    transform: scale(1.01);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+  }
+
+
+  .modern-table tbody td {
+    padding: 1rem;
+    vertical-align: middle;
+  }
+
+
+  .action-btn-group {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+
+  .action-btn {
+    padding: 0.4rem 0.8rem;
+    border-radius: 8px;
+    border: none;
+    transition: all 0.3s ease;
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+
+  .action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+
+
+  .badge-modern {
+    padding: 0.4rem 0.8rem;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 12px;
+  }
+
+
+  .stats-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    text-align: center;
+    transition: all 0.3s ease;
+  }
+
+
+  .stats-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+  }
+
+
+  .stats-card .icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    font-size: 24px;
+  }
+
+
+  .modal-header-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+  }
+
+
+  .form-section-title {
+    color: #667eea;
+    font-weight: 600;
+    border-bottom: 2px solid #667eea;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+    .suppliers-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 2rem;
+    border-radius: 15px;
+    margin-bottom: 2rem;
+    color: white;
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+  }
+
+  /* Add this new style for back button */
+  .back-button-container {
+    padding: 1.5rem 2rem 0 2rem;
+    margin-bottom: -1rem;
+  }
+
+  .back-btn-modern {
+    padding: 0.6rem 1.2rem;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    border: 2px solid #667eea;
+    color: #667eea;
+    background: white;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .back-btn-modern:hover {
+    background: #667eea;
+    color: white;
+    transform: translateX(-5px);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  }
+
+  .back-btn-modern i {
+    font-size: 16px;
+  }
+
+  .search-filter-bar {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    margin-bottom: 1.5rem;
+  }
+
+  .modern-table {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+  }
+
+  .modern-table thead {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+  }
+
+  .modern-table thead th {
+    border: none;
+    padding: 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+  }
+
+  .modern-table tbody tr {
+    transition: all 0.3s ease;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .modern-table tbody tr:hover {
+    background: #f8f9ff;
+    transform: scale(1.01);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+  }
+
+  .modern-table tbody td {
+    padding: 1rem;
+    vertical-align: middle;
+  }
+
+  .action-btn-group {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .action-btn {
+    padding: 0.4rem 0.8rem;
+    border-radius: 8px;
+    border: none;
+    transition: all 0.3s ease;
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+
+  .badge-modern {
+    padding: 0.4rem 0.8rem;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 12px;
+  }
+
+  .stats-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    text-align: center;
+    transition: all 0.3s ease;
+  }
+
+  .stats-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+  }
+
+  .stats-card .icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    font-size: 24px;
+  }
+
+  .modal-header-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+  }
+
+  .form-section-title {
+    color: #667eea;
+    font-weight: 600;
+    border-bottom: 2px solid #667eea;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+  }
+</style>
+
+<!-- Back Button with Modern Styling -->
+<div class="back-button-container">
+    <a href="{% url 'admin_settings' %}" class="back-btn-modern">
+        <i class="fas fa-arrow-left"></i>
+        <span>Back to Admin Settings</span>
+    </a>
+</div>
+
+<div class="container-fluid" style="margin-top: 90px; padding: 0 2rem;">
+  
+  <!-- Header -->
+  <div class="suppliers-header">
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <h2 class="mb-2">
+          <i class="fas fa-truck"></i> Suppliers Management
+        </h2>
+        <p class="mb-0" style="opacity: 0.9;">Manage all your travel service suppliers</p>
+      </div>
+      
+      <!-- ✅ PERMISSION CHECK: Add Supplier Button -->
+      {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.permissions.can_add_supplier %}
+      <button type="button" class="btn btn-light btn-lg shadow" 
+              data-bs-toggle="modal" 
+              data-bs-target="#supplierModal" 
+              onclick="resetSupplierForm()">
+        <i class="fas fa-plus-circle me-2"></i>Add Supplier
+      </button>
+      {% endif %}
+    </div>
+  </div>
+
+
+  <!-- Stats Cards -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-3">
+      <div class="stats-card">
+        <div class="icon" style="background: #e3f2fd;">
+          <i class="fas fa-building" style="color: #2196f3;"></i>
+        </div>
+        <h3 class="mb-1">{{ total_suppliers }}</h3>
+        <p class="text-muted mb-0">Total Suppliers</p>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="stats-card">
+        <div class="icon" style="background: #e8f5e9;">
+          <i class="fas fa-check-circle" style="color: #4caf50;"></i>
+        </div>
+        <h3 class="mb-1">{{ verified_suppliers }}</h3>
+        <p class="text-muted mb-0">Verified</p>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="stats-card">
+        <div class="icon" style="background: #fff3e0;">
+          <i class="fas fa-clock" style="color: #ff9800;"></i>
+        </div>
+        <h3 class="mb-1">{{ pending_suppliers }}</h3>
+        <p class="text-muted mb-0">Pending</p>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="stats-card">
+        <div class="icon" style="background: #fce4ec;">
+          <i class="fas fa-ban" style="color: #e91e63;"></i>
+        </div>
+        <h3 class="mb-1">{{ inactive_suppliers }}</h3>
+        <p class="text-muted mb-0">Inactive</p>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Search & Filter Bar -->
+  <div class="search-filter-bar">
+    <div class="row g-3">
+      <div class="col-md-4">
+        <div class="input-group">
+          <span class="input-group-text border-0 bg-light">
+            <i class="fas fa-search"></i>
+          </span>
+          <input type="text" class="form-control border-0 bg-light" id="searchInput" placeholder="Search suppliers..." onkeyup="filterTable()">
+        </div>
+      </div>
+      <div class="col-md-3">
+        <select class="form-select border-0 bg-light" id="typeFilter" onchange="filterTable()">
+          <option value="">All Types</option>
+          <option value="Hotel">Hotel</option>
+          <option value="Vehicle">Vehicle</option>
+          <option value="Activity">Activity</option>
+          <option value="Houseboat">Houseboat</option>
+          <option value="Special Inclusion">Special Inclusion</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <select class="form-select border-0 bg-light" id="statusFilter" onchange="filterTable()">
+          <option value="">All Status</option>
+          <option value="verified">Verified</option>
+          <option value="pending">Pending</option>
+        </select>
+      </div>
+      <div class="col-md-3 text-end">
+        <button class="btn btn-outline-primary" onclick="resetFilters()">
+          <i class="fas fa-redo me-1"></i>Reset Filters
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Modern Table -->
+  <div class="modern-table">
+    <div class="table-responsive">
+      <table class="table table-hover mb-0" id="suppliersTable">
+        <thead>
+          <tr>
+            <th><i class="fas fa-building me-2"></i>Company</th>
+            <th><i class="fas fa-tag me-2"></i>Type</th>
+            <th><i class="fas fa-user me-2"></i>Contact</th>
+            <th><i class="fas fa-envelope me-2"></i>Email</th>
+            <th><i class="fas fa-phone me-2"></i>Mobile</th>
+            <th><i class="fas fa-map-marker-alt me-2"></i>City</th>
+            <th><i class="fas fa-shield-alt me-2"></i>Status</th>
+            {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.permissions.can_edit_supplier %}
+            <th class="text-center"><i class="fas fa-cogs me-2"></i>Actions</th>
+            {%endif%}
+          </tr>
+        </thead>
+        <tbody>
+          {% for supplier in suppliers %}
+          <tr data-type="{{ supplier.get_supplier_type_display }}" data-verified="{{ supplier.is_verified|lower }}">
+            <td>
+              <div class="d-flex align-items-center">
+                <div class="avatar-circle me-2" style="width: 40px; height: 40px; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700;">
+                  {{ supplier.company_name|first|upper }}
+                </div>
+                <div>
+                  <div class="fw-bold">{{ supplier.company_name }}</div>
+                  <small class="text-muted">ID: #SUP{{ supplier.id }}</small>
+                </div>
+              </div>
+            </td>
+            <td>
+              {% if supplier.supplier_type == 'hotel' %}
+                <span class="badge badge-modern bg-primary">
+                  <i class="fas fa-hotel me-1"></i>{{ supplier.get_supplier_type_display }}
+                </span>
+              {% elif supplier.supplier_type == 'vehicle' %}
+                <span class="badge badge-modern bg-success">
+                  <i class="fas fa-car me-1"></i>{{ supplier.get_supplier_type_display }}
+                </span>
+              {% elif supplier.supplier_type == 'activity' %}
+                <span class="badge badge-modern bg-warning">
+                  <i class="fas fa-ticket-alt me-1"></i>{{ supplier.get_supplier_type_display }}
+                </span>
+              {% elif supplier.supplier_type == 'houseboat' %}
+                <span class="badge badge-modern bg-info">
+                  <i class="fas fa-ship me-1"></i>{{ supplier.get_supplier_type_display }}
+                </span>
+              {% elif supplier.supplier_type == 'standalone_inclusion' %}
+                <span class="badge badge-modern" style="background-color: #9b59b6;">
+                  <i class="fas fa-star me-1"></i>{{ supplier.get_supplier_type_display }}
+                </span>
+              {% else %}
+                <span class="badge badge-modern bg-secondary">
+                  <i class="fas fa-box me-1"></i>{{ supplier.get_supplier_type_display }}
+                </span>
+              {% endif %}
+            </td>
+            <td>
+              <div>{{ supplier.supplier_first_name }} {{ supplier.supplier_last_name }}</div>
+            </td>
+            <td>
+              <a href="mailto:{{ supplier.email }}" class="text-decoration-none">
+                <i class="fas fa-envelope me-1"></i>{{ supplier.email }}
+              </a>
+            </td>
+            <td>
+              <a href="tel:{{ supplier.mobile_no }}" class="text-decoration-none">
+                <i class="fas fa-phone me-1"></i>{{ supplier.mobile_no }}
+              </a>
+            </td>
+            <td>
+              <i class="fas fa-map-marker-alt me-1 text-muted"></i>{{ supplier.city }}
+            </td>
+            <td>
+              <div class="d-flex flex-column gap-1">
+                {% if supplier.is_verified %}
+                  <span class="badge badge-modern bg-success">
+                    <i class="fas fa-check-circle me-1"></i>Verified
+                  </span>
+                {% else %}
+                  <span class="badge badge-modern bg-warning">
+                    <i class="fas fa-clock me-1"></i>Pending
+                  </span>
+                {% endif %}
+                
+                {% if supplier.is_active %}
+                  <span class="badge badge-modern bg-success">
+                    <i class="fas fa-check me-1"></i>Active
+                  </span>
+                {% else %}
+                  <span class="badge badge-modern bg-danger">
+                    <i class="fas fa-times me-1"></i>Inactive
+                  </span>
+                {% endif %}
+              </div>
+            </td>
+            <td>
+              <div class="action-btn-group justify-content-center">
+                
+                <!-- ✅ PERMISSION CHECK: Edit Button -->
+                {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.permissions.can_edit_supplier %}
+                <button type="button" class="btn btn-warning action-btn" 
+                        onclick="editSupplier(this)"
+                        data-bs-toggle="modal" 
+                        data-bs-target="#supplierModal"
+                        data-id="{{ supplier.id }}"
+                        data-company-name="{{ supplier.company_name }}"
+                        data-supplier-type="{{ supplier.supplier_type }}"
+                        data-first-name="{{ supplier.supplier_first_name }}"
+                        data-last-name="{{ supplier.supplier_last_name }}"
+                        data-email="{{ supplier.email }}"
+                        data-mobile-no="{{ supplier.mobile_no }}"
+                        data-phone-no="{{ supplier.phone_no|default:'' }}"
+                        data-city="{{ supplier.city }}"
+                        data-address="{{ supplier.address }}"
+                        data-state="{{ supplier.state|default:'' }}"
+                        data-postal-code="{{ supplier.postal_code|default:'' }}"
+                        data-gst-number="{{ supplier.gst_number|default:'' }}"
+                        data-website="{{ supplier.website|default:'' }}"
+                        data-description="{{ supplier.description|default:'' }}"
+                        data-notes="{{ supplier.notes|default:'' }}"
+                        data-is-verified="{{ supplier.is_verified|lower }}"
+                        data-is-active="{{ supplier.is_active|lower }}">
+                  <i class="fas fa-edit"></i>
+                </button>
+                {% endif %}
+
+
+                <!-- ✅ PERMISSION CHECK: Delete Button -->
+                {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.permissions.can_delete_supplier %}
+                <form action="{% url 'delete_supplier' supplier.id %}" method="post" class="d-inline">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-danger action-btn" 
+                          onclick="return confirm('Are you sure you want to delete {{ supplier.company_name }}?')">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </form>
+                {% endif %}
+
+
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="8" class="text-center py-5">
+              <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+              <h5 class="text-muted">No suppliers found</h5>
+              <p class="text-muted">Start by adding your first supplier</p>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+
+<!-- Supplier Modal -->
+<div class="modal fade" id="supplierModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header modal-header-gradient">
+        <h5 class="modal-title">
+          <i class="fas fa-building me-2"></i>Add New Supplier
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+        <form method="POST" id="supplierForm" action="{% url 'add_supplier' %}">
+          {% csrf_token %}
+          
+          <!-- Basic Information -->
+          <h6 class="form-section-title">
+            <i class="fas fa-info-circle me-2"></i>Basic Information
+          </h6>
+          <div class="row mb-4">
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-bold">Company Name *</label>
+              <input type="text" class="form-control" id="company_name" name="company_name" required autocomplete="off">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-bold">Type *</label>
+              <select class="form-select" id="supplier_type" name="supplier_type" required autocomplete="off">
+                <option value="">Select Type</option>
+                <option value="hotel">🏨 Hotel</option>
+                <option value="vehicle">🚗 Vehicle</option>
+                <option value="activity">🎯 Activity</option>
+                <option value="houseboat">🚤 Houseboat</option>
+                <option value="standalone_inclusion">⭐ Special Inclusion</option>
+                <option value="other">📦 Other</option>
+              </select>
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-bold">Description</label>
+              <textarea class="form-control" id="description" name="description" rows="3" autocomplete="off"></textarea>
+            </div>
+          </div>
+
+
+          <!-- Contact Person -->
+          <h6 class="form-section-title">
+            <i class="fas fa-user me-2"></i>Contact Person
+          </h6>
+          <div class="row mb-4">
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-bold">First Name *</label>
+              <input type="text" class="form-control" id="supplier_first_name" name="supplier_first_name" required autocomplete="off">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-bold">Last Name *</label>
+              <input type="text" class="form-control" id="supplier_last_name" name="supplier_last_name" required autocomplete="off">
+            </div>
+          </div>
+
+
+          <!-- Contact Details -->
+          <h6 class="form-section-title">
+            <i class="fas fa-phone me-2"></i>Contact Details
+          </h6>
+          <div class="row mb-4">
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-bold">Email *</label>
+              <input type="email" class="form-control" id="email" name="email" required autocomplete="off">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-bold">Mobile *</label>
+              <input type="text" class="form-control" id="mobile_no" name="mobile_no" required autocomplete="off">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-bold">Alternate Phone</label>
+              <input type="text" class="form-control" id="phone_no" name="phone_no" autocomplete="off">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-bold">City *</label>
+              <input type="text" class="form-control" id="city" name="city" required autocomplete="off">
+            </div>
+          </div>
+
+
+          <!-- Address -->
+          <h6 class="form-section-title">
+            <i class="fas fa-map-marker-alt me-2"></i>Address
+          </h6>
+          <div class="row mb-4">
+            <div class="col-12 mb-3">
+              <label class="form-label fw-bold">Address *</label>
+              <textarea class="form-control" id="address" name="address" rows="2" required autocomplete="off"></textarea>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-bold">State</label>
+              <input type="text" class="form-control" id="state" name="state" autocomplete="off">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-bold">Postal Code</label>
+              <input type="text" class="form-control" id="postal_code" name="postal_code" autocomplete="off">
+            </div>
+          </div>
+
+
+          <!-- Business Info -->
+          <h6 class="form-section-title">
+            <i class="fas fa-briefcase me-2"></i>Business Information
+          </h6>
+          <div class="row mb-4">
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-bold">GST Number</label>
+              <input type="text" class="form-control" id="gst_number" name="gst_number" autocomplete="off">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-bold">Website</label>
+              <input type="url" class="form-control" id="website" name="website" autocomplete="off">
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-bold">Notes</label>
+              <textarea class="form-control" id="notes" name="notes" rows="2" autocomplete="off"></textarea>
+            </div>
+          </div>
+
+
+          <!-- Status -->
+          <h6 class="form-section-title">
+            <i class="fas fa-toggle-on me-2"></i>Status
+          </h6>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-check form-switch">
+                <input type="checkbox" class="form-check-input" id="is_active" name="is_active" value="on" checked style="width: 48px; height: 24px; cursor: pointer;">
+                <label class="form-check-label ms-2" for="is_active">Active</label>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-check form-switch">
+                <input type="checkbox" class="form-check-input" id="is_verified" name="is_verified" value="on" style="width: 48px; height: 24px; cursor: pointer;">
+                <label class="form-check-label ms-2" for="is_verified">Verified</label>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          <i class="fas fa-times me-1"></i>Close
+        </button>
+        <button type="submit" onclick="submitSupplierForm()" class="btn btn-success">
+          <i class="fas fa-save me-1"></i>Save Supplier
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- JavaScript -->
+<script>
+function resetSupplierForm() {
+  const form = document.getElementById('supplierForm');
+  form.reset();
+  form.action = "{% url 'add_supplier' %}";
+  document.querySelector('.modal-title').innerHTML = '<i class="fas fa-building me-2"></i>Add New Supplier';
+  document.getElementById('is_active').checked = true;
+  document.getElementById('is_verified').checked = false;
+}
+
+
+function editSupplier(button) {
+  const form = document.getElementById('supplierForm');
+  const supplierId = button.getAttribute('data-id');
+  
+  form.action = "{% url 'edit_supplier' 0 %}".replace('/0/', `/${supplierId}/`);
+  document.querySelector('.modal-title').innerHTML = '<i class="fas fa-edit me-2"></i>Edit Supplier';
+  
+  // Populate fields
+  document.getElementById('company_name').value = button.getAttribute('data-company-name') || '';
+  document.getElementById('supplier_type').value = button.getAttribute('data-supplier-type') || '';
+  document.getElementById('supplier_first_name').value = button.getAttribute('data-first-name') || '';
+  document.getElementById('supplier_last_name').value = button.getAttribute('data-last-name') || '';
+  document.getElementById('email').value = button.getAttribute('data-email') || '';
+  document.getElementById('mobile_no').value = button.getAttribute('data-mobile-no') || '';
+  document.getElementById('phone_no').value = button.getAttribute('data-phone-no') || '';
+  document.getElementById('city').value = button.getAttribute('data-city') || '';
+  document.getElementById('address').value = button.getAttribute('data-address') || '';
+  document.getElementById('state').value = button.getAttribute('data-state') || '';
+  document.getElementById('postal_code').value = button.getAttribute('data-postal-code') || '';
+  document.getElementById('gst_number').value = button.getAttribute('data-gst-number') || '';
+  document.getElementById('website').value = button.getAttribute('data-website') || '';
+  document.getElementById('description').value = button.getAttribute('data-description') || '';
+  document.getElementById('notes').value = button.getAttribute('data-notes') || '';
+  
+  document.getElementById('is_active').checked = button.getAttribute('data-is-active') === 'true';
+  document.getElementById('is_verified').checked = button.getAttribute('data-is-verified') === 'true';
+}
+
+
+function submitSupplierForm() {
+  const form = document.getElementById('supplierForm');
+  
+  if (!form.checkValidity()) {
+    form.reportValidity();
+    return false;
+  }
+  
+  form.submit();
+  return false;
+}
+
+
+// Filter Table
+function filterTable() {
+  const searchValue = document.getElementById('searchInput').value.toLowerCase();
+  const typeFilter = document.getElementById('typeFilter').value.toLowerCase();
+  const statusFilter = document.getElementById('statusFilter').value.toLowerCase();
+  
+  const table = document.getElementById('suppliersTable');
+  const rows = table.getElementsByTagName('tr');
+  
+  for (let i = 1; i < rows.length; i++) {
+    const row = rows[i];
+    const text = row.textContent.toLowerCase();
+    const type = row.getAttribute('data-type')?.toLowerCase() || '';
+    const verified = row.getAttribute('data-verified') || '';
+    
+    let showRow = true;
+    
+    if (searchValue && !text.includes(searchValue)) {
+      showRow = false;
+    }
+    
+    if (typeFilter && !type.includes(typeFilter)) {
+      showRow = false;
+    }
+    
+    if (statusFilter === 'verified' && verified !== 'true') {
+      showRow = false;
+    } else if (statusFilter === 'pending' && verified === 'true') {
+      showRow = false;
+    }
+    
+    row.style.display = showRow ? '' : 'none';
+  }
+}
+
+
+function resetFilters() {
+  document.getElementById('searchInput').value = '';
+  document.getElementById('typeFilter').value = '';
+  document.getElementById('statusFilter').value = '';
+  filterTable();
+}
+</script>
+
+
+{% endblock %}

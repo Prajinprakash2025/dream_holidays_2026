@@ -1,0 +1,1168 @@
+  {% extends "base.html" %} {% load static %} {% block content %}
+
+  <style>
+
+    /* Make modal body scrollable with fixed height */
+    #queryModal .modal-body {
+      max-height: 65vh;
+      overflow-y: auto;
+    }
+    
+    /* Compact card styling */
+    #queryModal .card {
+      margin-bottom: 1rem !important;
+    }
+    
+    #queryModal .card-body {
+      padding: 0.75rem !important;
+    }
+    
+    #queryModal .card-header {
+      padding: 0.5rem 0.75rem !important;
+    }
+    
+    /* Smaller form fields */
+    #queryModal .form-control,
+    #queryModal .form-select {
+      padding: 0.375rem 0.75rem;
+      font-size: 0.9rem;
+    }
+    
+    #queryModal .form-label {
+      margin-bottom: 0.25rem;
+      font-size: 0.85rem;
+    }
+    
+    /* Ensure footer is always visible */
+    #queryModal .modal-footer {
+      position: sticky;
+      bottom: 0;
+      background: white;
+      z-index: 10;
+      border-top: 2px solid #dee2e6;
+    }
+    /* Fix dropdown option colors */
+    .form-select option {
+      background-color: white;
+      color: #333;
+      padding: 8px;
+    }
+
+    .form-select option:hover {
+      background-color: #f0f0f0;
+    }
+
+    /* Fix for selected option */
+    .form-select option:checked {
+      background-color: #0d6efd;
+      color: white;
+    }
+
+    /* Better dropdown styling */
+    .form-select {
+      cursor: pointer;
+    }
+
+    .form-select:focus {
+      border-color: #86b7fe;
+      box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+
+    .record-card {
+      background: #fff;
+      border-radius: 6px;
+      padding: 12px 14px;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+      margin-bottom: 12px;
+      transition: 0.3s;
+      font-size: 11px;
+      line-height: 1.2;
+      position: relative;
+    }
+
+    .record-card:hover {
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    }
+
+    .record-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      font-weight: 600;
+      color: #2b4c7e;
+      margin-bottom: 6px;
+    }
+
+    .record-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .record-actions a {
+      font-size: 12px;
+      color: #444;
+      cursor: pointer;
+    }
+
+    .record-actions a:hover {
+      color: #0d6efd;
+    }
+
+    .record-actions i {
+      font-size: 13px;
+    }
+
+    .record-info-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 14px;
+      margin-bottom: 2px;
+    }
+
+    .record-info {
+      flex: 1 1 170px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .record-label {
+      font-weight: 500;
+      color: #444;
+      margin-right: 3px;
+    }
+
+    .record-remark {
+      margin-top: 4px;
+    }
+
+    .record-meta small {
+      color: #999;
+      font-size: 10px;
+    }
+
+      .creator-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      background: #e3f2fd;
+      color: #1976d2;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 500;
+    }
+    
+    .my-query {
+      border-left: 3px solid #28a745;
+    }
+  </style>
+
+
+
+
+  <div class="container mt-9">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 class="mb-0">
+        {{ title }} 
+        <span class="badge bg-primary">{{ total_queries }}</span>
+      </h5>
+      
+      <!-- ✅ PERMISSION-BASED ADD BUTTON -->
+      {% if user_type == 'superuser' %}
+        <button
+          class="btn btn-primary btn-sm"
+          data-bs-toggle="modal"
+          data-bs-target="#queryModal"
+          onclick="openAddModal()"
+        >
+          <i class="fas fa-plus me-1"></i>Add Query
+        </button>
+      
+      {% elif current_user.role == 'admin' or current_user.role == 'manager' %}
+        <button
+          class="btn btn-primary btn-sm"
+          data-bs-toggle="modal"
+          data-bs-target="#queryModal"
+          onclick="openAddModal()"
+        >
+          <i class="fas fa-plus me-1"></i>Add Query
+        </button>
+      
+      {% elif current_user.permissions.can_create_queries %}
+        <button
+          class="btn btn-primary btn-sm"
+          data-bs-toggle="modal"
+          data-bs-target="#queryModal"
+          onclick="openAddModal()"
+        >
+          <i class="fas fa-plus me-1"></i>Add Query
+        </button>
+      
+      {% else %}
+        <span class="badge bg-secondary">
+          <i class="fas fa-lock me-1"></i>View Only
+        </span>
+      {% endif %}
+    </div>
+
+    {% for query in queries %}
+    <div class="record-card {% if query.created_by == current_user %}my-query{% endif %}">
+      <div class="record-header">
+        <span>
+          {{ query.client_name }} ({{ query.get_gender_display }})
+          <!-- ✅ SHOW WHO CREATED IT -->
+          {% if query.created_by %}
+            <span class="creator-badge">
+              <i class="fas fa-user-circle"></i> 
+              {% if query.created_by == current_user %}
+                You
+              {% else %}
+                {{ query.created_by.get_full_name }}
+              {% endif %}
+            </span>
+          {% endif %}
+        </span>
+        
+  <!-- In your query_list.html - Update the actions section -->
+
+  <div class="record-actions">
+    <!-- VIEW -->
+    <a
+      data-bs-toggle="modal"
+      data-bs-target="#viewQueryModal"
+      onclick="viewQuery({{ query.id }})"
+      title="View Details"
+    >
+      <i class="fas fa-eye"></i>
+    </a>
+    
+    <!-- EDIT BUTTON - Permission Based -->
+    {% if user_type == 'superuser' %}
+      <a
+        data-bs-toggle="modal"
+        data-bs-target="#queryModal"
+        onclick="openEditModal({{ query.id }})"
+        title="Edit"
+      >
+        <i class="fas fa-pen"></i>
+      </a>
+    {% elif current_user.role == 'admin' %}
+      <a
+        data-bs-toggle="modal"
+        data-bs-target="#queryModal"
+        onclick="openEditModal({{ query.id }})"
+        title="Edit"
+      >
+        <i class="fas fa-pen"></i>
+      </a>
+    {% elif current_user.permissions.can_edit_all_queries %}
+      <a
+        data-bs-toggle="modal"
+        data-bs-target="#queryModal"
+        onclick="openEditModal({{ query.id }})"
+        title="Edit"
+      >
+        <i class="fas fa-pen"></i>
+      </a>
+    {% elif current_user.permissions.can_edit_queries %}
+      {% if query.created_by == current_user or query.assign == current_user %}
+        <a
+          data-bs-toggle="modal"
+          data-bs-target="#queryModal"
+          onclick="openEditModal({{ query.id }})"
+          title="Edit"
+        >
+          <i class="fas fa-pen"></i>
+        </a>
+      {% endif %}
+    {% elif current_user.role == 'manager' %}
+      {% if query.created_by == current_user or query.assign == current_user %}
+        <a
+          data-bs-toggle="modal"
+          data-bs-target="#queryModal"
+          onclick="openEditModal({{ query.id }})"
+          title="Edit"
+        >
+          <i class="fas fa-pen"></i>
+        </a>
+      {% endif %}
+    {% endif %}
+    
+    <!-- DELETE BUTTON - Only Admin/Superuser -->
+    {% if user_type == 'superuser' or current_user.role == 'admin' %}
+      <a
+        onclick="deleteQuery({{ query.id }}, '{{ query.client_name|escapejs }}')"
+        title="Delete"
+      >
+        <i class="fas fa-trash text-danger"></i>
+      </a>
+    {% endif %}
+    
+    <!-- ✅ PROPOSALS LINK - PERMISSION BASED -->
+    {% if user_type == 'superuser' %}
+      <!-- Superuser always has access -->
+      <a href="{% url 'query_proposals' query.id %}" title="View Proposals">
+        <i class="fas fa-file-alt text-primary"></i>
+      </a>
+    
+    {% elif current_user.role == 'admin' or current_user.role == 'manager' %}
+      <!-- Admin and Manager always have access -->
+      <a href="{% url 'query_proposals' query.id %}" title="View Proposals">
+        <i class="fas fa-file-alt text-primary"></i>
+      </a>
+    
+    {% elif current_user.permissions.can_view_proposals %}
+      <!-- User with granted permission -->
+      <a href="{% url 'query_proposals' query.id %}" title="View Proposals">
+        <i class="fas fa-file-alt text-primary"></i>
+      </a>
+    {% endif %}
+  </div>
+
+      </div>
+
+      <div class="record-info-row">
+        <div class="record-info">
+          <span class="record-label">Phone:</span>{{ query.phone_number }}
+        </div>
+        <div class="record-info">
+          <span class="record-label">Email:</span>{{ query.email|default:"N/A" }}
+        </div>
+        <div class="record-info">
+          <span class="record-label">Type:</span>{{ query.get_type_display }}
+        </div>
+        <div class="record-info">
+          <span class="record-label">Sector:</span>{{ query.get_sector_display }}
+        </div>
+        <div class="record-info">
+          <span class="record-label">Priority:</span>{{ query.get_priority_display }}
+        </div>
+        <div class="record-info">
+          <span class="record-label">Assign:</span>
+          {% if query.assign %}
+            {{ query.assign.get_full_name }}
+          {% else %}
+            <span class="text-muted">Unassigned</span>
+          {% endif %}
+        </div>
+        <div class="record-info">
+          <span class="record-label">Source:</span>
+          {% if query.lead_source %}
+            {{ query.lead_source.source_name }}
+          {% else %}
+            <span class="text-muted">N/A</span>
+          {% endif %}
+        </div>
+        <div class="record-info">
+          <span class="record-label">From:</span>{{ query.from_date|date:"M d, Y" }}
+        </div>
+        <div class="record-info">
+          <span class="record-label">To:</span>{{ query.to_date|date:"M d, Y" }}
+        </div>
+        <div class="record-info">
+          <span class="record-label">Days:</span>{{ query.total_days }}
+        </div>
+        <div class="record-info">
+          <span class="record-label">Adult:</span>{{ query.adult }}
+        </div>
+        <div class="record-info">
+          <span class="record-label">Child:</span>{{ query.childrens }}
+        </div>
+        <div class="record-info">
+          <span class="record-label">Infant:</span>{{ query.infant }}
+        </div>
+        <div class="record-info">
+          <span class="record-label">Service:</span>{{ query.get_services_display }}
+        </div>
+      </div>
+
+      {% if query.remark %}
+      <div class="record-remark">
+        <span class="record-label">Remark:</span>{{ query.remark }}
+      </div>
+      {% endif %}
+
+      <div class="record-meta mt-1">
+        <small>Created: {{ query.created_at|date:"M d, Y H:i" }}</small>
+      </div>
+    </div>
+    {% empty %}
+    <div class="alert alert-info text-center">
+      <i class="fas fa-info-circle me-2"></i>No queries found.
+      {% if user_type == 'team_member' and current_user.role not in 'admin,manager' %}
+        <br><small class="text-muted">You can only see queries you created.</small>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Add/Edit Query Modal -->
+  <div class="modal fade" id="queryModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+      <div class="modal-content">
+        <form method="POST" id="queryForm" action="">
+          {% csrf_token %}
+          <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title" id="queryModalLabel">
+              <i class="fas fa-user-plus me-2"></i>Add Query
+            </h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+
+          <div class="modal-body">
+            <input type="hidden" id="queryId" name="query_id" />
+
+            <!-- Client Information Section -->
+            <div class="card mb-3">
+              <div class="card-header bg-light">
+                <h6 class="mb-0">
+                  <i class="fas fa-user me-2"></i>Client Information
+                </h6>
+              </div>
+              <div class="card-body">
+                <div class="row g-3">
+                  <div class="col-md-3">
+                    <label class="form-label">
+                      <i class="fas fa-signature me-1 text-primary"></i>Client Name*
+                    </label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      name="client_name"
+                      id="client_name"
+                      required
+                      placeholder="Enter full name"
+                    />
+                  </div>
+                  <div class="col-md-3">
+                    <label class="form-label">
+                      <i class="fas fa-venus-mars me-1 text-primary"></i>Gender*
+                    </label>
+                    <select class="form-select" name="gender" id="gender" required>
+                      <option value="">Select</option>
+                      {% for value, label in query_form.fields.gender.choices %}
+                      <option value="{{ value }}">{{ label }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                  <div class="col-md-3">
+                    <label class="form-label">
+                      <i class="fas fa-phone me-1 text-primary"></i>Phone Number*
+                    </label>
+                    <input
+                      type="tel"
+                      class="form-control"
+                      name="phone_number"
+                      id="phone_number"
+                      required
+                      placeholder="+91 XXXXXXXXXX"
+                    />
+                  </div>
+                  <div class="col-md-3">
+                    <label class="form-label">
+                      <i class="fas fa-envelope me-1 text-primary"></i>Email*
+                    </label>
+                    <input
+                      type="email"
+                      class="form-control"
+                      name="email"
+                      id="email"
+                      required
+                      placeholder="email@example.com"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Query Details Section -->
+            <div class="card mb-3">
+              <div class="card-header bg-light">
+                <h6 class="mb-0">
+                  <i class="fas fa-info-circle me-2"></i>Query Details
+                </h6>
+              </div>
+              <div class="card-body">
+                <div class="row g-3">
+                  <div class="col-md-3">
+                    <label class="form-label">
+                      <i class="fas fa-users me-1 text-info"></i>Type*
+                    </label>
+                    <select class="form-select" name="type" id="type" required>
+                      <option value="">Select</option>
+                      {% for value, label in query_form.fields.type.choices %}
+                      <option value="{{ value }}">{{ label }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                  <div class="col-md-3">
+                    <label class="form-label">
+                      <i class="fas fa-map-marked-alt me-1 text-info"></i>Sector*
+                    </label>
+                    <select class="form-select" name="sector" id="sector" required>
+                      <option value="">Select</option>
+                      {% for value, label in query_form.fields.sector.choices %}
+                      <option value="{{ value }}">{{ label }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                  <div class="col-md-3">
+                    <label class="form-label">
+                      <i class="fas fa-flag me-1 text-info"></i>Priority*
+                    </label>
+                    <select class="form-select" name="priority" id="priority" required>
+                      <option value="">Select</option>
+                      {% for value, label in query_form.fields.priority.choices %}
+                      <option value="{{ value }}">{{ label }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                  <div class="col-md-3">
+                    <label class="form-label">
+                      <i class="fas fa-concierge-bell me-1 text-info"></i>Services*
+                    </label>
+                    <select class="form-select" name="services" id="services" required>
+                      <option value="">Select Services</option>
+                      {% for value, label in query_form.fields.services.choices %}
+                      <option value="{{ value }}">{{ label }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Assignment Section - CONDITIONAL -->
+            <div class="card mb-3">
+              <div class="card-header bg-light">
+                <h6 class="mb-0">
+                  <i class="fas fa-tasks me-2"></i>Assignment & Source
+                </h6>
+              </div>
+              <div class="card-body">
+                <div class="row g-3">
+                  <!-- ✅ SHOW ASSIGN FIELD ONLY FOR ADMIN/MANAGER/SUPERUSER -->
+                  {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.role == 'manager' %}
+                  <div class="col-md-6">
+                    <label class="form-label">
+                      <i class="fas fa-user-tie me-1 text-success"></i>Assign To
+                    </label>
+                    <select class="form-select" name="assign" id="assign">
+                      <option value="">-- Select Team Member --</option>
+                      {% for member in team_members %}
+                      <option value="{{ member.id }}">{{ member.get_full_name }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                  <div class="col-md-6">
+                  {% else %}
+                  <!-- ✅ REGULAR USERS: Full width lead source -->
+                  <div class="col-md-12">
+                  {% endif %}
+                    <label class="form-label">
+                      <i class="fas fa-bullseye me-1 text-success"></i>Lead Source
+                    </label>
+                    <select class="form-select" name="lead_source" id="lead_source">
+                      <option value="">-- Select Lead Source --</option>
+                      {% for source in lead_sources %}
+                      <option value="{{ source.id }}">{{ source.source_name }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Travel Details Section - REORDERED: Total Days FIRST -->
+            <div class="card mb-3">
+              <div class="card-header bg-light">
+                <h6 class="mb-0">
+                  <i class="fas fa-plane-departure me-2"></i>Travel Details
+                </h6>
+              </div>
+              <div class="card-body">
+                <div class="row g-3">
+                  
+                  <!-- 1. Total Days - FIRST FIELD -->
+                  <div class="col-md-4">
+                    <label class="form-label">
+                      <i class="fas fa-clock me-1 text-warning"></i>Total Days*
+                    </label>
+                    <input
+                      type="number"
+                      class="form-control"
+                      name="total_days"
+                      id="total_days"
+                      min="1"
+                      required
+                      placeholder="Enter number of days"
+                    />
+                    <small class="text-muted">Enter trip duration</small>
+                  </div>
+                  
+                  <!-- 2. From Date - SECOND FIELD -->
+                  <div class="col-md-4">
+                    <label class="form-label">
+                      <i class="fas fa-calendar-check me-1 text-warning"></i>From Date*
+                    </label>
+                    <input
+                      type="date"
+                      class="form-control"
+                      name="from_date"
+                      id="from_date"
+                      required
+                    />
+                    <small class="text-muted">Start date of travel</small>
+                  </div>
+                  
+                  <!-- 3. To Date - THIRD FIELD (Auto-calculated) -->
+                  <div class="col-md-4">
+                    <label class="form-label">
+                      <i class="fas fa-calendar-times me-1 text-warning"></i>To Date*
+                    </label>
+                    <input
+                      type="date"
+                      class="form-control"
+                      name="to_date"
+                      id="to_date"
+                      required
+                    />
+                    <small class="text-muted">Auto-calculated (can edit)</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Passenger Information Section -->
+            <div class="card mb-3">
+              <div class="card-header bg-light">
+                <h6 class="mb-0">
+                  <i class="fas fa-users me-2"></i>Passenger Information
+                </h6>
+              </div>
+              <div class="card-body">
+                <div class="row g-3">
+                  <div class="col-md-4">
+                    <label class="form-label">
+                      <i class="fas fa-male me-1 text-danger"></i>Adults
+                    </label>
+                    <input
+                      type="number"
+                      class="form-control"
+                      name="adult"
+                      id="adult"
+                      min="0"
+                      value="0"
+                      placeholder="Number of adults"
+                    />
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label">
+                      <i class="fas fa-child me-1 text-danger"></i>Childrens
+                    </label>
+                    <input
+                      type="number"
+                      class="form-control"
+                      name="childrens"
+                      id="childrens"
+                      min="0"
+                      value="0"
+                      placeholder="Number of childrens"
+                    />
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label">
+                      <i class="fas fa-baby me-1 text-danger"></i>Infants
+                    </label>
+                    <input
+                      type="number"
+                      class="form-control"
+                      name="infant"
+                      id="infant"
+                      min="0"
+                      value="0"
+                      placeholder="Number of infants"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Remarks Section -->
+            <div class="card mb-3">
+              <div class="card-header bg-light">
+                <h6 class="mb-0">
+                  <i class="fas fa-comment me-2"></i>Additional Notes
+                </h6>
+              </div>
+              <div class="card-body">
+                <textarea
+                  class="form-control"
+                  name="remark"
+                  id="remark"
+                  rows="3"
+                  placeholder="Enter any special requirements or notes..."
+                ></textarea>
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+              <i class="fas fa-times me-1"></i>Cancel
+            </button>
+            <button type="submit" class="btn btn-primary">
+              <i class="fas fa-save me-1"></i>Save Query
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+    
+
+
+  <!-- View Query Modal -->
+  <div class="modal fade" id="viewQueryModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header bg-info text-white">
+          <h5 class="modal-title">
+            <i class="fas fa-eye me-2"></i>Query Details
+          </h5>
+          <button
+            type="button"
+            class="btn-close btn-close-white"
+            data-bs-dismiss="modal"
+          ></button>
+        </div>
+        <div class="modal-body" id="viewQueryContent">
+          <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2 text-muted">Loading query details...</p>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            <i class="fas fa-times me-1"></i>Close
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // =====================================================
+    // QUERY MANAGEMENT SYSTEM - JavaScript
+    // =====================================================
+    
+    const userType = "{{ user_type }}";
+    const userRole = "{{ current_user.role }}";
+    const currentUserId = {{ current_user.id|default:"null" }};
+
+    document.addEventListener("DOMContentLoaded", function () {
+      initializeDateCalculation();
+      initializeFormValidation();
+    });
+
+    // =====================================================
+    // DATE CALCULATION - NEW LOGIC
+    // =====================================================
+    function initializeDateCalculation() {
+      const fromDateInput = document.getElementById("from_date");
+      const toDateInput = document.getElementById("to_date");
+      const totalDaysInput = document.getElementById("total_days");
+
+      let isToDateManuallyChanged = false;
+
+      function calculateToDate() {
+        const fromDate = fromDateInput.value;
+        const totalDays = parseInt(totalDaysInput.value);
+
+        if (fromDate && totalDays && totalDays > 0) {
+          const from = new Date(fromDate);
+          const to = new Date(from);
+          to.setDate(from.getDate() + totalDays - 1);
+
+          const toDateString = to.toISOString().split('T')[0];
+          toDateInput.value = toDateString;
+          isToDateManuallyChanged = false;
+        }
+      }
+
+      function calculateTotalDays() {
+        const fromDate = fromDateInput.value;
+        const toDate = toDateInput.value;
+
+        if (fromDate && toDate) {
+          const from = new Date(fromDate);
+          const to = new Date(toDate);
+          const diffTime = to - from;
+          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+
+          if (diffDays > 0) {
+            totalDaysInput.value = diffDays;
+          } else {
+            totalDaysInput.value = "";
+            toDateInput.value = "";
+            showToast("To Date must be after From Date", "warning");
+          }
+        }
+      }
+
+      if (fromDateInput && toDateInput && totalDaysInput) {
+        totalDaysInput.addEventListener("input", function() {
+          if (fromDateInput.value) {
+            calculateToDate();
+          }
+        });
+
+        fromDateInput.addEventListener("change", function() {
+          if (totalDaysInput.value) {
+            calculateToDate();
+          }
+        });
+
+        toDateInput.addEventListener("change", function() {
+          if (fromDateInput.value && toDateInput.value) {
+            calculateTotalDays();
+            isToDateManuallyChanged = true;
+          }
+        });
+
+        totalDaysInput.addEventListener("focus", function() {
+          if (isToDateManuallyChanged) {
+            isToDateManuallyChanged = false;
+          }
+        });
+      }
+    }
+
+    // =====================================================
+    // FORM VALIDATION
+    // =====================================================
+    function initializeFormValidation() {
+      const form = document.getElementById("queryForm");
+
+      if (form) {
+        form.addEventListener("submit", function (e) {
+          const phoneInput = document.getElementById("phone_number");
+          if (phoneInput) {
+            const phone = phoneInput.value.trim();
+            if (phone && !/^\d{10}$/.test(phone.replace(/\D/g, ""))) {
+              e.preventDefault();
+              showToast("Please enter a valid 10-digit phone number", "danger");
+              phoneInput.focus();
+              return false;
+            }
+          }
+        });
+      }
+    }
+
+    // =====================================================
+    // MODAL OPERATIONS
+    // =====================================================
+
+    function openAddModal() {
+      const modal = document.getElementById("queryModal");
+      const modalTitle = document.getElementById("queryModalLabel");
+      const form = document.getElementById("queryForm");
+
+      modalTitle.innerHTML = '<i class="fas fa-user-plus me-2"></i>Add Query';
+      form.action = "{% url 'add_query' %}";
+      form.reset();
+      
+      const queryIdField = document.getElementById("queryId");
+      if (queryIdField) {
+        queryIdField.value = "";
+      }
+
+      clearFormValidation(form);
+    }
+
+    function openEditModal(queryId) {
+      const modalTitle = document.getElementById("queryModalLabel");
+      const form = document.getElementById("queryForm");
+
+      modalTitle.innerHTML = '<i class="fas fa-edit me-2"></i>Edit Query';
+      form.action = `/query/${queryId}/edit/`;
+
+      showModalLoading(true);
+
+      fetch(`/api/query/${queryId}/`)
+        .then((response) => {
+          if (!response.ok) {
+            if (response.status === 403) {
+              throw new Error("You don't have permission to edit this query");
+            }
+            throw new Error("Failed to fetch query");
+          }
+          return response.json();
+        })
+        .then((data) => {
+          if (data.success) {
+            populateForm(data.query);
+          } else {
+            throw new Error(data.message || "Failed to load query");
+          }
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          showToast(error.message || "Failed to load query data. Please try again.", "danger");
+          const modalInstance = bootstrap.Modal.getInstance(document.getElementById("queryModal"));
+          if (modalInstance) {
+            modalInstance.hide();
+          }
+        })
+        .finally(() => {
+          showModalLoading(false);
+        });
+    }
+
+    function populateForm(query) {
+      const fields = [
+        "client_name",
+        "gender",
+        "phone_number",
+        "email",
+        "type",
+        "sector",
+        "priority",
+        "services",
+        "from_date",
+        "to_date",
+        "total_days",
+        "adult",
+        "childrens",  // ✅ FIXED: Was "children", now "childrens"
+        "infant",
+        "remark",
+      ];
+
+      const queryIdField = document.getElementById("queryId");
+      if (queryIdField) {
+        queryIdField.value = query.id;
+      }
+
+      fields.forEach((field) => {
+        const element = document.getElementById(field);
+        if (element) {
+          element.value =
+            query[field] ||
+            (field.includes("adult") ||
+            field.includes("childrens") ||
+            field.includes("infant")
+              ? 0
+              : "");
+        }
+      });
+
+      // ✅ FIXED: Set Lead Source dropdown value
+      const leadSourceField = document.getElementById("lead_source");
+      if (leadSourceField && query.lead_source_id) {
+        leadSourceField.value = query.lead_source_id;
+      }
+
+      // ✅ FIXED: Set Assign dropdown value
+      const assignField = document.getElementById("assign");
+      if (assignField && query.assign_id) {
+        assignField.value = query.assign_id;
+      }
+    }
+
+    // =====================================================
+    // VIEW QUERY
+    // =====================================================
+
+    function viewQuery(queryId) {
+      const content = document.getElementById("viewQueryContent");
+
+      content.innerHTML = `
+      <div class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-2 text-muted">Loading query details...</p>
+      </div>
+    `;
+
+      fetch(`/api/query/${queryId}/`)
+        .then((response) => {
+          if (!response.ok) {
+            if (response.status === 403) {
+              throw new Error("You don't have permission to view this query");
+            }
+            throw new Error("Failed to fetch query");
+          }
+          return response.json();
+        })
+        .then((data) => {
+          if (data.success) {
+            renderQueryDetails(data.query);
+          } else {
+            throw new Error(data.message || "Failed to load query");
+          }
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          content.innerHTML = `
+          <div class="alert alert-danger">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            ${error.message || 'Failed to load query details. Please try again.'}
+          </div>
+        `;
+        });
+    }
+
+    function renderQueryDetails(query) {
+      const content = document.getElementById("viewQueryContent");
+      content.innerHTML = `
+      <div class="card mb-3">
+        <div class="card-header bg-light">
+          <h6 class="mb-0"><i class="fas fa-user me-2"></i>Client Information</h6>
+        </div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-6"><strong>Name:</strong> ${query.client_name}</div>
+            <div class="col-md-6"><strong>Gender:</strong> ${query.gender_display || "N/A"}</div>
+            <div class="col-md-6"><strong>Phone:</strong> ${query.phone_number}</div>
+            <div class="col-md-6"><strong>Email:</strong> ${query.email || "N/A"}</div>
+          </div>
+        </div>
+      </div>
+      <div class="card mb-3">
+        <div class="card-header bg-light">
+          <h6 class="mb-0"><i class="fas fa-info-circle me-2"></i>Query Details</h6>
+        </div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-6"><strong>Type:</strong> ${query.type_display || "N/A"}</div>
+            <div class="col-md-6"><strong>Sector:</strong> ${query.sector_display || "N/A"}</div>
+            <div class="col-md-6"><strong>Priority:</strong> ${query.priority_display || "N/A"}</div>
+            <div class="col-md-6"><strong>Services:</strong> ${query.services_display || "N/A"}</div>
+            <div class="col-md-6"><strong>Assigned To:</strong> ${query.assign_name || "Not assigned"}</div>
+            <div class="col-md-6"><strong>Lead Source:</strong> ${query.lead_source_name || "N/A"}</div>
+          </div>
+        </div>
+      </div>
+      <div class="text-center mt-3">
+        <small class="text-muted">Created: ${query.created_at}</small>
+      </div>
+    `;
+    }
+
+    // =====================================================
+    // DELETE QUERY
+    // =====================================================
+
+    function deleteQuery(queryId, clientName) {
+      if (userType !== 'superuser' && userRole !== 'admin') {
+        showToast('Only admins can delete queries', 'danger');
+        return;
+      }
+
+      if (!confirm(`⚠️ Are you sure you want to delete query for "${clientName}"?\n\nThis action cannot be undone!`)) {
+        return;
+      }
+
+      const deleteBtn = event.target.closest("a");
+      const originalHTML = deleteBtn.innerHTML;
+      deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+      deleteBtn.style.pointerEvents = "none";
+
+      fetch(`/api/query/${queryId}/delete/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": getCookie("csrftoken"),
+          "X-Requested-With": "XMLHttpRequest",
+        },
+      })
+        .then((response) => {
+          if (!response.ok) {
+            if (response.status === 403) {
+              throw new Error("You don't have permission to delete this query");
+            }
+            throw new Error("Delete failed");
+          }
+          return response.json();
+        })
+        .then((data) => {
+          if (data.success) {
+            showToast(data.message, "success");
+            const card = deleteBtn.closest(".record-card");
+            card.style.transition = "all 0.3s";
+            card.style.opacity = "0";
+            card.style.transform = "translateX(-20px)";
+            setTimeout(() => location.reload(), 300);
+          } else {
+            throw new Error(data.message || "Delete failed");
+          }
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          showToast(error.message || "Failed to delete query. Please try again.", "danger");
+          deleteBtn.innerHTML = originalHTML;
+          deleteBtn.style.pointerEvents = "auto";
+        });
+    }
+
+    // =====================================================
+    // UTILITY FUNCTIONS
+    // =====================================================
+
+    function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== "") {
+        const cookies = document.cookie.split(";");
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim();
+          if (cookie.substring(0, name.length + 1) === name + "=") {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+
+    function showModalLoading(isLoading) {
+      const submitBtn = document.querySelector("#queryModal .btn-primary");
+      const formInputs = document.querySelectorAll("#queryForm input, #queryForm select, #queryForm textarea");
+
+      if (submitBtn) {
+        if (isLoading) {
+          submitBtn.disabled = true;
+          submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Loading...';
+          formInputs.forEach((input) => (input.disabled = true));
+        } else {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i class="fas fa-save me-1"></i>Save Query';
+          formInputs.forEach((input) => (input.disabled = false));
+        }
+      }
+    }
+
+    function clearFormValidation(form) {
+      const validatedElements = form.querySelectorAll(".is-valid, .is-invalid");
+      validatedElements.forEach((el) => {
+        el.classList.remove("is-valid", "is-invalid");
+      });
+    }
+
+    function showToast(message, type = "info") {
+      const icon = type === "success" ? "✅ " : type === "danger" ? "❌ " : "⚠️ ";
+      alert(icon + message);
+    }
+  </script>
+
+
+
+
+  {% endblock %}

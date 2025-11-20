@@ -1,0 +1,1799 @@
+{% extends "proposals_base.html" %}
+{% load static %}
+
+{% block title %}Proposals - Query #{{ query.id }}{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* SUB-NAVBAR STYLING */
+  .query-compact-nav {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 8px;
+    padding: 12px 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    margin-bottom: 20px;
+  }
+  
+  .nav-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+  
+  .info-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    color: #fff;
+    font-size: 0.95rem;
+  }
+  
+  .query-id {
+    font-size: 1.1rem;
+    padding: 5px 12px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 5px;
+    font-weight: 600;
+  }
+  
+  .info-bar .badge {
+    font-size: 0.9rem;
+    padding: 6px 12px;
+  }
+  
+  .separator {
+    color: rgba(255,255,255,0.5);
+    font-weight: 300;
+  }
+  
+  .date-info {
+    display: flex;
+    align-items: center;
+  }
+  
+  .action-bar {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  
+  .action-bar .btn {
+    border-color: rgba(255,255,255,0.5);
+    color: #fff;
+    transition: all 0.3s;
+    font-weight: 500;
+  }
+  
+  .action-bar .btn:hover {
+    background: rgba(255,255,255,0.2);
+    border-color: #fff;
+    transform: translateY(-2px);
+  }
+  
+  /* STATUS BUTTONS */
+  .status-form .btn {
+    transition: all 0.3s;
+  }
+  
+  .status-form .btn:hover {
+    transform: translateY(-2px);
+  }
+
+  /* PROPOSALS SECTION HEADER */
+  .proposals-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .proposals-header h5 {
+    margin: 0;
+    font-weight: 600;
+    color: #2b4c7e;
+  }
+
+  /* HORIZONTAL SCROLL CONTAINER */
+  .proposals-scroll-wrapper {
+    position: relative;
+    margin-bottom: 20px;
+  }
+
+  .proposals-scroll-container {
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 10px 5px 20px 5px;
+    scroll-behavior: smooth;
+  }
+
+  /* Custom Scrollbar */
+  .proposals-scroll-container::-webkit-scrollbar {
+    height: 10px;
+  }
+
+  .proposals-scroll-container::-webkit-scrollbar-track {
+    background: #e9ecef;
+    border-radius: 10px;
+  }
+
+  .proposals-scroll-container::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 10px;
+  }
+
+  .proposals-scroll-container::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+  }
+
+  /* Firefox Scrollbar */
+  .proposals-scroll-container {
+    scrollbar-width: thin;
+    scrollbar-color: #667eea #e9ecef;
+  }
+
+  /* CARD STYLING */
+  .proposal-card {
+    flex: 0 0 380px;
+    min-width: 380px;
+    max-width: 380px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .proposal-card:hover {
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    transform: translateY(-5px);
+  }
+  
+  .card-header-dark {
+    background: linear-gradient(135deg, #37474f 0%, #2b3940 100%);
+    color: #fff;
+    padding: 15px;
+  }
+  
+  .card-header-dark h6 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+  
+  .card-header-dark .destination {
+    font-size: 0.85rem;
+    opacity: 0.9;
+    margin-top: 5px;
+  }
+  
+  .card-body-compact {
+    padding: 20px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .info-section {
+    flex: 1;
+  }
+  
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 0.9rem;
+  }
+  
+  .info-row:last-child {
+    border-bottom: none;
+  }
+  
+  .info-label {
+    color: #6c757d;
+    font-weight: 500;
+  }
+  
+  .info-value {
+    color: #212529;
+    font-weight: 600;
+    text-align: right;
+  }
+  
+  .status-badge {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin: 10px 0;
+  }
+  
+  .pricing-section {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 12px;
+    margin: 15px 0;
+  }
+  
+  .price-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    font-size: 0.95rem;
+  }
+  
+  .price-label {
+    color: #495057;
+    font-weight: 500;
+  }
+  
+  .price-amount {
+    color: #000;
+    font-weight: 700;
+    font-size: 1.05rem;
+  }
+  
+  .action-buttons {
+    margin-top: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .action-buttons .btn {
+    transition: all 0.3s;
+  }
+  
+  .action-buttons .btn:hover {
+    transform: translateX(5px);
+  }
+
+  /* EMPTY STATE CARD */
+  .empty-state-card {
+    flex: 0 0 380px;
+    min-width: 380px;
+    max-width: 380px;
+    background: #f8f9fa;
+    border: 2px dashed #dee2e6;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 60px 40px;
+    text-align: center;
+    min-height: 450px;
+  }
+  
+  .empty-state-icon {
+    font-size: 4rem;
+    color: #dee2e6;
+    margin-bottom: 20px;
+  }
+  
+  .empty-state-card h5 {
+    color: #6c757d;
+    margin-bottom: 10px;
+  }
+  
+  .empty-state-card p {
+    color: #adb5bd;
+    margin: 0;
+  }
+
+  /* CREATE CARD */
+  .create-card {
+    flex: 0 0 380px;
+    min-width: 380px;
+    max-width: 380px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 30px;
+    text-align: center;
+    min-height: 450px;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  }
+  
+  .create-card-icon {
+    font-size: 3.5rem;
+    color: rgba(255,255,255,0.9);
+    margin-bottom: 25px;
+  }
+  
+  .create-card h5 {
+    color: #fff;
+    margin-bottom: 30px;
+    font-weight: 600;
+  }
+  
+  .create-card .btn {
+    width: 100%;
+    max-width: 280px;
+    padding: 15px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    border: 2px solid rgba(255,255,255,0.5);
+    color: #fff;
+    background: rgba(255,255,255,0.1);
+    transition: all 0.3s;
+    margin-bottom: 15px;
+  }
+  
+  .create-card .btn:hover {
+    background: rgba(255,255,255,0.25);
+    border-color: #fff;
+    transform: translateY(-3px);
+  }
+  
+  .create-card .btn i {
+    font-size: 1.2rem;
+  }
+
+  /* ✅ MODAL FIX - Ensure modal appears properly */
+  .modal {
+    z-index: 1055 !important;
+  }
+  
+  .modal-backdrop {
+    z-index: 1050 !important;
+  }
+  
+  .modal-dialog {
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+  }
+  
+  /* ✅ MODAL STYLING */
+  .modal-content {
+    border-radius: 15px;
+    overflow: hidden;
+    border: none;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+  }
+  
+  .modal-header {
+    border-bottom: none;
+  }
+  
+  .modal-footer {
+    border-top: 1px solid #e9ecef;
+    padding: 20px 25px;
+  }
+  
+  /* ✅ FORM STYLING */
+  .text-pink {
+    color: #e91e63 !important;
+  }
+  
+  .form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+  }
+  
+  .form-control-lg {
+    font-size: 1.1rem;
+  }
+  
+  .card-header {
+    font-size: 1rem;
+    padding: 12px 20px;
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    .query-compact-nav {
+      padding: 10px 15px;
+    }
+    
+    .info-bar {
+      width: 100%;
+      font-size: 0.85rem;
+    }
+    
+    .action-bar {
+      width: 100%;
+    }
+    
+    .proposals-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    
+    .proposal-card,
+    .empty-state-card,
+    .create-card {
+      flex: 0 0 320px;
+      min-width: 320px;
+      max-width: 320px;
+    }
+    
+    .modal-dialog {
+      margin: 0.5rem;
+      max-width: 100%;
+    }
+  }
+</style>
+
+{% endblock %}
+
+{% block proposals_content %}
+
+<!-- Compact Sub-Navbar Header -->
+<div class="query-compact-nav">
+  <div class="nav-content">
+    <div class="info-bar">
+      <span class="query-id">
+        <i class="fas fa-hashtag me-1"></i>
+        <strong>{{ query.id }}</strong>
+      </span>
+      
+      {% if query.total_days %}
+      <span class="badge bg-light text-dark">
+        <i class="fas fa-calendar-day me-1"></i>
+        {{ query.total_days }} Days
+      </span>
+      {% endif %}
+      
+      <span class="separator">|</span>
+      
+      <span class="date-info">
+        <i class="fas fa-calendar-alt me-1"></i>
+        {{ query.from_date|date:"d M Y"|default:"Not set" }} 
+        <i class="fas fa-arrow-right mx-2"></i>
+        {{ query.to_date|date:"d M Y"|default:"Not set" }}
+      </span>
+      
+      <span class="separator d-none d-lg-inline">|</span>
+      
+      <span class="d-none d-lg-inline">
+        <i class="fas fa-clock me-1"></i>
+        <small>{{ query.created_at|date:"d M Y" }}</small>
+      </span>
+    </div>
+    
+    <div class="action-bar">
+      <button class="btn btn-sm btn-outline-light">
+        <i class="fab fa-whatsapp"></i>
+        <span class="d-none d-md-inline ms-1">WhatsApp</span>
+      </button>
+      <button class="btn btn-sm btn-outline-light">
+        <i class="fas fa-envelope"></i>
+        <span class="d-none d-md-inline ms-1">Email</span>
+      </button>
+      <a href="{% url 'itinerary_history' query.id %}" class="btn btn-outline-secondary">
+        <i class="fas fa-history"></i> View History ({{ archived_count }})
+      </a>
+      <a href="{% url 'list_itineraries' %}" class="btn btn-sm btn-outline-light">
+        <i class="fas fa-tasks"></i>
+        <span class="d-none d-lg-inline ms-1">Itineraries</span>
+      </a>
+      <button class="btn btn-sm btn-outline-light">
+        <i class="fas fa-edit"></i>
+        <span class="d-none d-md-inline ms-1">Edit</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<!-- Status Buttons -->
+<form method="post" action="{% url 'update_query_status' query.id %}" class="status-form mb-4">
+  {% csrf_token %}
+  <div class="d-flex flex-wrap gap-2">
+    {% for value, label in query.STATUS_CHOICES %}
+    <button name="status" value="{{ value }}" type="submit"
+      class="btn btn-sm {% if query.status == value %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+      {{ label }}
+    </button>
+    {% endfor %}
+  </div>
+</form>
+
+
+<!-- Proposals Section Header -->
+<div class="proposals-header">
+  <h5><i class="fas fa-file-alt me-2"></i>Proposals</h5>
+  <div class="d-flex gap-2">
+    <button class="btn btn-dark btn-sm">
+      <i class="fas fa-list me-1"></i>All Proposals
+    </button>
+    <button class="btn btn-outline-secondary btn-sm">
+      <i class="fas fa-archive me-1"></i>Archived
+    </button>
+  </div>
+</div>
+
+
+<!-- Horizontal Scroll Proposals -->
+<div class="proposals-scroll-wrapper">
+  <div class="proposals-scroll-container">
+    
+    {% if itineraries %}
+      {% for itinerary in itineraries %}
+      <div class="proposal-card">
+
+        <!-- Card Header -->
+        <div class="card-header-dark">
+          <div class="d-flex justify-content-between align-items-start">
+            <div style="flex: 1;">
+              <h6>
+                {% if itinerary.total_days %}
+                  {{ itinerary.total_days }} Days Trip
+                {% else %}
+                  Multi-Day Trip
+                {% endif %}
+              </h6>
+              <div class="destination">
+                {{ itinerary.destination_list|default:"No destinations" }}
+              </div>
+            </div>
+            <span class="badge bg-light text-dark">ID: {{ itinerary.id }}</span>
+          </div>
+        </div>
+
+        <!-- Card Body -->
+        <div class="card-body-compact">
+          <div class="info-section">
+
+            <!-- Passengers from Itinerary -->
+            <div class="info-row">
+              <span class="info-label"><i class="fas fa-users me-1"></i>Passengers</span>
+              <span class="info-value">
+                {% if itinerary.adults or itinerary.childrens or itinerary.infants %}
+                  {{ itinerary.adults|default:0 }}A
+                  {% if itinerary.childrens %} | {{ itinerary.childrens }}C{% endif %}
+                  {% if itinerary.infants %} | {{ itinerary.infants }}I{% endif %}
+                {% else %}
+                  Not specified
+                {% endif %}
+              </span>
+            </div>
+
+            <!-- Travel Dates from Itinerary -->
+            <div class="info-row">
+              <span class="info-label"><i class="fas fa-calendar me-1"></i>Travel Dates</span>
+              <span class="info-value">
+                {% if itinerary.travel_from and itinerary.travel_to %}
+                  {{ itinerary.travel_from|date:"d M Y" }} → {{ itinerary.travel_to|date:"d M Y" }}
+                {% else %}
+                  Not set
+                {% endif %}
+              </span>
+            </div>
+
+            <!-- Created By -->
+            <div class="info-row">
+              <span class="info-label"><i class="fas fa-user me-1"></i>Created By</span>
+              <span class="info-value">
+                {% if itinerary.created_by %}
+                  {{ itinerary.created_by }}
+                {% else %}
+                  Unknown
+                {% endif %}
+              </span>
+            </div>
+
+            <!-- Created Date -->
+            <div class="info-row">
+              <span class="info-label"><i class="fas fa-clock me-1"></i>Created</span>
+              <span class="info-value">{{ itinerary.created_at|date:"d M Y" }}</span>
+            </div>
+
+            <!-- Status Badge -->
+            <div class="text-center my-2">
+              <span class="status-badge
+                {% if itinerary.status == 'confirmed' %}bg-success text-white
+                {% elif itinerary.status == 'draft' %}bg-secondary text-white
+                {% elif itinerary.status == 'cancelled' %}bg-danger text-white
+                {% else %}bg-warning text-dark{% endif %}">
+                {{ itinerary.get_status_display|default:itinerary.status|title }}
+              </span>
+            </div>
+
+            <!-- Selected Option -->
+            {% if itinerary.selected_option %}
+            <div class="text-center mb-2">
+              <small class="text-muted">
+                <i class="fas fa-check-circle text-success me-1"></i>
+                <strong>{{ itinerary.selected_option }}</strong>
+              </small>
+            </div>
+            {% endif %}
+
+            <!-- Pricing Options -->
+            {% if itinerary.pricing_options.count %}
+            <div class="pricing-section">
+              {% for option in itinerary.pricing_options.all %}
+              <div class="price-item">
+                <span class="price-label">{{ option.option_name }}</span>
+                <span class="price-amount">₹{{ option.final_amount|floatformat:0 }}</span>
+              </div>
+              {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center text-muted small my-3">
+              <i class="fas fa-info-circle me-1"></i>No pricing available
+            </div>
+            {% endif %}
+          </div>
+
+          <!-- ✅ UPDATED ACTION BUTTONS WITH CANCEL -->
+          <div class="action-buttons">
+            {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.role == 'manager' %}
+              
+              <!-- Edit Day Plans -->
+              <a href="{% url 'itinerary_day_plan' itinerary.id %}" class="btn btn-outline-primary btn-sm">
+                <i class="fas fa-edit me-1"></i>Edit Day Plans
+              </a>
+
+              <!-- Edit Itinerary Details -->
+              <button 
+                type="button"
+                class="btn btn-outline-primary btn-sm" 
+                data-bs-toggle="modal" 
+                data-bs-target="#editItineraryModal" 
+                data-itinerary-id="{{ itinerary.id }}"
+                data-travel-from="{{ itinerary.travel_from|date:'Y-m-d' }}"
+                data-travel-to="{{ itinerary.travel_to|date:'Y-m-d' }}"
+                data-adults="{{ itinerary.adults }}"
+                data-childrens="{{ itinerary.childrens }}"
+                data-infants="{{ itinerary.infants }}">
+                <i class="fas fa-edit me-1"></i> Edit Details
+              </button>
+
+              <!-- ✅ STATUS-BASED ACTIONS -->
+              {% if itinerary.status == 'draft' %}
+                <!-- Confirm Button (Only for Draft) -->
+                <button 
+                  class="btn btn-outline-success btn-sm" 
+                  data-bs-toggle="modal" 
+                  data-bs-target="#confirmItineraryModal" 
+                  data-itinerary-id="{{ itinerary.id }}">
+                  <i class="fas fa-check me-1"></i>Confirm
+                </button>
+              
+              {% elif itinerary.status == 'confirmed' %}
+                <!-- Change Option -->
+                <button 
+                  class="btn btn-outline-info btn-sm" 
+                  data-bs-toggle="modal" 
+                  data-bs-target="#confirmItineraryModal" 
+                  data-itinerary-id="{{ itinerary.id }}" 
+                  data-is-reselection="true">
+                  <i class="fas fa-exchange-alt me-1"></i>Change Option
+                </button>
+                
+                <!-- Set to Draft -->
+                <button 
+                  class="btn btn-outline-warning btn-sm" 
+                  onclick="setDraftItinerary({{ itinerary.id }})">
+                  <i class="fas fa-undo me-1"></i>Set to Draft
+                </button>
+                
+                <!-- ✅ CANCEL BUTTON (NEW) -->
+                <button 
+                  class="btn btn-outline-danger btn-sm" 
+                  onclick="cancelItinerary({{ itinerary.id }})">
+                  <i class="fas fa-ban me-1"></i>Cancel
+                </button>
+              
+              {% elif itinerary.status == 'cancelled' %}
+                <!-- Cancelled Badge -->
+                <div class="alert alert-danger py-1 px-2 mb-2 small">
+                  <i class="fas fa-ban me-1"></i>
+                  <strong>Cancelled</strong>
+                </div>
+                
+                <!-- Reactivate Button -->
+                <button 
+                  class="btn btn-outline-success btn-sm" 
+                  onclick="setDraftItinerary({{ itinerary.id }})">
+                  <i class="fas fa-redo me-1"></i>Reactivate
+                </button>
+              {% endif %}
+
+              <!-- View Quotation (Always Available) -->
+              <a 
+                href="{% url 'view_quotation' itinerary.id %}" 
+                class="btn btn-primary btn-sm" 
+                target="_blank">
+                <i class="fas fa-file-invoice me-1"></i>View Quotation
+              </a>
+              
+              <!-- Delete Button -->
+              <button 
+                class="btn btn-outline-danger btn-sm" 
+                onclick="deleteItinerary({{ itinerary.id }}, '{{ itinerary.name|escapejs }}')">
+                <i class="fas fa-trash me-1"></i>Delete
+              </button>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <!-- EMPTY STATE CARD -->
+      <div class="empty-state-card">
+        <div class="empty-state-icon">
+          <i class="fas fa-file-alt"></i>
+        </div>
+        <h5>No Proposals Yet</h5>
+        <p>Create your first itinerary to get started</p>
+      </div>
+    {% endif %}
+
+    <!-- CREATE CARD -->
+    <div class="create-card">
+      <div class="create-card-icon">
+        <i class="fas fa-plus-circle"></i>
+      </div>
+      <h5>Create New Itinerary</h5>
+      
+      {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.role == 'manager' %}
+      <button class="btn" data-bs-toggle="modal" data-bs-target="#createItineraryModal">
+        <i class="fas fa-plus me-2"></i>Create Itinerary
+      </button>
+
+      <a href="{% url 'insert_package_to_itinerary' query.id %}" class="btn">
+        <i class="fas fa-download me-2"></i>Insert Itinerary
+      </a>
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+
+
+
+
+<!-- Confirmation Modal -->
+<div
+  class="modal fade"
+  id="confirmItineraryModal"
+  tabindex="-1"
+  aria-labelledby="confirmModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header border-0">
+        <h5 class="modal-title" id="confirmModalLabel">Alert</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body text-center py-4">
+        <h5 class="mb-3 fw-bold">You are about to confirm an itinerary</h5>
+        <p class="text-muted small mb-4">This action cannot be undone.</p>
+
+        <div class="bg-light p-3 rounded mb-4">
+          <label class="form-label fw-bold mb-2">Select Hotel Option</label>
+          <select class="form-select" id="hotelOptionSelect">
+            <option value="">Select</option>
+          </select>
+        </div>
+
+        <button
+          type="button"
+          class="btn btn-success px-4"
+          onclick="confirmItinerary()"
+        >
+          Confirm Itinerary
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Create Itinerary Modal -->
+<div class="modal fade" id="createItineraryModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <form id="createItineraryForm" method="post" action="{% url 'create_itinerary' query.id %}">
+        {% csrf_token %}
+
+        <!-- Modal Header -->
+        <div class="modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+          <h5 class="modal-title">
+            <i class="fas fa-route me-2"></i>Create Your Itinerary
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+
+        <!-- Modal Body -->
+        <div class="modal-body" style="background: #f8f9fa; padding: 25px;">
+
+          <!-- Error Alert -->
+          <div id="formErrors" class="alert alert-danger d-none">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <span id="errorMessage"></span>
+          </div>
+
+          <!-- Itinerary Name (FIRST FIELD) -->
+          <div class="mb-4">
+            <label for="name" class="form-label fw-bold">
+              <i class="fas fa-tag me-1 text-primary"></i>Itinerary Name <span class="text-danger">*</span>
+            </label>
+            <input
+              type="text"
+              class="form-control form-control-lg"
+              id="name"
+              name="name"
+              placeholder="e.g., Kerala Backwater Tour"
+              required>
+            <div class="invalid-feedback">Please enter an itinerary name</div>
+          </div>
+
+          <!-- Travel Schedule (Days and Dates) -->
+          <div class="card mb-4" style="border: 2px solid #667eea;">
+            <div class="card-header" style="background: #667eea; color: white;">
+              <strong><i class="fas fa-calendar-alt me-2"></i>Travel Schedule</strong>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-4 mb-3">
+                  <label for="total_days" class="form-label fw-bold">
+                    <i class="fas fa-calendar-day me-1 text-primary"></i>Total Days <span class="text-danger">*</span>
+                  </label>
+                  <input
+                    type="number"
+                    class="form-control form-control-lg"
+                    id="total_days"
+                    name="total_days"
+                    value="{{ query.total_days }}"
+                    min="1"
+                    placeholder="4"
+                    required>
+                  <small class="text-muted">Enter number of days</small>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                  <label for="from_date" class="form-label fw-bold">
+                    <i class="fas fa-calendar-check me-1 text-success"></i>From Date <span class="text-danger">*</span>
+                  </label>
+                  <input
+                    type="date"
+                    class="form-control form-control-lg"
+                    id="from_date"
+                    name="from_date"
+                    value="{{ query.from_date|date:'Y-m-d' }}"
+                    required>
+                  <small class="text-muted">Start date</small>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                  <label for="to_date" class="form-label fw-bold">
+                    <i class="fas fa-calendar-times me-1 text-danger"></i>To Date <span class="text-danger">*</span>
+                  </label>
+                  <input
+                    type="date"
+                    class="form-control form-control-lg"
+                    id="to_date"
+                    name="to_date"
+                    value="{{ query.to_date|date:'Y-m-d' }}"
+                    required>
+                  <small class="text-muted">End date (auto-filled)</small>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Passenger Details -->
+          <div class="row mb-4">
+            <div class="col-md-4 mb-3">
+              <label for="adult" class="form-label fw-bold">
+                <i class="fas fa-user me-1 text-info"></i>Adults
+              </label>
+              <input
+                type="number"
+                class="form-control"
+                id="adult"
+                name="adult"
+                value="{{ query.adult|default:0 }}"
+                min="0"
+                placeholder="2">
+            </div>
+            <div class="col-md-4 mb-3">
+              <label for="children" class="form-label fw-bold">
+                <i class="fas fa-child me-1 text-warning"></i>Children
+              </label>
+              <input
+                type="number"
+                class="form-control"
+                id="children"
+                name="children"
+                value="{{ query.childrens|default:0 }}"
+                min="0"
+                placeholder="0">
+            </div>
+            <div class="col-md-4 mb-3">
+              <label for="infant" class="form-label fw-bold">
+                <i class="fas fa-baby me-1" style="color: #e91e63;"></i>Infants
+              </label>
+              <input
+                type="number"
+                class="form-control"
+                id="infant"
+                name="infant"
+                value="{{ query.infant|default:0 }}"
+                min="0"
+                placeholder="0">
+            </div>
+          </div>
+
+          <!-- Destinations -->
+          <div class="mb-4">
+            <label for="destinations" class="form-label fw-bold">
+              <i class="fas fa-map-marked-alt me-1 text-success"></i>Destinations
+            </label>
+            <input
+              type="text"
+              class="form-control"
+              id="destinations"
+              name="destinations"
+              placeholder="e.g., Kochi, Munnar, Thekkady, Alleppey">
+            <small class="text-muted">Enter destinations separated by commas</small>
+          </div>
+
+          <!-- Notes -->
+          <div class="mb-3">
+            <label for="notes" class="form-label fw-bold">
+              <i class="fas fa-sticky-note me-1 text-warning"></i>Notes (Optional)
+            </label>
+            <textarea
+              class="form-control"
+              id="notes"
+              name="notes"
+              rows="3"
+              placeholder="Add any special requirements, preferences, or notes..."></textarea>
+          </div>
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            <i class="fas fa-times me-1"></i>Cancel
+          </button>
+          <button type="submit" class="btn btn-primary btn-lg" id="submitItineraryBtn">
+            <i class="fas fa-check-circle me-1"></i>Create Itinerary
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+<!-- ✅ BOOKING REPORT MODAL - SHOWS COPIED & SKIPPED ITEMS -->
+<div class="modal fade" id="bookingReportModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header bg-info text-white">
+        <h5 class="modal-title">
+          <i class="fas fa-sync-alt me-2"></i>Booking Migration Report
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body">
+        
+        <!-- COPIED ITEMS SECTION -->
+        <div id="copiedItemsSection" style="display: none;">
+          <div class="alert alert-success">
+            <h6 class="alert-heading">
+              <i class="fas fa-check-circle me-2"></i>Successfully Migrated
+            </h6>
+            <div id="copiedItemsList"></div>
+          </div>
+        </div>
+
+        <!-- SKIPPED ITEMS SECTION -->
+        <div id="skippedItemsSection" style="display: none;">
+          <div class="alert alert-warning">
+            <h6 class="alert-heading">
+              <i class="fas fa-exclamation-triangle me-2"></i>Items Requiring Manual Setup
+            </h6>
+            <p class="mb-3">The following bookings could not be automatically migrated:</p>
+            
+            <!-- HOTELS -->
+            <div id="skippedHotels" style="display: none;" class="mb-3">
+              <h6 class="text-danger">
+                <i class="fas fa-hotel me-1"></i>Hotels
+              </h6>
+              <div id="hotelsList"></div>
+            </div>
+
+            <!-- ACTIVITIES -->
+            <div id="skippedActivities" style="display: none;" class="mb-3">
+              <h6 class="text-danger">
+                <i class="fas fa-map me-1"></i>Activities
+              </h6>
+              <div id="activitiesList"></div>
+            </div>
+
+            <!-- VEHICLES -->
+            <div id="skippedVehicles" style="display: none;" class="mb-3">
+              <h6 class="text-danger">
+                <i class="fas fa-car me-1"></i>Vehicles
+              </h6>
+              <div id="vehiclesList"></div>
+            </div>
+
+            <!-- HOUSEBOATS -->
+            <div id="skippedHouseboats" style="display: none;" class="mb-3">
+              <h6 class="text-danger">
+                <i class="fas fa-ship me-1"></i>Houseboats
+              </h6>
+              <div id="houseboatsList"></div>
+            </div>
+          </div>
+
+          <!-- ACTION BUTTONS -->
+          <div class="alert alert-info mt-3">
+            <i class="fas fa-info-circle me-2"></i>
+            <strong>Next Steps:</strong>
+            <ul class="mb-0 mt-2">
+              <li>Review the items listed above</li>
+              <li>Check availability for new dates</li>
+              <li>Add them manually to the day plans if needed</li>
+              <li>Or proceed with the new itinerary as-is</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- NO ISSUES SECTION -->
+        <div id="noIssuesSection" style="display: none;">
+          <div class="alert alert-success">
+            <h6 class="alert-heading">
+              <i class="fas fa-thumbs-up me-2"></i>All Bookings Migrated Successfully!
+            </h6>
+            <p>All hotels, activities, vehicles, and other bookings have been successfully migrated to the new itinerary.</p>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="location.reload()">
+          <i class="fas fa-check me-1"></i>Continue to New Itinerary
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ✅ EDIT ITINERARY MODAL - WITH AUTO-LOAD & VALIDATION -->
+<div class="modal fade" id="editItineraryModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <form id="editItineraryForm" method="post" action="{% url 'edit_itinerary' %}">
+        {% csrf_token %}
+        <input type="hidden" id="editItineraryId" name="itinerary_id" value="">
+
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title">
+            <i class="fas fa-edit me-2"></i>Edit Itinerary Dates & Passengers
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+
+        <!-- ✅ ERROR MESSAGES CONTAINER -->
+        <div id="editFormErrors" class="alert alert-danger d-none">
+          <div id="editErrorMessage"></div>
+        </div>
+
+        <div class="modal-body">
+          <!-- Travel From Date -->
+          <div class="mb-3">
+            <label for="travel_from" class="form-label fw-semibold">
+              <i class="fas fa-calendar-check me-2 text-success"></i>Travel From *
+            </label>
+            <input type="date" class="form-control" id="travel_from" name="travel_from" required>
+            <small class="text-muted">Start date of your journey</small>
+            <div class="invalid-feedback"></div>
+          </div>
+
+          <!-- Travel To Date -->
+          <div class="mb-3">
+            <label for="travel_to" class="form-label fw-semibold">
+              <i class="fas fa-calendar-times me-2 text-danger"></i>Travel To *
+            </label>
+            <input type="date" class="form-control" id="travel_to" name="travel_to" required>
+            <small class="text-muted">End date of your journey</small>
+            <div class="invalid-feedback"></div>
+          </div>
+
+          <!-- Adults -->
+          <div class="mb-3">
+            <label for="adults" class="form-label fw-semibold">
+              <i class="fas fa-user me-2 text-primary"></i>Adults *
+            </label>
+            <input type="number" class="form-control" id="adults" name="adults" min="1" required>
+            <small class="text-muted">Minimum 1 adult required</small>
+            <div class="invalid-feedback"></div>
+          </div>
+
+          <!-- Children -->
+          <div class="mb-3">
+            <label for="childrens" class="form-label fw-semibold">
+              <i class="fas fa-child me-2 text-info"></i>Children
+            </label>
+            <input type="number" class="form-control" id="childrens" name="childrens" min="0" value="0">
+            <small class="text-muted">Number of children (optional)</small>
+            <div class="invalid-feedback"></div>
+          </div>
+
+          <!-- Infants -->
+          <div class="mb-3">
+            <label for="infants" class="form-label fw-semibold">
+              <i class="fas fa-baby me-2 text-warning"></i>Infants
+            </label>
+            <input type="number" class="form-control" id="infants" name="infants" min="0" value="0">
+            <small class="text-muted">Number of infants (optional)</small>
+            <div class="invalid-feedback"></div>
+          </div>
+
+          <!-- Info Alert -->
+          <div class="alert alert-info mt-4">
+            <i class="fas fa-info-circle me-2"></i>
+            <strong>Note:</strong> Updating itinerary details will create a new version and archive the old one. Day plans will need to be rebuilt.
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            <i class="fas fa-times me-1"></i>Close
+          </button>
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-save me-1"></i>Save Changes
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+
+  // ===================================
+  // EDIT ITINERARY MODAL - AUTO-LOAD DATA ✅
+  // ===================================
+  var editItineraryModal = document.getElementById('editItineraryModal');
+  if (editItineraryModal) {
+    editItineraryModal.addEventListener('show.bs.modal', function (event) {
+      var button = event.relatedTarget;
+      var itineraryId = button.getAttribute('data-itinerary-id');
+      
+      console.log('📝 Opening edit modal for itinerary:', itineraryId);
+      
+      // Set the itinerary id in hidden input
+      document.getElementById('editItineraryId').value = itineraryId;
+      
+      // ✅ FETCH ITINERARY DATA VIA AJAX
+      fetch(`/api/itinerary/${itineraryId}/details/`, {
+        method: 'GET',
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-CSRFToken': getCookie('csrftoken')
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          console.log('✅ Itinerary data loaded:', data);
+          
+          // ✅ AUTO-FILL FORM FIELDS WITH ITINERARY DATA
+          document.getElementById('travel_from').value = data.itinerary.travel_from || '';
+          document.getElementById('travel_to').value = data.itinerary.travel_to || '';
+          document.getElementById('adults').value = data.itinerary.adults || 1;
+          document.getElementById('childrens').value = data.itinerary.childrens || 0;
+          document.getElementById('infants').value = data.itinerary.infants || 0;
+          
+          console.log('✅ Form fields populated');
+        } else {
+          console.error('❌ Error loading itinerary:', data.message);
+          alert('⚠️ Failed to load itinerary data: ' + data.message);
+        }
+      })
+      .catch(error => {
+        console.error('❌ Fetch error:', error);
+        alert('⚠️ Error loading itinerary: ' + error.message);
+      });
+    });
+  }
+
+  // ===================================
+  // GLOBAL VARIABLES
+  // ===================================
+  let currentItineraryId = null;
+  let isReselection = false;
+
+  // ===================================
+  // UTILITY FUNCTIONS
+  // ===================================
+
+  // Get CSRF Token
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== "") {
+      const cookies = document.cookie.split(";");
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === name + "=") {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
+  // Handle fetch responses
+  function handleResponse(response) {
+    const contentType = response.headers.get('content-type');
+    
+    if (contentType && contentType.includes('application/json')) {
+      return response.json().then(data => {
+        if (!response.ok) {
+          throw new Error(data.message || `HTTP ${response.status}: ${response.statusText}`);
+        }
+        return data;
+      });
+    } else {
+      return response.text().then(text => {
+        console.error('Non-JSON response:', text);
+        throw new Error(`Server returned non-JSON response. Status: ${response.status}`);
+      });
+    }
+  }
+
+  // ===================================
+  // INITIALIZATION
+  // ===================================
+  document.addEventListener("DOMContentLoaded", function () {
+    
+    // ===================================
+    // CONFIRM ITINERARY MODAL
+    // ===================================
+    const confirmModal = document.getElementById("confirmItineraryModal");
+    if (confirmModal) {
+      confirmModal.addEventListener("show.bs.modal", function (event) {
+        const button = event.relatedTarget;
+        currentItineraryId = button.dataset.itineraryId;
+        isReselection = button.dataset.isReselection === 'true';
+        
+        const modalTitle = document.getElementById("confirmModalLabel");
+        const modalDescription = confirmModal.querySelector('.modal-body h5');
+        const confirmButton = confirmModal.querySelector('.btn-success');
+        
+        if (isReselection) {
+          modalTitle.textContent = "Change Selected Option";
+          modalDescription.textContent = "Select a new option for this itinerary";
+          confirmButton.textContent = "Update Selection";
+        } else {
+          modalTitle.textContent = "Confirm Itinerary";
+          modalDescription.textContent = "You are about to confirm an itinerary";
+          confirmButton.textContent = "Confirm Itinerary";
+        }
+        
+        loadHotelOptions(currentItineraryId);
+      });
+    }
+
+    // ===================================
+    // DATE & DAYS AUTO-CALCULATION
+    // ===================================
+    const fromDateInput = document.getElementById('from_date');
+    const toDateInput = document.getElementById('to_date');
+    const totalDaysInput = document.getElementById('total_days');
+    
+    if (fromDateInput && toDateInput && totalDaysInput) {
+      
+      // ✅ When Days or From Date changes → Calculate To Date
+      function calculateToDate() {
+        const fromDate = fromDateInput.value;
+        const days = parseInt(totalDaysInput.value);
+        
+        if (fromDate && days && days > 0) {
+          const from = new Date(fromDate);
+          const to = new Date(from);
+          to.setDate(to.getDate() + days - 1);
+          
+          const toDateStr = to.toISOString().split('T')[0];
+          toDateInput.value = toDateStr;
+        }
+      }
+      
+      // ✅ When To Date changes → Calculate Days
+      function calculateDaysFromDates() {
+        const fromDate = fromDateInput.value;
+        const toDate = toDateInput.value;
+        
+        if (fromDate && toDate) {
+          const from = new Date(fromDate);
+          const to = new Date(toDate);
+          
+          if (to >= from) {
+            const diffTime = Math.abs(to - from);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+            totalDaysInput.value = diffDays;
+          } else {
+            alert('⚠️ To Date must be after From Date');
+            toDateInput.value = '';
+          }
+        }
+      }
+      
+      // ✅ Event Listeners
+      totalDaysInput.addEventListener('input', calculateToDate);
+      fromDateInput.addEventListener('change', calculateToDate);
+      toDateInput.addEventListener('change', calculateDaysFromDates);
+      
+      // ✅ Initial calculation on page load
+      if (fromDateInput.value && totalDaysInput.value) {
+        calculateToDate();
+      } else if (fromDateInput.value && toDateInput.value) {
+        calculateDaysFromDates();
+      }
+    }
+
+    // ===================================
+    // EDIT ITINERARY FORM SUBMISSION ✅
+    // ===================================
+    const editForm = document.getElementById('editItineraryForm');
+    
+    if (editForm) {
+      editForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const submitBtn = editForm.querySelector('button[type="submit"]');
+        const formErrors = document.getElementById('editFormErrors');
+        const itineraryId = document.getElementById('editItineraryId').value;
+        
+        // Clear previous errors
+        if (formErrors) {
+          formErrors.classList.add('d-none');
+        }
+        document.querySelectorAll('.is-invalid').forEach(el => {
+          el.classList.remove('is-invalid');
+        });
+        
+        const originalText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Saving...';
+        
+        // Get form values
+        const travelFrom = document.getElementById('travel_from').value;
+        const travelTo = document.getElementById('travel_to').value;
+        const adults = document.getElementById('adults').value;
+        const childrens = document.getElementById('childrens').value;
+        const infants = document.getElementById('infants').value;
+        
+        // Validation
+        if (!travelFrom || !travelTo) {
+          alert('⚠️ Please fill in all required fields');
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalText;
+          return;
+        }
+        
+        const fromDate = new Date(travelFrom);
+        const toDate = new Date(travelTo);
+        
+        if (toDate < fromDate) {
+          alert('⚠️ Travel end date must be after travel start date');
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalText;
+          return;
+        }
+        
+        console.log('📝 Submitting edit:', {
+          itinerary_id: itineraryId,
+          travel_from: travelFrom,
+          travel_to: travelTo,
+          adults: adults,
+          childrens: childrens,
+          infants: infants
+        });
+        
+        const formData = new FormData(editForm);
+        
+        fetch(editForm.action, {
+          method: 'POST',
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': getCookie('csrftoken')
+          },
+          body: formData
+        })
+        .then(handleResponse)
+        .then(data => {
+          if (data.success) {
+            console.log('✅ Itinerary updated successfully');
+            
+            const modal = bootstrap.Modal.getInstance(editItineraryModal);
+            modal.hide();
+            
+            alert('✅ ' + data.message);
+            
+            // ✅ SHOW BOOKING REPORT MODAL IF BOOKINGS WERE COPIED
+            if (data.booking_report) {
+              setTimeout(() => {
+                showBookingReport(data.booking_report);
+              }, 1000);
+            }
+            
+            // Reload page after 2 seconds
+            setTimeout(() => {
+              location.reload();
+            }, 2000);
+            
+          } else {
+            // Handle field errors
+            if (data.errors) {
+              let errorHtml = '';
+              for (const [field, error] of Object.entries(data.errors)) {
+                errorHtml += `${error}<br>`;
+                const fieldEl = document.getElementById(field);
+                if (fieldEl) {
+                  fieldEl.classList.add('is-invalid');
+                  const feedback = fieldEl.parentElement.querySelector('.invalid-feedback');
+                  if (feedback) {
+                    feedback.textContent = error;
+                  }
+                }
+              }
+              if (formErrors) {
+                formErrors.querySelector('#editErrorMessage').innerHTML = errorHtml;
+                formErrors.classList.remove('d-none');
+              }
+            } else {
+              throw new Error(data.message || "Update failed");
+            }
+            
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+          }
+        })
+        .catch(error => {
+          console.error('❌ Edit error:', error);
+          alert('❌ ' + error.message);
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalText;
+        });
+      });
+      
+      // ✅ Reset form when modal is closed
+      if (editItineraryModal) {
+        editItineraryModal.addEventListener('hidden.bs.modal', function() {
+          editForm.reset();
+          const formErrors = document.getElementById('editFormErrors');
+          if (formErrors) {
+            formErrors.classList.add('d-none');
+          }
+          document.querySelectorAll('.is-invalid').forEach(el => {
+            el.classList.remove('is-invalid');
+          });
+        });
+      }
+    }
+
+    // ===================================
+    // CREATE ITINERARY FORM SUBMISSION
+    // ===================================
+    const createForm = document.getElementById('createItineraryForm');
+    
+    if (createForm) {
+      createForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const submitBtn = document.getElementById('submitItineraryBtn');
+        const formErrors = document.getElementById('formErrors');
+        const errorMessage = document.getElementById('errorMessage');
+        
+        // Clear previous errors
+        formErrors.classList.add('d-none');
+        document.querySelectorAll('.is-invalid').forEach(el => {
+          el.classList.remove('is-invalid');
+        });
+        
+        const originalText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Creating...';
+        
+        const formData = new FormData(createForm);
+        
+        fetch(createForm.action, {
+          method: 'POST',
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': getCookie('csrftoken')
+          },
+          body: formData
+        })
+        .then(handleResponse)
+        .then(data => {
+          if (data.success) {
+            const modal = bootstrap.Modal.getInstance(document.getElementById('createItineraryModal'));
+            modal.hide();
+            
+            alert('✅ ' + data.message);
+            
+            if (data.redirect_url) {
+              window.location.href = data.redirect_url;
+            } else {
+              location.reload();
+            }
+            
+          } else {
+            // Handle field errors
+            if (data.errors) {
+              let errorHtml = '';
+              for (const [field, error] of Object.entries(data.errors)) {
+                errorHtml += `${error} `;
+                const fieldEl = document.getElementById(field);
+                if (fieldEl) {
+                  fieldEl.classList.add('is-invalid');
+                  const feedback = fieldEl.nextElementSibling;
+                  if (feedback && feedback.classList.contains('invalid-feedback')) {
+                    feedback.textContent = error;
+                  }
+                }
+              }
+              if (errorMessage) {
+                errorMessage.textContent = errorHtml;
+              }
+              formErrors.classList.remove('d-none');
+            } else {
+              throw new Error(data.message || "Form submission failed");
+            }
+            
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+          }
+        })
+        .catch(error => {
+          console.error('Create itinerary error:', error);
+          if (errorMessage) {
+            errorMessage.textContent = error.message;
+          }
+          formErrors.classList.remove('d-none');
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalText;
+        });
+      });
+      
+      // ✅ Reset form when modal is closed
+      const createModal = document.getElementById('createItineraryModal');
+      if (createModal) {
+        createModal.addEventListener('hidden.bs.modal', function() {
+          createForm.reset();
+          const formErrors = document.getElementById('formErrors');
+          if (formErrors) {
+            formErrors.classList.add('d-none');
+          }
+          document.querySelectorAll('.is-invalid').forEach(el => {
+            el.classList.remove('is-invalid');
+          });
+          const submitBtn = document.getElementById('submitItineraryBtn');
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-check-circle me-1"></i>Create Itinerary';
+          }
+        });
+      }
+    }
+  });
+
+  // ===================================
+  // LOAD HOTEL OPTIONS
+  // ===================================
+  function loadHotelOptions(itineraryId) {
+    const select = document.getElementById("hotelOptionSelect");
+    if (!select) return;
+    
+    select.innerHTML = '<option value="">Loading...</option>';
+
+    fetch(`/api/itinerary/${itineraryId}/options/`)
+      .then(handleResponse)
+      .then((data) => {
+        select.innerHTML = '<option value="">Select an option</option>';
+
+        if (data.success && data.options && data.options.length > 0) {
+          data.options.forEach((option) => {
+            const opt = document.createElement("option");
+            opt.value = option.id;
+            opt.textContent = `${option.name} - ₹${parseFloat(option.price).toLocaleString("en-IN")}`;
+            select.appendChild(opt);
+          });
+        } else {
+          select.innerHTML = '<option value="">No pricing options available</option>';
+        }
+      })
+      .catch((error) => {
+        console.error("Load options error:", error);
+        select.innerHTML = '<option value="">Error loading options</option>';
+        alert(`❌ Failed to load options: ${error.message}`);
+      });
+  }
+
+  // ===================================
+  // CONFIRM ITINERARY
+  // ===================================
+  function confirmItinerary() {
+    const selectedOption = document.getElementById("hotelOptionSelect").value;
+
+    if (!selectedOption) {
+      alert("⚠️ Please select a hotel option");
+      return;
+    }
+
+    const confirmBtn = event.target;
+    const originalText = confirmBtn.textContent;
+    confirmBtn.disabled = true;
+    confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>' + (isReselection ? "Updating..." : "Confirming...");
+
+    fetch(`/api/itinerary/${currentItineraryId}/confirm/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": getCookie("csrftoken"),
+        "X-Requested-With": "XMLHttpRequest"
+      },
+      body: JSON.stringify({
+        option_id: selectedOption,
+      }),
+    })
+      .then(handleResponse)
+      .then((data) => {
+        if (data.success) {
+          const modal = bootstrap.Modal.getInstance(
+            document.getElementById("confirmItineraryModal")
+          );
+          modal.hide();
+          
+          const message = isReselection 
+            ? "✅ Option changed successfully!" 
+            : "✅ Itinerary confirmed successfully!";
+          alert(message);
+          
+          location.reload();
+        } else {
+          throw new Error(data.message || "Confirmation failed");
+        }
+      })
+      .catch((error) => {
+        console.error("Confirm error:", error);
+        alert(`❌ ${error.message}`);
+        confirmBtn.disabled = false;
+        confirmBtn.innerHTML = originalText;
+      });
+  }
+
+  // ===================================
+  // CANCEL ITINERARY
+  // ===================================
+  function cancelItinerary(itineraryId) {
+    if (!confirm("⚠️ Are you sure you want to cancel this itinerary?\n\nThis action cannot be undone!")) {
+      return;
+    }
+
+    fetch(`/api/itinerary/${itineraryId}/cancel/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": getCookie("csrftoken"),
+        "X-Requested-With": "XMLHttpRequest"
+      },
+    })
+      .then(handleResponse)
+      .then((data) => {
+        if (data.success) {
+          alert("✅ Itinerary cancelled successfully!");
+          location.reload();
+        } else {
+          throw new Error(data.message || "Cancellation failed");
+        }
+      })
+      .catch((error) => {
+        console.error("Cancel error:", error);
+        alert(`❌ ${error.message}`);
+      });
+  }
+
+  // ===================================
+  // SET DRAFT ITINERARY
+  // ===================================
+  function setDraftItinerary(itineraryId) {
+    if (!confirm("⚠️ Set this itinerary back to draft?\n\nThis will clear the confirmation and selected option.")) {
+      return;
+    }
+
+    fetch(`/api/itinerary/${itineraryId}/draft/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": getCookie("csrftoken"),
+        "X-Requested-With": "XMLHttpRequest"
+      },
+    })
+      .then(handleResponse)
+      .then((data) => {
+        if (data.success) {
+          alert("✅ Itinerary set to draft!");
+          location.reload();
+        } else {
+          throw new Error(data.message || "Failed to set draft");
+        }
+      })
+      .catch((error) => {
+        console.error("Set draft error:", error);
+        alert(`❌ ${error.message}`);
+      });
+  }
+
+  // ===================================
+  // DELETE ITINERARY
+  // ===================================
+  function deleteItinerary(itineraryId, itineraryName) {
+    if (!confirm(`⚠️ Are you sure you want to delete "${itineraryName}"?\n\n⚠️ This action cannot be undone!\n⚠️ All day plans, bookings, and pricing will be permanently deleted.`)) {
+      return;
+    }
+    
+    const deleteBtn = event.target.closest('button');
+    const originalText = deleteBtn.innerHTML;
+    deleteBtn.disabled = true;
+    deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Deleting...';
+    
+    fetch(`/api/itinerary/${itineraryId}/delete/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCookie('csrftoken'),
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+    })
+    .then(handleResponse)
+    .then(data => {
+      if (data.success) {
+        alert('✅ ' + data.message);
+        location.reload();
+      } else {
+        throw new Error(data.message || "Delete failed");
+      }
+    })
+    .catch(error => {
+      console.error('Delete error:', error);
+      alert(`❌ ${error.message}`);
+      deleteBtn.disabled = false;
+      deleteBtn.innerHTML = originalText;
+    });
+  }
+
+</script>
+
+
+{% endblock %}

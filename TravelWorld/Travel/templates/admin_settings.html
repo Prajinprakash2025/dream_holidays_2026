@@ -1,0 +1,199 @@
+{% extends "admin_board.html" %}
+{% load static %}
+{% block content %}
+
+<!-- Font Awesome for Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<div style="margin-top: 70px; padding: 2rem;">
+  <h2 class="mb-4">
+    <i class="fas fa-database me-2"></i>Master Data Management
+  </h2>
+  
+  <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 1.5rem; text-align: center;">
+    
+    <!-- Suppliers -->
+    {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.permissions.can_manage_suppliers %}
+    <a href="{% url 'supplier_list' %}" class="text-decoration-none text-dark" target="_blank">
+      <div class="grid-card">
+        <i class="fas fa-truck fa-2x mb-2"></i>
+        <div>Suppliers</div>
+      </div>
+    </a>
+    {% endif %}
+
+    <!-- Destinations -->
+    {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.permissions.can_manage_destinations_master %}
+    <a href="{% url 'destination_list' %}" class="text-decoration-none text-dark" target="_blank">
+      <div class="grid-card">
+        <i class="fas fa-location-dot fa-2x mb-2"></i>
+        <div>Destinations</div>
+      </div>
+    </a>
+    {% endif %}
+
+    <!-- Room Types -->
+    {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.permissions.can_manage_room_types %}
+    <a href="{% url 'room_type_list' %}" class="text-decoration-none text-dark" target="_blank">
+      <div class="grid-card">
+        <i class="fas fa-bed fa-2x mb-2"></i>
+        <div>Room Types</div>
+      </div>
+    </a>
+    {% endif %}
+
+    <!-- Meal Plans -->
+    {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.permissions.can_manage_meal_plans %}
+    <a href="{% url 'meal_plan_list' %}" class="text-decoration-none text-dark" target="_blank">
+      <div class="grid-card">
+        <i class="fas fa-utensils fa-2x mb-2"></i>
+        <div>Meal Plans</div>
+      </div>
+    </a>
+    {% endif %}
+
+    <!-- Hotels -->
+    {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.permissions.can_manage_hotels %}
+    <a href="{% url 'hotel_list' %}" class="text-decoration-none text-dark" target="_blank">
+      <div class="grid-card">
+        <i class="fas fa-hotel fa-2x mb-2"></i>
+        <div>Hotels</div>
+      </div>
+    </a>
+    {% endif %}
+
+    <!-- Houseboats -->
+    {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.permissions.can_manage_houseboats %}
+    <a href="{% url 'houseboat_list' %}" class="text-decoration-none text-dark" target="_blank">
+      <div class="grid-card">
+        <i class="fas fa-ship fa-2x mb-2"></i>
+        <div>House Boat</div>
+      </div>
+    </a>
+    {% endif %}
+
+    <!-- Activities -->
+    {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.permissions.can_manage_activities %}
+    <a href="{% url 'activity_list' %}" class="text-decoration-none text-dark" target="_blank">
+      <div class="grid-card">
+        <i class="fas fa-running fa-2x mb-2"></i>
+        <div>Activities</div>
+      </div>
+    </a>
+    {% endif %}
+
+    <!-- Special Inclusions -->
+    {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.permissions.can_manage_special_inclusions %}
+    <a href="{% url 'special_inclusion_list' %}" class="text-decoration-none text-dark" target="_blank">
+      <div class="grid-card">
+        <i class="fas fa-star fa-2x mb-2"></i>
+        <div>Special Inclusions</div>
+      </div>
+    </a>
+    {% endif %}
+
+    <!-- Vehicles -->
+    {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.permissions.can_manage_vehicles %}
+    <a href="{% url 'vehicle_list' %}" class="text-decoration-none text-dark" target="_blank">
+      <div class="grid-card">
+        <i class="fas fa-car fa-2x mb-2"></i>
+        <div>Vehicles</div>
+      </div>
+    </a>
+    {% endif %}
+
+    <!-- Package Templates/Itineraries -->
+    {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.permissions.can_manage_package_templates %}
+    <a href="{% url 'list_package_templates' %}" class="text-decoration-none text-dark" target="_blank">
+      <div class="grid-card">
+        <i class="fas fa-map fa-2x mb-2"></i>
+        <div>Itineraries</div>
+      </div>
+    </a>
+    {% endif %}
+
+    <!-- Lead Source -->
+    {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.permissions.can_manage_lead_sources %}
+    <a href="{% url 'leadsource_list' %}" class="text-decoration-none text-dark" target="_blank">
+      <div class="grid-card">
+        <i class="fas fa-bullhorn fa-2x mb-2"></i>
+        <div>Lead Source</div>
+      </div>
+    </a>
+    {% endif %}
+
+    <!-- Package Themes -->
+    {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.permissions.can_manage_package_themes %}
+    <a href="{% url 'package_theme_list' %}" class="text-decoration-none text-dark" target="_blank">
+      <div class="grid-card">
+        <i class="fas fa-palette fa-2x mb-2"></i>
+        <div>Theme Packages</div>
+      </div>
+    </a>
+    {% endif %}
+
+    <!-- Currencies -->
+    {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.permissions.can_manage_currencies %}
+    <a href="{% url 'currency_list' %}" class="text-decoration-none text-dark" target="_blank">
+      <div class="grid-card">
+        <i class="fas fa-coins fa-2x mb-2"></i>
+        <div>Currencies</div>
+      </div>
+    </a>
+    {% endif %}
+
+  </div>
+
+  <!-- Empty State -->
+  {% if user_type != 'superuser' and current_user.role != 'admin' %}
+    {% if not current_user.permissions.can_manage_suppliers and not current_user.permissions.can_manage_destinations_master and not current_user.permissions.can_manage_hotels %}
+    <div class="alert alert-warning mt-5 text-center">
+      <i class="fas fa-lock fa-3x mb-3"></i>
+      <h5>No Access to Master Data</h5>
+      <p>You don't have permission to manage master data. Contact your administrator for access.</p>
+    </div>
+    {% endif %}
+  {% endif %}
+</div>
+
+<style>
+  .grid-card {
+    padding: 1.5rem 1rem;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #f9f9f9 0%, #ffffff 100%);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+  }
+
+  .grid-card:hover {
+    transform: translateY(-8px);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+    border-color: #667eea;
+  }
+
+  .grid-card:hover i,
+  .grid-card:hover div {
+    color: white !important;
+  }
+
+  .grid-card i {
+    color: #667eea;
+    transition: color 0.3s ease;
+  }
+
+  .grid-card div {
+    font-weight: 600;
+    font-size: 14px;
+    color: #2c3e50;
+    transition: color 0.3s ease;
+  }
+
+  h2 {
+    color: #2c3e50;
+    font-weight: 700;
+  }
+</style>
+
+{% endblock %}

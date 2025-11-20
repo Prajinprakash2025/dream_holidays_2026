@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-5">
+    <div class="card shadow-lg rounded">
+        <div class="card-header">
+            <h4 class="m-0">{% if form.instance.pk %}Edit{% else %}Add{% endif %} Room Type</h4>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label">Room Type Name</label>
+                    {{ form.name }}
+                </div>
+                <div class="form-check">
+                    {{ form.is_active }}
+                    <label class="form-check-label">Active</label>
+                </div>
+                <button type="submit" class="btn btn-success mt-3">Save</button>
+                <a href="{% url 'room_type_list' %}" class="btn btn-secondary mt-3">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

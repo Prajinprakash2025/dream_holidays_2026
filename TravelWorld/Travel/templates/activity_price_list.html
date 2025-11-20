@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+    <h2>Price List for {{ activity.name }}</h2>
+    <a href="{% url 'add_activity_price' activity.id %}" class="btn btn-primary mb-3">Add Price</a>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>From</th>
+                <th>To</th>
+                <th>Price (Per Person)</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for price in prices %}
+            <tr>
+                <td>{{ price.from_date }}</td>
+                <td>{{ price.to_date }}</td>
+                <td>{{ price.per_person }}</td>
+                <td>
+                    <a href="{% url 'edit_activity_price' price.id %}" class="btn btn-sm btn-warning">Edit</a>
+                    <a href="{% url 'delete_activity_price' price.id %}" class="btn btn-sm btn-danger">Delete</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="{% url 'activity_list' %}" class="btn btn-secondary mt-3">Back to Activities</a>
+</div>
+{% endblock %}

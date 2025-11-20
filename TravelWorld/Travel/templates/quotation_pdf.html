@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Quotation - {{ itinerary.id }}</title>
+  <style>
+    /* A4 page settings for xhtml2pdf */
+    @page {
+      size: A4;
+      margin: 20mm 25mm;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      color: #000;
+      background: #fff;
+      margin: 0;
+      padding: 0;
+      font-size: 11pt;
+    }
+    
+    /* Header table */
+    .header-table { 
+      width: 100%; 
+      border-collapse: collapse; 
+      margin-bottom: 6mm; 
+    }
+    
+    .header-table td { 
+      vertical-align: top; 
+      border: none; 
+      padding: 0; 
+    }
+    
+    .logo-cell { 
+      width: 50%; 
+    }
+    
+    .logo-cell img { 
+      width: 70mm; 
+      height: auto; 
+    }
+    
+    /* ✅ Blue box for contact info */
+    .contact-cell-box { 
+      width: 50%; 
+      text-align: right; 
+      font-size: 9pt; 
+      line-height: 1.5; 
+      color: #1c42ef; 
+      background-color: #ffffffff;
+      padding: 3mm;
+      border: 1px solid #1c42ef;
+      border-radius: 2mm;
+    }
+
+    .contact-cell-box a {
+      color: #1c42ef;
+      text-decoration: none;
+    }
+
+    .divider { 
+      border: 0; 
+      border-top: 3px solid #0066a1; 
+      margin: 4mm 0 6mm 0; 
+    }
+
+    .greeting { 
+      font-size: 10.5pt; 
+      margin-bottom: 5mm; 
+      line-height: 1.5; 
+    }
+    
+    .greeting-bold { 
+      font-weight: bold; 
+      margin-bottom: 2mm; 
+    }
+
+    .section-title { 
+      font-size: 11pt; 
+      font-weight: bold; 
+      color: #333; 
+      margin: 4mm 0 3mm 0; 
+    }
+
+    /* ✅ Travel details table with borders */
+    .travel-details-table {
+      border-collapse: collapse;
+      margin: 4mm 0;
+      font-size: 10pt;
+      border: 1px solid #000;
+      background-color: #c7f0f4ff;
+    }
+
+    .travel-details-table td {
+      padding: 2.5mm 3mm;
+      border: 1px solid #000;
+    }
+
+    .label-cell {
+      background-color: #f5f5f5;
+      font-weight: 600;
+      color: #000;
+      width: 50%;
+      padding: 3.5mm 3mm;  /* ✅ Match the height */
+
+    }
+
+    .value-cell {
+      background-color: #fff;
+      color: #000;
+      font-weight: normal;
+      width: 50%;
+    }
+
+    .places { 
+      font-size: 10.5pt; 
+      font-weight: bold; 
+      color: #1e4a7a; 
+      margin: 4mm 0; 
+    }
+
+    /* ✅ Orange contact section */
+    .contact-section-orange { 
+      font-size: 10pt; 
+      margin: 5mm 0; 
+      font-style: italic; 
+      color: #d4a017; 
+      line-height: 1.8; 
+    }
+    
+    .contact-section-orange .contact-name { 
+      font-style: italic; 
+      font-weight: 600; 
+      color: #000; 
+    }
+
+    .contact-section-orange em {
+      font-style: italic;
+    }
+
+    .contact-section-orange strong {
+      font-weight: bold;
+    }
+
+    /* Section headers */
+    .blue-header {
+      background-color: #1e4a7a; 
+      color: #fff; 
+      font-weight: bold; 
+      font-size: 11pt;
+      padding: 3mm; 
+      text-align: center; 
+      margin: 6mm 0 4mm 0;
+      page-break-after: avoid;
+      width: 100%;
+      display: block;
+    }
+
+    /* Boxes */
+    .package-box { 
+      border: 1px solid #000; 
+      padding: 4mm; 
+      margin: 4mm 0; 
+      page-break-inside: avoid;
+      width: 100%;
+      display: block;
+    }
+    
+    .package-title { 
+      font-size: 11pt; 
+      font-weight: bold; 
+      text-align: center; 
+      margin-bottom: 3mm; 
+    }
+
+    .accommodation-table { 
+      width: 100%; 
+      border-collapse: collapse; 
+      margin: 3mm 0; 
+      font-size: 10pt; 
+    }
+    
+    .accommodation-table th {
+      background-color: #3eb8c5; 
+      color: #fff; 
+      font-weight: bold; 
+      padding: 2.5mm 2mm; 
+      text-align: center; 
+      border: 1px solid #000;
+    }
+    
+    .accommodation-table td { 
+      padding: 2.5mm 2mm; 
+      border: 1px solid #000; 
+      text-align: center; 
+    }
+
+    .total-price { 
+      font-weight: bold; 
+      text-align: center; 
+      padding: 3mm; 
+      border-top: 2px solid #000; 
+      font-size: 10.5pt; 
+    }
+
+    /* Day plan blocks - FULL WIDTH */
+    .day-block { 
+      page-break-before: auto;
+      page-break-after: auto;
+      margin-bottom: 4mm;
+      width: 100%;
+      display: block;
+      padding: 0;
+    }
+    
+    .day-card {
+      margin-bottom: 4mm;
+      width: 100%;
+      padding: 0;
+    }
+    
+    .day-title { 
+      color: #1e4a7a; 
+      font-size: 10.5pt; 
+      font-weight: bold; 
+      margin: 4mm 0 2.5mm 0; 
+      page-break-after: avoid !important;  /* ✅ Never break after title */
+      page-break-inside: avoid !important;
+      width: 100%;
+      padding: 0;
+    }
+        
+    .day-image { 
+      width: 100% !important;
+      max-width: 100%;
+      height: 55mm; 
+      margin: 2.5mm 0;
+      display: block;
+      padding: 0;
+      page-break-before: avoid !important;  /* ✅ Stay with title */
+      page-break-inside: avoid !important;
+    }
+    
+    /* ✅ Description SAME WIDTH as image */
+    .day-description { 
+      font-size: 10pt; 
+      line-height: 1.65; 
+      margin: 2mm 0; 
+      text-align: justify;
+      text-justify: inter-word;
+      word-spacing: 0em;
+      width: 100% !important;
+      max-width: 100%;
+      display: block;
+      padding: 0;
+      page-break-inside: auto;  /* ✅ Allow breaking inside description if too long */
+    }
+    
+    .day-description p {
+      margin: 1mm 0 2mm 0;
+      padding: 0;
+      text-align: justify;
+      text-justify: inter-word;
+      word-spacing: 0em;
+      width: 100% !important;
+      max-width: 100%;
+      display: block;
+    }
+
+    /* Lists */
+    ul { 
+      list-style-type: disc; 
+      font-size: 10pt; 
+      color: #333; 
+      padding-left: 5mm; 
+      margin: 2.5mm 0;
+      width: 100%;
+    }
+    
+    ul li { 
+      margin: 1.8mm 0;
+      line-height: 1.5;
+      text-align: justify;
+    }
+    
+    p { 
+      margin: 2.5mm 0;
+      line-height: 1.5;
+      text-align: justify;
+      width: 100%;
+    }
+
+    a { 
+      color: #0066cc; 
+      text-decoration: underline; 
+    }
+
+    /* Bank details */
+    .bank-details-container {
+      width: 100%;
+      margin: 4mm 0;
+      text-align: center;
+      display: block;
+    }
+
+    .qr-section {
+      width: 100%;
+      text-align: center;
+    }
+
+    .qr-section img {
+      width: 120mm;
+      height: auto;
+      max-width: 100%;
+      margin: 0 auto;
+      border: 2px solid #ccc;
+      padding: 3mm;
+      display: block;
+    }
+
+    .closing-box {
+      text-align: center;
+      margin: 4mm 0;
+      padding: 3mm;
+      border-top: 2px dotted #0066a1;
+      border-bottom: 2px dotted #0066a1;
+      width: 100%;
+      display: block;
+    }
+    
+    .closing-box p {
+      font-size: 11pt;
+      color: #0066a1;
+      font-style: italic;
+      font-weight: 600;
+      margin: 0;
+    }
+
+    /* Content sections */
+    .content-section {
+      font-size: 10pt;
+      line-height: 1.6;
+      margin: 3mm 0;
+      width: 100%;
+      display: block;
+    }
+    
+    .content-section ul {
+      padding-left: 5mm;
+      margin: 2mm 0;
+    }
+    
+    .content-section li {
+      margin: 1.5mm 0;
+      line-height: 1.5;
+      text-align: justify;
+    }
+    
+    .content-section p {
+      margin: 2mm 0;
+      line-height: 1.5;
+      text-align: justify;
+      width: 100%;
+    }
+
+    /* Footer */
+    .footer-section {
+      text-align: center;
+      margin-top: auto;
+      padding-top: 20px;
+    }
+
+    .footer-section img {
+      width: 240px;
+      height: auto;
+      margin-bottom: 15px;
+    }
+
+    .footer-section p {
+      font-size: 10px;
+      line-height: 1.6;
+      color: #333;
+      margin: 3px 0;
+    }
+
+    /* Page break */
+    .page-break { 
+      page-break-before: always; 
+    }
+  </style>
+</head>
+<body>
+
+  <!-- PAGE 1: Header and basics -->
+  <table class="header-table">
+    <tr>
+      <td class="logo-cell"><img src="{{ logo_uri }}" alt="Travel Hope Logo" /></td>
+      <td class="contact-cell-box">
+        <strong>Name : {{ query.assign.first_name|default:"Shahina" }} {{ query.assign.last_name|default:"EB" }}</strong><br />
+        <strong>Designation : {{ query.assign.role|default:"Travel Advisor" }}</strong><br />
+        <strong>Phone Number : 09048340303</strong><br />
+        <strong>Email ID : <a href="mailto:salesone@travelhope.in">salesone@travelhope.in</a></strong>
+      </td>
+    </tr>
+  </table>
+
+  <hr class="divider" />
+
+  <div class="greeting">
+    <div class="greeting-bold">Dear Guest,</div>
+    <div class="greeting-bold">Greetings from Travel hope!!!!!</div>
+    <div>
+      Thank you for giving us the opportunity to plan your holiday. We are pleased to provide you with the best details with cost from
+      <strong style="color: red;">{{ query.from_date|date:"jS M Y" }}</strong> to
+      <strong style="color: red;">{{ query.to_date|date:"jS M Y" }}</strong> for
+      <strong style="color: red;">{{ query.total_days|default:3 }} Days</strong>
+    </div>
+  </div>
+
+  <div class="section-title">Please find the details of your proposed travel plans:</div>
+
+  <!-- ✅ NEW STYLED TABLE -->
+  <table class="travel-details-table">
+    <tr>
+      <td class="label-cell">Number of persons</td>
+      <td class="value-cell">{{ query.adult|default:4 }} Adults{% if query.children %} + {{ query.children }} Children{% endif %}</td>
+    </tr>
+    <tr>
+      <td class="label-cell">Number Of children (With age)</td>
+      <td class="value-cell">{{ query.children|default:"00" }}</td>
+    </tr>
+    <tr>
+      <td class="label-cell">Type of vehicle</td>
+      <td class="value-cell">{{ selected_option.vehicle_type|default:"A/C Ertiga" }}</td>
+    </tr>
+    <tr>
+      <td class="label-cell">Number of rooms</td>
+      <td class="value-cell">{{ selected_option.number_of_rooms|default:"02" }}</td>
+    </tr>
+    <tr>
+      <td class="label-cell">Number of extra bed</td>
+      <td class="value-cell">{{ selected_option.extra_beds|default:"00" }}</td>
+    </tr>
+    <tr>
+      <td class="label-cell">Child without extra beds</td>
+      <td class="value-cell">{{ selected_option.child_without_bed|default:"00" }}</td>
+    </tr>
+    <tr>
+      <td class="label-cell">Child with extra bed</td>
+      <td class="value-cell">{{ selected_option.child_with_bed|default:"00" }}</td>
+    </tr>
+  </table>
+
+  <div class="places">Places to visit: {{ itinerary.destination_list }}</div>
+
+  <div class="contact-section-orange">
+    <em>If you have future clarification or assistant needed, please contact,</em><br /><br />
+    <span class="contact-name">Mrs. Shimna N S</span> <em>(Director)</em> Mob – <strong>09048950303</strong><br />
+    <span class="contact-name">Mr. Sreekumar Sukumaran</span> <em>(Manager - Operations)</em> Mob- <strong>09048210303</strong>
+  </div>
+
+  <!-- PAGE 2+: Auto flow starts -->
+  <div class="page-break"></div>
+
+  <div class="blue-header">ACCOMMODATION</div>
+
+  <div class="package-box">
+    <table class="accommodation-table">
+      <thead>
+          <tr>
+    <td colspan="5" style="font-size: 15pt; font-weight: bold; text-align: center;color: #0066cc;" class="package-title-cell">Standard Package</td>
+  </tr>
+        <tr>
+        <tr>
+          <th>Date</th>
+          <th>Destination</th>
+          <th>Hotels</th>
+          <th>Room Type</th>
+          <th>Meal Plan</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if hotel_bookings %}
+          {% for booking in hotel_bookings %}
+          <tr>
+            <td>{{ booking.check_in_date|date:"d M Y" }}</td>
+            <td>{{ booking.destination.name|default:"-" }}</td>
+            <td>{{ booking.hotel.name|default:"-" }}</td>
+            <td>{{ booking.room_type.name|default:"-" }}</td>
+            <td>{{ booking.meal_plan.name|default:"-" }}</td>
+          </tr>
+          {% endfor %}
+        {% else %}
+          <tr><td colspan="5" style="text-align:center;">No accommodation details available</td></tr>
+        {% endif %}
+      </tbody>
+    </table>
+
+    <div class="total-price">
+      Total Package Price: ₹{{ total_package_price|default:"0" }}
+      for {{ query.adult|default:0 }} Adult{{ query.adult|pluralize }}
+      {% if query.children %}+ {{ query.children }} Child{{ query.children|pluralize:"ren" }}{% endif %}
+    </div>
+  </div>
+
+  <div class="blue-header">DAY TO DAY TRAVEL PLANNING</div>
+
+{% if day_plans %}
+  {% for day in day_plans %}
+  <table style="page-break-inside: avoid; width: 100%; border: none; margin-bottom: 4mm;">
+    <tr>
+      <td style="border: none; padding: 0;">
+        <div class="day-title">
+          Day {{ day.day_number|stringformat:"02d" }}{% if day.title %} - {{ day.title }}{% endif %}
+        </div>
+
+        {% if day.image %}
+        <img src="{{ day.image.url }}" class="day-image" alt="Day {{ day.day_number }}">
+        {% elif day.get_image %}
+        <img src="{{ day.get_image.url }}" class="day-image" alt="Day {{ day.day_number }}">
+        {% endif %}
+
+        {% if day.description %}
+        <div class="day-description">{{ day.description|linebreaks }}</div>
+        {% elif day.get_description %}
+        <div class="day-description">{{ day.get_description|linebreaks }}</div>
+        {% endif %}
+      </td>
+    </tr>
+  </table>
+  {% endfor %}
+{% endif %}
+
+
+  <div class="blue-header">SPECIAL INCLUSION</div>
+  <div>
+    <ul>
+      <li>Complementary Tea plantation visit</li>
+    </ul>
+  </div>
+
+  <div class="blue-header">INCLUSION</div>
+  <div>
+    <ul>
+      <li>Pickup and drop facility from Airport / Railway station/Bus station</li>
+      <li>Complimentary breakfast (Except on Arrival Date)</li>
+      <li>Child who has age till 05 years will be complimentary</li>
+      <li>Driver will use English/Hindi to describe about the places throughout your trip</li>
+      <li>Driver Bata, fuel charge, toll, vehicle parking, road tax, interstate charges</li>
+      <li>All sightseeing, land transfer & inter transfer</li>
+      <li>GST.</li>
+    </ul>
+  </div>
+
+  <div class="blue-header">EXCLUSION</div>
+  <div>
+    <ul>
+      <li>All Personal Activities & Entry tickets not included in the package cost</li>
+      <li>Medical and travel insurance.</li>
+      <li>Mandatory Gala Dinner Charges applicable on Christmas (24 December) and New Year Eve (31 December)</li>
+    </ul>
+  </div>
+  
+  <div class="page-break"></div>
+
+  <div class="blue-header">TERMS AND CONDITIONS</div>
+  <div>
+    <ul style="font-size: 10pt; line-height: 1.6;">
+      <li>The above rates are calculated as per the hotels & rooms mentioned. In case room type is not mentioned calculation is based on the base category room in the hotel mentioned and will be confirmed only after receiving the advance payment and on the availability of rooms in those hotels.</li>
+      <li>In case of the non-availability of rooms in the specified hotels, we will inform you the same and offer you alternate options of hotels and the rate will increase or decrease depending on the hotel selection.</li>
+      <li>Officials of the hotel are selected as per the budget and through our feedback system.</li>
+      <li>We also recommend you to go through the details of hotels mentioned to make sure it is as per your preferences before confirming the package.</li>
+      <li>Checkin time is 2pm and checkout time as mentioned has to be paid directly by guests either to hotel or to the DMC.</li>
+      <li>Gala dinner on Dec 24th,31st/New year eve excluded in package cost</li>
+      <li>Periyar wildlife boating tickets can be booked online by clicking the below links. <a href="https://www.periyarfoundation.online">https://www.periyarfoundation.online</a></li>
+      <li>The time mentioned for Sightseeing is approximate; however he will be available between 08am to 06pm for sightseeing in all days.</li>
+      <li>Vehicle KM will be calculated as Garage to Garage</li>
+      <li>The driver's breakfast is not included in the package</li>
+      <li>The company is not responsible for missing sightseeing, destinations due to political strike or roadblocks.</li>
+      <li>Stays in Munnar, Thekkady, Kodaikanal and Ooty, Coorg will be Non A/C as mentioned. If you require A/C, you can pay extra directly at hotels and upgrade but depends on their availability.</li>
+      <li>All Personal Activities & Entry tickets are not included in the package</li>
+    </ul>
+  </div>
+
+  <div class="blue-header">PAYMENT POLICY</div>
+  <div>
+    <ul style="font-size: 10pt; line-height: 1.6;">
+      <li>35% advance before arrival (Except Peak Season). During Peak Season 50% advance before arrival</li>
+      <li>Balance payment on your arrival day at the time of Pick up.</li>
+    </ul>
+  </div>
+
+  <div class="blue-header">CANCELLATION POLICY</div>
+  <div style="font-size: 10pt; line-height: 1.6;">
+    <p style="margin-bottom: 3mm;">
+      You may cancel your package at any time. Cancellation will be effective only on the receipt of a 
+      written notification or an E-mail in this regard from the person who made the booking.
+    </p>
+    <p style="margin-bottom: 3mm; font-weight: bold;">The following cancellation charges shall be applicable:</p>
+    <ul style="line-height: 1.6;">
+      <li>Cancellation above 30 days prior to start of tour – 20% Retention of Entire Package Amount</li>
+      <li>Cancellation below 30 days and above 15 days of tour – 50% retention of Entire Package Amount</li>
+      <li>Cancellation below 15 days of tour – 100% retention of Entire Package Amount</li>
+    </ul>
+  </div>
+
+  <div class="blue-header">REFUND AFTER CANCELLATION</div>
+  <div style="font-size: 10pt; line-height: 1.6;">
+    <p>The Refund after cancellation of the booking will be take 15 working days from the cancellation date.</p>
+  </div>
+
+  <div class="blue-header">BANK DETAILS</div>
+
+  <div class="bank-details-container">
+    <div class="qr-section">
+      <img src="{{ qr_code_url }}" style="margin-bottom: 15px" alt="Bank Details QR Code" />
+    </div>
+  </div>
+
+  <div style="margin: 1mm 0; font-size: 10pt; line-height: 1.3; color: #333;">
+    <p style="margin: 0; padding: 0;">
+      This is an initial quote based on our most popular holiday package to your chosen destination. 
+      The pricing is indicative and can change depending on the hotels etc. chosen. Once your Travel 
+      Expert gets in touch with you, feel free to ask for any customization in this itinerary or have 
+      a fresh itinerary designed just for you. The package inclusions are shown on the package review 
+      page and confirm that all elements including hotels, Houseboat (if any), Cab and sightseeing are 
+      exactly as finalized by you.
+    </p>
+  </div>
+  
+  <div class="page-break"></div>
+
+  <div style="text-align: center; margin: 1mm 0; padding: 1mm; border-top: 2px dotted #0066a1; border-bottom: 2px dotted #0066a1;">
+    <p style="font-size: 11pt; color: #0066a1; font-style: italic; font-weight: 600; margin: 0;">
+      Travel Hope Team wishes you a memorable holiday with us...
+    </p>
+  </div>
+
+  <div style="text-align: center; margin-top: 8mm;">
+    <img src="{{ logo_uri }}" alt="Travel Hope Logo" style="width: 70mm; height: auto; display: block; margin: 0 auto 3mm auto;" />
+    <p style="margin: 0; padding: 0; font-size: 10pt; line-height: 1.2; color: #333;">
+      2nd Floor, Mayeli Arcade, Metro pillar no: 800, S A Road, Kalavantin, Kochi-682020.
+    </p>
+    <p style="margin: 0; padding: 0; font-size: 10pt; line-height: 1.2; color: #333;">
+      Mail: info@travelhope.in | Website: www.travelhope.in | Mob: 90489 10303.
+    </p>
+  </div>
+
+</body>
+</html>

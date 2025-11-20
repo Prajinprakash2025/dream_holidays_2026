@@ -1,0 +1,436 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quotation - {{ itinerary.id }}</title>
+  
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  
+  <style>
+    body {
+      background: #e9ecef;
+      font-family: Arial, sans-serif;
+      padding: 0;
+      margin: 0;
+    }
+
+    /* Action bar */
+    .action-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: #fff;
+      padding: 15px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      z-index: 9999;
+      text-align: center;
+    }
+
+    /* Main container - looks like A4 */
+    .quotation-wrapper {
+      max-width: 794px;
+      margin: 80px auto 30px;
+      background: white;
+      box-shadow: 0 0 20px rgba(0,0,0,0.15);
+      padding: 40px 50px;
+    }
+
+    /* Page break markers */
+    .page-break {
+      border-top: 2px dashed #ccc;
+      margin: 40px -50px;
+      padding-top: 40px;
+      position: relative;
+    }
+
+    .page-break::before {
+      content: "--- Page Break ---";
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: white;
+      padding: 0 15px;
+      color: #999;
+      font-size: 11px;
+    }
+
+    /* Logo and header */
+    .logo-img {
+      width: 280px;
+      height: auto;
+    }
+
+    .contact-info {
+      font-size: 11px;
+      color: #1c42ef;
+      line-height: 1.6;
+    }
+
+    .divider {
+      border: 0;
+      border-top: 12px solid #0066a1;
+      margin: 20px 0;
+    }
+
+    /* Tables */
+    .details-table th {
+      background: #dbe9ed;
+      font-weight: 600;
+      border: 1px solid #000;
+    }
+
+    .details-table td {
+      background: #dbe9ed;
+      border: 1px solid #000;
+    }
+
+    .accommodation-table th {
+      background: #3eb8c5;
+      color: white;
+      border: 1px solid #000;
+    }
+
+    .accommodation-table td {
+      border: 1px solid #000;
+    }
+
+    /* Section headers */
+    .blue-header {
+      background: #1e4a7a;
+      color: white;
+      font-weight: bold;
+      padding: 10px;
+      text-align: center;
+      margin: 20px 0 10px;
+    }
+
+    /* Day sections */
+    .day-card {
+      margin-bottom: 20px;
+    }
+
+    .day-title {
+      color: #1e4a7a;
+      font-size: 13px;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    .day-img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 5px;
+      margin-bottom: 8px;
+    }
+
+    .day-description {
+      font-size: 11px;
+      line-height: 1.5;
+      text-align: justify;
+    }
+
+    /* Package box */
+    .package-box {
+      border: 2px solid #000;
+      padding: 15px;
+      margin: 15px 0;
+    }
+
+    /* Content sections */
+    .content-section {
+      font-size: 11px;
+      line-height: 1.5;
+    }
+
+    .content-section ul {
+      padding-left: 20px;
+    }
+
+    .content-section li {
+      margin: 3px 0;
+    }
+
+    /* QR code */
+    .qr-img {
+      max-width: 500px;
+      width: 100%;
+      border: 2px solid #ccc;
+      padding: 10px;
+    }
+
+    /* Footer */
+    .footer-logo {
+      width: 220px;
+      margin-bottom: 10px;
+    }
+
+    /* Print styles */
+    @media print {
+      body {
+        background: white;
+      }
+
+      .action-bar {
+        display: none !important;
+      }
+
+      .quotation-wrapper {
+        margin: 0;
+        box-shadow: none;
+        max-width: 100%;
+      }
+
+      .page-break {
+        page-break-before: always;
+        border: none;
+        margin: 0;
+        padding: 0;
+      }
+
+      .page-break::before {
+        display: none;
+      }
+
+      @page {
+        size: A4;
+        margin: 15mm;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Action Bar -->
+<div class="action-bar">
+  <a href="{% url 'download_quotation_pdf' itinerary.id %}" class="btn btn-primary btn-lg me-2">
+    📥 Download PDF
+  </a>
+  <button onclick="window.print()" class="btn btn-success btn-lg">
+    🖨️ Print
+  </button>
+</div>
+
+<!-- Main Quotation Content -->
+<div class="quotation-wrapper">
+
+  <!-- Header -->
+  <div class="row mb-3">
+    <div class="col-6">
+      <img src="{% static 'assets/img/travel_hope.png' %}" alt="Logo" class="logo-img" />
+    </div>
+    <div class="col-6 text-end contact-info">
+      <strong>Name:</strong> {{ query.assign }}<br>
+      <strong>Designation:</strong> {{ query.assign.role }}<br>
+      <strong>Phone:</strong> 09048949303<br>
+      <strong>Email:</strong> salesone@travelhope.in
+    </div>
+  </div>
+
+  <hr class="divider" />
+
+  <!-- Greeting -->
+  <div class="mb-3">
+    <p class="fw-bold mb-1">Dear Guest,</p>
+    <p class="fw-bold mb-2">Greetings of Travel hope!!!!!</p>
+    <p>Thank you for giving us the opportunity to plan your holiday. We are pleased to provide you with the best details with cost from <strong style="color: red;">{{ query.from_date|date:"jS M Y" }}</strong> to <strong style="color: red;">{{ query.to_date|date:"jS M Y" }} ({{ query.total_days }} Days)</strong></p>
+  </div>
+
+  <!-- Details Table -->
+  <p class="fw-bold">Please find the details of your proposed travel plans:</p>
+  
+  <table class="table table-bordered details-table">
+    <tr>
+      <th style="width: 40%;">Number of persons</th>
+      <td>{{ query.adult|default:0 }} Adult{{ query.adult|pluralize }}{% if query.children %} + {{ query.children }} Child{{ query.children|pluralize:"ren" }}{% endif %}</td>
+    </tr>
+    {% if query.children %}
+    <tr>
+      <th>Number of children (With age)</th>
+      <td>{{ query.children }}</td>
+    </tr>
+    {% endif %}
+    <tr>
+      <th>Type of vehicle</th>
+      <td>{{ selected_option.vehicle_type|default:"A/C Ertiga" }}</td>
+    </tr>
+    <tr>
+      <th>Number of rooms</th>
+      <td>{{ selected_option.number_of_rooms|default:"0" }}</td>
+    </tr>
+    {% if selected_option.extra_beds > 0 %}
+    <tr>
+      <th>Number of extra bed{{ selected_option.extra_beds|pluralize }}</th>
+      <td>{{ selected_option.extra_beds }}</td>
+    </tr>
+    {% endif %}
+  </table>
+
+  <p class="fw-bold text-primary">Places to visit: {{ itinerary.destination_list }}</p>
+
+  <div class="mb-4" style="font-size: 15px; font-style: italic; color: #d4a017; line-height: 2;">
+    <em>If you have future clarification or assistant needed, please contact,</em><br>
+    <strong style="color: #333;">Mrs. Shimna N S</strong> <em>(Director) Mob – 09048950303</em><br>
+    <strong style="color: #333;">Mr. Sreekumar Sukumaran</strong> <em>(Manager - Operations) Mob- 09048210303</em>
+  </div>
+
+  <!-- Page Break -->
+  <div class="page-break"></div>
+
+  <!-- Accommodation -->
+  <div class="blue-header">ACCOMMODATION</div>
+  
+  <div class="package-box">
+    <p class="fw-bold text-center mb-3">Standard Package</p>
+    
+    <table class="table table-bordered accommodation-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Destination</th>
+          <th>Hotels</th>
+          <th>Room Type</th>
+          <th>Meal Plan</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for booking in hotel_bookings %}
+        <tr>
+          <td>{{ booking.check_in_date|date:"d M Y" }}</td>
+          <td>{{ booking.destination.name|default:"-" }}</td>
+          <td>{{ booking.hotel.name|default:"-" }}</td>
+          <td>{{ booking.room_type.name|default:"-" }}</td>
+          <td>{{ booking.meal_plan.name|default:"-" }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="5" class="text-center">No accommodation details</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    
+    <p class="fw-bold text-center mt-3 pt-3 border-top border-dark">
+      Total Package Price: ₹{{ total_package_price|floatformat:0 }} for {{ query.adult|default:0 }} Adult{{ query.adult|pluralize }}{% if query.children %} + {{ query.children }} Child{{ query.children|pluralize:"ren" }}{% endif %}
+    </p>
+  </div>
+
+  <!-- Day Plans -->
+  <div class="blue-header">DAY TO DAY TRAVEL PLANNING</div>
+
+  {% for day in day_plans %}
+    <div class="day-card">
+      <div class="day-title">Day {{ day.day_number|stringformat:"02d" }}{% if day.title %} - {{ day.title }}{% endif %}</div>
+      
+      {% if day.get_image %}
+      <img src="{{ day.get_image.url }}" alt="Day {{ day.day_number }}" class="day-img">
+      {% endif %}
+      
+      {% if day.get_description %}
+      <div class="day-description">{{ day.get_description|linebreaks }}</div>
+      {% endif %}
+    </div>
+
+    {# Add page break every 2 days #}
+    {% if forloop.counter|divisibleby:"2" and not forloop.last %}
+    <div class="page-break"></div>
+    {% endif %}
+  {% endfor %}
+
+  <!-- Page break before terms -->
+  <div class="page-break"></div>
+
+  <!-- Package Terms -->
+  {% if package_terms %}
+    
+    {% if package_terms.special_inclusion %}
+    <div class="blue-header">SPECIAL INCLUSION</div>
+    <div class="content-section">{{ package_terms.special_inclusion|safe }}</div>
+    {% endif %}
+
+    {% if package_terms.package_inclusion %}
+    <div class="blue-header">INCLUSION</div>
+    <div class="content-section">{{ package_terms.package_inclusion|safe }}</div>
+    {% endif %}
+
+    {% if package_terms.package_exclusion %}
+    <div class="blue-header">EXCLUSION</div>
+    <div class="content-section">{{ package_terms.package_exclusion|safe }}</div>
+    {% endif %}
+
+  {% endif %}
+
+  <!-- Page break before policies -->
+  <div class="page-break"></div>
+
+  {% if package_terms %}
+    
+    {% if package_terms.terms_and_conditions %}
+    <div class="blue-header">TERMS AND CONDITIONS</div>
+    <div class="content-section">{{ package_terms.terms_and_conditions|safe }}</div>
+    {% endif %}
+
+    {% if package_terms.payment_policy %}
+    <div class="blue-header">PAYMENT POLICY</div>
+    <div class="content-section">{{ package_terms.payment_policy|safe }}</div>
+    {% endif %}
+
+    {% if package_terms.cancellation_policy %}
+    <div class="blue-header">CANCELLATION POLICY</div>
+    <div class="content-section">{{ package_terms.cancellation_policy|safe }}</div>
+    {% endif %}
+
+    {% if package_terms.refund_policy %}
+    <div class="blue-header">REFUND AFTER CANCELLATION</div>
+    <div class="content-section">{{ package_terms.refund_policy|safe }}</div>
+    {% endif %}
+
+  {% endif %}
+
+  <!-- Page break before bank details -->
+  <div class="page-break"></div>
+
+  <!-- Bank Details -->
+  <div class="blue-header">BANK DETAILS</div>
+  
+  <div class="text-center my-4">
+    <img src="{% static 'assets/img/low.png' %}" alt="Bank QR Code" class="qr-img">
+  </div>
+
+  <p class="content-section">
+    This is an initial quote based on our most popular holiday package to your chosen destination. 
+    The pricing is indicative and can change depending on the hotels etc. chosen. Once your Travel 
+    Expert gets in touch with you, feel free to ask for any customization in this itinerary or have 
+    a fresh itinerary designed just for you.
+  </p>
+
+  <!-- Closing Message -->
+  <div class="text-center my-4 py-3 border-top border-bottom" style="border-style: dotted !important; border-color: #0066a1 !important;">
+    <p class="fw-bold" style="color: #0066a1; font-style: italic; margin: 0;">
+      Travel Hope Team wishes you a memorable holiday with us...
+    </p>
+  </div>
+
+  <!-- Footer -->
+  <div class="text-center mt-4 pt-3 border-top">
+    <img src="{% static 'assets/img/travel_hope.png' %}" alt="Logo" class="footer-logo">
+    <p style="font-size: 10px; line-height: 1.6; margin: 5px 0;">
+      2nd Floor, Mayeli Arcade, Metro pillar no: 800, S A Road, Kalavantin, Kochi-682020.
+    </p>
+    <p style="font-size: 10px;">
+      Mail: info@travelhope.in | Website: www.travelhope.in | Mob: 90489 10303
+    </p>
+  </div>
+
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

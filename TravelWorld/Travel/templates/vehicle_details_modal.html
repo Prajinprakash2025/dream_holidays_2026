@@ -1,0 +1,51 @@
+<div class="row">
+    <div class="col-md-6">
+        <label>Name:</label>
+        <input class="form-control" value="{{ vehicle.name }}" disabled>
+        
+        <label>Details:</label>
+        <input class="form-control" value="{{ vehicle.details }}" disabled>
+        
+        <label>Destination:</label>
+        <input class="form-control" value="{{ vehicle.destination.name }}" disabled>
+    </div>
+</div>
+
+<hr>
+
+<h5>Images</h5>
+<div class="row">
+    {% for img in vehicle.images.all %}
+    <div class="col-md-3 mb-2">
+        <img src="{{ img.image.url }}" class="img-fluid rounded border">
+    </div>
+    {% empty %}
+    <p>No images uploaded.</p>
+    {% endfor %}
+</div>
+
+<hr>
+
+<h5>Pricing</h5>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>From</th>
+            <th>To</th>
+            <th>Price for total km</th>
+            <th>Price per extra km</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for price in vehicle.vehiclepricing_set.all %}
+        <tr>
+            <td>{{ price.from_date }}</td>
+            <td>{{ price.to_date }}</td>
+            <td>{{ price.total_fee_100km }}</td>
+            <td>{{ price.extra_fee_per_km }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4">No price data available.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>

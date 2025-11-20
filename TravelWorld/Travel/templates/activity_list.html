@@ -1,0 +1,721 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+  .modal-dialog-scrollable .modal-body {
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
+  }
+  
+  .modal-dialog-scrollable {
+    max-height: calc(100vh - 3.5rem);
+  }
+    
+  .activities-header {
+    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+    padding: 2rem;
+    border-radius: 15px;
+    margin-bottom: 2rem;
+    color: white;
+    box-shadow: 0 10px 30px rgba(67, 233, 123, 0.3);
+  }
+
+  .modern-table-container {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+  }
+
+  .modern-table thead {
+    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+    color: white;
+  }
+
+  .modern-table thead th {
+    border: none;
+    padding: 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+  }
+
+  .modern-table tbody tr {
+    transition: all 0.3s ease;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .modern-table tbody tr:hover {
+    background: #f0fff4;
+    transform: scale(1.01);
+    box-shadow: 0 4px 12px rgba(67, 233, 123, 0.1);
+  }
+
+  .modern-table tbody td {
+    padding: 1rem;
+    vertical-align: middle;
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .btn-action {
+    padding: 0.4rem 0.8rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    border: none;
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .btn-action:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  }
+
+  .modal-header-gradient {
+    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+    color: white;
+  }
+
+  .form-section-title {
+    color: #38f9d7;
+    font-weight: 600;
+    border-bottom: 2px solid #43e97b;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .search-box {
+    background: white;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    margin-bottom: 1.5rem;
+  }
+
+  .search-input {
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    font-size: 14px;
+    transition: all 0.3s ease;
+  }
+
+  .search-input:focus {
+    border-color: #43e97b;
+    box-shadow: 0 0 0 0.2rem rgba(67, 233, 123, 0.25);
+  }
+  .suppliers-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 2rem;
+    border-radius: 15px;
+    margin-bottom: 2rem;
+    color: white;
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+  }
+
+  /* Add this new style for back button */
+  .back-button-container {
+    padding: 1.5rem 2rem 0 2rem;
+    margin-bottom: -1rem;
+  }
+
+  .back-btn-modern {
+    padding: 0.6rem 1.2rem;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    border: 2px solid #667eea;
+    color: #667eea;
+    background: white;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .back-btn-modern:hover {
+    background: #667eea;
+    color: white;
+    transform: translateX(-5px);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  }
+
+  .back-btn-modern i {
+    font-size: 16px;
+  }
+
+  .search-filter-bar {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    margin-bottom: 1.5rem;
+  }
+
+  .modern-table {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+  }
+
+  .modern-table thead {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+  }
+
+  .modern-table thead th {
+    border: none;
+    padding: 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+  }
+
+  .modern-table tbody tr {
+    transition: all 0.3s ease;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .modern-table tbody tr:hover {
+    background: #f8f9ff;
+    transform: scale(1.01);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+  }
+
+  .modern-table tbody td {
+    padding: 1rem;
+    vertical-align: middle;
+  }
+
+  .action-btn-group {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .action-btn {
+    padding: 0.4rem 0.8rem;
+    border-radius: 8px;
+    border: none;
+    transition: all 0.3s ease;
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+
+  .badge-modern {
+    padding: 0.4rem 0.8rem;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 12px;
+  }
+
+  .stats-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    text-align: center;
+    transition: all 0.3s ease;
+  }
+
+  .stats-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+  }
+
+  .stats-card .icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    font-size: 24px;
+  }
+
+  .modal-header-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+  }
+
+  .form-section-title {
+    color: #667eea;
+    font-weight: 600;
+    border-bottom: 2px solid #667eea;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+  }
+</style>
+
+<!-- Back Button with Modern Styling -->
+<div class="back-button-container">
+    <a href="{% url 'admin_settings' %}" class="back-btn-modern">
+        <i class="fas fa-arrow-left"></i>
+        <span>Back to Admin Settings</span>
+    </a>
+</div>
+<div class="container-fluid" style="margin-top: 90px; padding: 0 2rem;">
+
+  <!-- Header -->
+  <div class="activities-header">
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <h2 class="mb-2">
+          <i class="fas fa-hiking"></i> Activities Management
+        </h2>
+        <p class="mb-0" style="opacity: 0.9;">Manage activities and experiences for travelers</p>
+      </div>
+      
+      <!-- ✅ PERMISSION CHECK: Add Activity Button -->
+      {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.permissions.can_add_activity %}
+      <button type="button" class="btn btn-light btn-lg shadow" data-bs-toggle="modal" data-bs-target="#activityModal" onclick="resetActivityForm()">
+        <i class="fas fa-plus-circle me-2"></i>Add Activity
+      </button>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Search Box -->
+  <div class="search-box">
+    <div class="input-group">
+      <span class="input-group-text bg-transparent border-0">
+        <i class="fas fa-search text-muted"></i>
+      </span>
+      <input type="text" class="form-control search-input border-0" id="searchInput" placeholder="Search activities..." onkeyup="filterActivities()">
+      <button class="btn btn-outline-secondary" onclick="resetSearch()">
+        <i class="fas fa-redo me-1"></i>Reset
+      </button>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="modern-table-container">
+    <div class="table-responsive">
+      <table class="table modern-table mb-0" id="activitiesTable">
+        <thead>
+          <tr>
+            <th><i class="fas fa-hiking me-2"></i>Name</th>
+            <th><i class="fas fa-tag me-2"></i>Type</th>
+            <th><i class="fas fa-map-marker-alt me-2"></i>Destination</th>
+            <th><i class="fas fa-truck me-2"></i>Supplier</th>
+            <th><i class="fas fa-clock me-2"></i>Duration</th>
+            <th class="text-center"><i class="fas fa-toggle-on me-2"></i>Status</th>
+            <th class="text-center"><i class="fas fa-cogs me-2"></i>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for activity in activities %}
+          <tr>
+            <td>
+              <div class="fw-bold">{{ activity.name }}</div>
+              <small class="text-muted">ID: #ACT{{ activity.id }}</small>
+            </td>
+            <td>
+              <span class="badge bg-info" style="padding: 0.5rem 0.8rem;">
+                {{ activity.get_activity_type_display }}
+              </span>
+            </td>
+            <td>{{ activity.destination.name }}</td>
+            <td>
+              {% if activity.supplier %}
+                <span class="badge bg-warning text-dark" style="padding: 0.5rem 0.8rem;">
+                  {{ activity.supplier.company_name }}
+                </span>
+              {% else %}
+                <span class="text-muted"><em>No Supplier</em></span>
+              {% endif %}
+            </td>
+            <td>{{ activity.duration_hours }} hrs</td>
+            <td class="text-center">
+              {% if activity.is_active %}
+                <span class="badge bg-success" style="padding: 0.5rem 1rem;">
+                  <i class="fas fa-check-circle me-1"></i>Active
+                </span>
+              {% else %}
+                <span class="badge bg-danger" style="padding: 0.5rem 1rem;">
+                  <i class="fas fa-times-circle me-1"></i>Inactive
+                </span>
+              {% endif %}
+            </td>
+            <td>
+              <div class="action-buttons">
+                
+                <!-- ✅ PERMISSION CHECK: Prices Button -->
+                {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.permissions.can_manage_hotel_prices %}
+                <a href="{% url 'activity_price_list' activity.id %}" class="btn btn-info btn-action">
+                  <i class="fas fa-dollar-sign me-1"></i>Prices
+                </a>
+                {% endif %}
+                
+                <!-- ✅ PERMISSION CHECK: Edit Button -->
+                {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.permissions.can_edit_activity %}
+                <button type="button" class="btn btn-warning btn-action" onclick="editActivity(this)"
+                        data-bs-toggle="modal"
+                        data-bs-target="#activityModal"
+                        data-id="{{ activity.id }}"
+                        data-name="{{ activity.name }}"
+                        data-activity-type="{{ activity.activity_type }}"
+                        data-destination-id="{{ activity.destination.id }}"
+                        data-supplier-id="{{ activity.supplier.id|default:'' }}"
+                        data-difficulty-level="{{ activity.difficulty_level }}"
+                        data-duration-hours="{{ activity.duration_hours }}"
+                        data-max-participants="{{ activity.max_participants }}"
+                        data-min-participants="{{ activity.min_participants }}"
+                        data-details="{{ activity.details }}"
+                        data-inclusions="{{ activity.inclusions|default:'' }}"
+                        data-exclusions="{{ activity.exclusions|default:'' }}"
+                        data-age-restriction="{{ activity.age_restriction|default:'' }}"
+                        data-contact-person="{{ activity.contact_person|default:'' }}"
+                        data-contact-phone="{{ activity.contact_phone|default:'' }}"
+                        data-meeting-point="{{ activity.meeting_point|default:'' }}"
+                        data-website="{{ activity.website|default:'' }}"
+                        data-is-active="{{ activity.is_active|lower }}">
+                  <i class="fas fa-edit me-1"></i>Edit
+                </button>
+                {% endif %}
+                
+                <!-- ✅ PERMISSION CHECK: Delete Button -->
+                {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.permissions.can_delete_activity %}
+                <button type="button" class="btn btn-danger btn-action" 
+                        data-bs-toggle="modal" 
+                        data-bs-target="#deleteModal"
+                        data-delete-url="{% url 'delete_activity' activity.id %}"
+                        data-delete-name="{{ activity.name }}">
+                  <i class="fas fa-trash me-1"></i>Delete
+                </button>
+                {% endif %}
+                
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="7" class="text-center py-5">
+              <i class="fas fa-hiking fa-3x text-muted mb-3"></i>
+              <h5 class="text-muted">No activities found</h5>
+              <p class="text-muted">Start by adding your first activity</p>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit Modal -->
+<div class="modal fade" id="activityModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header modal-header-gradient">
+        <h5 class="modal-title">
+          <i class="fas fa-hiking me-2"></i>Add Activity
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+
+      <!-- ✅ FIX: Move form inside modal-body for proper scrolling -->
+      <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+        <form method="POST" id="activityForm" enctype="multipart/form-data">
+          {% csrf_token %}
+          
+          <!-- Basic Information -->
+          <div class="mb-4">
+            <h6 class="form-section-title">
+              <i class="fas fa-info-circle me-2"></i>Basic Information
+            </h6>
+            
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Activity Name *</label>
+                <input type="text" class="form-control" id="name" name="name" required autocomplete="off">
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Type *</label>
+                <select class="form-select" id="activity_type" name="activity_type" required autocomplete="off">
+                  <option value="">Select Type</option>
+                  <option value="adventure">Adventure</option>
+                  <option value="cultural">Cultural</option>
+                  <option value="religious">Religious</option>
+                  <option value="water_sports">Water Sports</option>
+                  <option value="trekking">Trekking</option>
+                  <option value="tour">Guided Tour</option>
+                  <option value="entertainment">Entertainment</option>
+                  <option value="shopping">Shopping</option>
+                  <option value="dining">Dining</option>
+                  <option value="wellness">Wellness</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Destination *</label>
+                <select class="form-select" id="destination" name="destination" required autocomplete="off">
+                  <option value="">Select Destination</option>
+                  {% for dest in destinations %}
+                    <option value="{{ dest.id }}">{{ dest.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Supplier</label>
+                <select class="form-select" id="supplier" name="supplier" autocomplete="off">
+                  <option value="">Select Supplier (Optional)</option>
+                  {% for supp in suppliers %}
+                    <option value="{{ supp.id }}">{{ supp.company_name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-bold">Description *</label>
+              <textarea class="form-control" id="details" name="details" rows="3" required autocomplete="off"></textarea>
+            </div>
+          </div>
+
+          <hr>
+
+          <!-- Activity Details -->
+          <div class="mb-4">
+            <h6 class="form-section-title">
+              <i class="fas fa-list-check me-2"></i>Activity Details
+            </h6>
+            
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Difficulty Level *</label>
+                <select class="form-select" id="difficulty_level" name="difficulty_level" required autocomplete="off">
+                  <option value="">Select Level</option>
+                  <option value="easy">Easy</option>
+                  <option value="moderate">Moderate</option>
+                  <option value="difficult">Difficult</option>
+                  <option value="expert">Expert</option>
+                </select>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Duration (Hours) *</label>
+                <input type="number" class="form-control" id="duration_hours" name="duration_hours" step="0.5" min="0.5" required autocomplete="off">
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Min Participants *</label>
+                <input type="number" class="form-control" id="min_participants" name="min_participants" min="1" value="1" required autocomplete="off">
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Max Participants *</label>
+                <input type="number" class="form-control" id="max_participants" name="max_participants" min="1" value="20" required autocomplete="off">
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-bold">Age Restriction</label>
+              <input type="text" class="form-control" id="age_restriction" name="age_restriction" placeholder="e.g., Minimum 18 years" autocomplete="off">
+            </div>
+          </div>
+
+          <hr>
+
+          <!-- Inclusions & Exclusions -->
+          <div class="mb-4">
+            <h6 class="form-section-title">
+              <i class="fas fa-check-double me-2"></i>Inclusions & Exclusions
+            </h6>
+            
+            <div class="mb-3">
+              <label class="form-label fw-bold">Inclusions</label>
+              <textarea class="form-control" id="inclusions" name="inclusions" rows="2" placeholder="What is included..." autocomplete="off"></textarea>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold">Exclusions</label>
+              <textarea class="form-control" id="exclusions" name="exclusions" rows="2" placeholder="What is not included..." autocomplete="off"></textarea>
+            </div>
+          </div>
+
+          <hr>
+
+          <!-- Contact & Meeting -->
+          <div class="mb-4">
+            <h6 class="form-section-title">
+              <i class="fas fa-phone me-2"></i>Contact & Meeting Point
+            </h6>
+            
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Contact Person</label>
+                <input type="text" class="form-control" id="contact_person" name="contact_person" autocomplete="off">
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Contact Phone</label>
+                <input type="tel" class="form-control" id="contact_phone" name="contact_phone" autocomplete="off">
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-bold">Meeting Point</label>
+              <input type="text" class="form-control" id="meeting_point" name="meeting_point" placeholder="Where do participants meet?" autocomplete="off">
+            </div>
+          </div>
+
+          <hr>
+
+          <!-- Additional Info -->
+          <div class="mb-4">
+            <h6 class="form-section-title">
+              <i class="fas fa-link me-2"></i>Additional Information
+            </h6>
+            
+            <div class="mb-3">
+              <label class="form-label fw-bold">Website</label>
+              <input type="url" class="form-control" id="website" name="website" placeholder="https://example.com" autocomplete="off">
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold">Activity Image</label>
+              <input type="file" class="form-control" id="photo" name="photo" accept="image/*">
+            </div>
+          </div>
+
+          <hr>
+
+          <!-- Status -->
+          <div class="mb-4">
+            <h6 class="form-section-title">
+              <i class="fas fa-toggle-on me-2"></i>Status
+            </h6>
+            <div class="form-check form-switch">
+              <input type="checkbox" class="form-check-input" id="is_active" name="is_active" checked style="width: 48px; height: 24px; cursor: pointer;">
+              <label class="form-check-label ms-2 fw-bold" for="is_active">Active Status</label>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- ✅ FIX: Footer stays outside modal-body -->
+      <div class="modal-footer border-0 pt-3">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          <i class="fas fa-times me-1"></i>Close
+        </button>
+        <button type="submit" form="activityForm" class="btn" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white;">
+          <i class="fas fa-save me-1"></i>Save Activity
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title">
+          <i class="fas fa-exclamation-triangle me-2"></i>Confirm Delete
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body text-center py-4">
+        <i class="fas fa-trash-alt fa-3x text-danger mb-3"></i>
+        <p class="mb-2">Are you sure you want to delete this activity?</p>
+        <h5 class="text-danger" id="deleteModalItemName"></h5>
+        <p class="text-muted small mb-0">This action cannot be undone.</p>
+      </div>
+      <div class="modal-footer border-0">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          <i class="fas fa-times me-1"></i>Cancel
+        </button>
+        <form method="post" id="deleteModalForm" class="d-inline">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger">
+            <i class="fas fa-trash me-1"></i>Delete
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function resetActivityForm() {
+  document.getElementById('activityForm').reset();
+  document.getElementById('activityForm').action = "{% url 'add_activity' %}";
+  document.querySelector('#activityModal .modal-title').innerHTML = '<i class="fas fa-hiking me-2"></i>Add Activity';
+  document.getElementById('is_active').checked = true;
+}
+
+function editActivity(button) {
+  const form = document.getElementById('activityForm');
+  const activityId = button.getAttribute('data-id');
+  
+  form.action = `/activities/edit/${activityId}/`;
+  document.querySelector('#activityModal .modal-title').innerHTML = '<i class="fas fa-edit me-2"></i>Edit Activity';
+  
+  // Fill all fields
+  document.getElementById('name').value = button.getAttribute('data-name') || '';
+  document.getElementById('activity_type').value = button.getAttribute('data-activity-type') || '';
+  document.getElementById('destination').value = button.getAttribute('data-destination-id') || '';
+  document.getElementById('supplier').value = button.getAttribute('data-supplier-id') || '';
+  document.getElementById('difficulty_level').value = button.getAttribute('data-difficulty-level') || '';
+  document.getElementById('duration_hours').value = button.getAttribute('data-duration-hours') || '';
+  document.getElementById('max_participants').value = button.getAttribute('data-max-participants') || '';
+  document.getElementById('min_participants').value = button.getAttribute('data-min-participants') || '';
+  document.getElementById('details').value = button.getAttribute('data-details') || '';
+  document.getElementById('inclusions').value = button.getAttribute('data-inclusions') || '';
+  document.getElementById('exclusions').value = button.getAttribute('data-exclusions') || '';
+  document.getElementById('age_restriction').value = button.getAttribute('data-age-restriction') || '';
+  document.getElementById('contact_person').value = button.getAttribute('data-contact-person') || '';
+  document.getElementById('contact_phone').value = button.getAttribute('data-contact-phone') || '';
+  document.getElementById('meeting_point').value = button.getAttribute('data-meeting-point') || '';
+  document.getElementById('website').value = button.getAttribute('data-website') || '';
+  
+  document.getElementById('is_active').checked = button.getAttribute('data-is-active') === 'true';
+}
+
+// Delete Modal
+document.getElementById('deleteModal').addEventListener('show.bs.modal', function(event) {
+  const button = event.relatedTarget;
+  document.getElementById('deleteModalForm').action = button.getAttribute('data-delete-url');
+  document.getElementById('deleteModalItemName').textContent = button.getAttribute('data-delete-name');
+});
+
+// Search/Filter
+function filterActivities() {
+  const searchValue = document.getElementById('searchInput').value.toLowerCase();
+  const table = document.getElementById('activitiesTable');
+  const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i];
+    const text = row.textContent.toLowerCase();
+    row.style.display = text.includes(searchValue) ? '' : 'none';
+  }
+}
+
+function resetSearch() {
+  document.getElementById('searchInput').value = '';
+  filterActivities();
+}
+</script>
+
+{% endblock %}

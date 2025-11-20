@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block content %}
+<br><br>  
+<div class="container">
+  <h2>{{ itinerary.name }} - Day Wise Planning</h2>
+
+  {% for day in day_plans %}
+    <div class="card my-3">
+      <div class="card-header d-flex justify-content-between">
+        <strong>Day {{ day.day_number }}</strong>
+        <button class="btn btn-outline-primary btn-sm" data-day="{{ day.day_number }}" onclick="openModal({{ day.day_number }})">Add Details</button>
+      </div>
+      <div class="card-body">
+        <label>Destinations:</label>
+        <ul>
+          {% for dest in itinerary.destinations.all %}
+            <li>{{ dest.name }}</li>
+          {% endfor %}
+        </ul>
+
+        <label>Day Plan:</label>
+        <textarea class="form-control" rows="3" name="notes_{{ day.day_number }}">{{ day.notes }}</textarea>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
+<!-- Right-side Modal -->
+<div class="modal fade" id="detailModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-slideout modal-dialog-right">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Add Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div id="modalContent">Loading...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function openModal(dayNumber) {
+  const itineraryId = {{ itinerary.id }};
+  fetch(`/planner/modal-content/${itineraryId}/${dayNumber}/`)
+    .then(response => response.text())
+    .then(html => {
+      document.getElementById('modalContent').innerHTML = html;
+      new bootstrap.Modal(document.getElementById('detailModal')).show();
+    });
+}
+</script>
+{% endblock %}

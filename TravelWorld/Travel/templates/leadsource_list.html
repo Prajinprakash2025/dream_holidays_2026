@@ -1,0 +1,502 @@
+{% extends "base.html" %}
+{% load widget_tweaks %}
+
+{% block content %}
+
+<style>
+  .leadsources-header {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    padding: 2rem;
+    border-radius: 15px;
+    margin-bottom: 2rem;
+    color: white;
+    box-shadow: 0 10px 30px rgba(240, 147, 251, 0.3);
+  }
+
+  .modern-table-container {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+  }
+
+  .modern-table thead {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+  }
+
+  .modern-table thead th {
+    border: none;
+    padding: 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+  }
+
+  .modern-table tbody tr {
+    transition: all 0.3s ease;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .modern-table tbody tr:hover {
+    background: #fff0f6;
+    transform: scale(1.01);
+    box-shadow: 0 4px 12px rgba(240, 147, 251, 0.1);
+  }
+
+  .modern-table tbody td {
+    padding: 1rem;
+    vertical-align: middle;
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+  }
+
+  .btn-action {
+    padding: 0.4rem 0.8rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    border: none;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .btn-action:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  }
+
+  .modal-header-gradient {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+  }
+
+  .form-section-title {
+    color: #f093fb;
+    font-weight: 600;
+    border-bottom: 2px solid #f5576c;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .search-box {
+    background: white;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    margin-bottom: 1.5rem;
+  }
+  .suppliers-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 2rem;
+    border-radius: 15px;
+    margin-bottom: 2rem;
+    color: white;
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+  }
+
+  /* Add this new style for back button */
+  .back-button-container {
+    padding: 1.5rem 2rem 0 2rem;
+    margin-bottom: -1rem;
+  }
+
+  .back-btn-modern {
+    padding: 0.6rem 1.2rem;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    border: 2px solid #667eea;
+    color: #667eea;
+    background: white;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .back-btn-modern:hover {
+    background: #667eea;
+    color: white;
+    transform: translateX(-5px);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  }
+
+  .back-btn-modern i {
+    font-size: 16px;
+  }
+
+  .search-filter-bar {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    margin-bottom: 1.5rem;
+  }
+
+  .modern-table {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+  }
+
+  .modern-table thead {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+  }
+
+  .modern-table thead th {
+    border: none;
+    padding: 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+  }
+
+  .modern-table tbody tr {
+    transition: all 0.3s ease;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .modern-table tbody tr:hover {
+    background: #f8f9ff;
+    transform: scale(1.01);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+  }
+
+  .modern-table tbody td {
+    padding: 1rem;
+    vertical-align: middle;
+  }
+
+  .action-btn-group {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .action-btn {
+    padding: 0.4rem 0.8rem;
+    border-radius: 8px;
+    border: none;
+    transition: all 0.3s ease;
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+
+  .badge-modern {
+    padding: 0.4rem 0.8rem;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 12px;
+  }
+
+  .stats-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    text-align: center;
+    transition: all 0.3s ease;
+  }
+
+  .stats-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+  }
+
+  .stats-card .icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    font-size: 24px;
+  }
+
+  .modal-header-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+  }
+
+  .form-section-title {
+    color: #667eea;
+    font-weight: 600;
+    border-bottom: 2px solid #667eea;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+  }
+</style>
+
+<!-- Back Button with Modern Styling -->
+<div class="back-button-container">
+    <a href="{% url 'admin_settings' %}" class="back-btn-modern">
+        <i class="fas fa-arrow-left"></i>
+        <span>Back to Admin Settings</span>
+    </a>
+</div>
+
+<div class="container-fluid" style="margin-top: 90px; padding: 0 2rem;">
+
+  <!-- Header -->
+  <div class="leadsources-header">
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <h2 class="mb-2">
+          <i class="fas fa-chart-line"></i> Lead Sources Management
+        </h2>
+        <p class="mb-0" style="opacity: 0.9;">Manage lead sources and tracking channels</p>
+      </div>
+      
+      <!-- ✅ PERMISSION CHECK: Add Lead Source Button -->
+      {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.permissions.can_add_leadsource %}
+      <button type="button" class="btn btn-light btn-lg shadow" data-bs-toggle="modal" data-bs-target="#leadSourceModal" onclick="resetLeadSourceForm()">
+        <i class="fas fa-plus-circle me-2"></i>Add Lead Source
+      </button>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Search Box -->
+  <div class="search-box">
+    <div class="input-group">
+      <span class="input-group-text bg-transparent border-0">
+        <i class="fas fa-search text-muted"></i>
+      </span>
+      <input type="text" class="form-control border-0" id="searchInput" placeholder="Search lead sources..." onkeyup="filterLeadSources()">
+      <button class="btn btn-outline-secondary" onclick="resetSearch()">
+        <i class="fas fa-redo me-1"></i>Reset
+      </button>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="modern-table-container">
+    <div class="table-responsive">
+      <table class="table modern-table mb-0" id="leadSourcesTable">
+        <thead>
+          <tr>
+            <th><i class="fas fa-tag me-2"></i>Source Name</th>
+            <th class="text-center"><i class="fas fa-toggle-on me-2"></i>Status</th>
+            <th><i class="fas fa-user me-2"></i>Created By</th>
+            <th class="text-center"><i class="fas fa-cogs me-2"></i>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for leadsource in leadsources %}
+          <tr>
+            <td>
+              <div class="fw-bold">{{ leadsource.source_name }}</div>
+              <small class="text-muted">ID: #LS{{ leadsource.id }}</small>
+            </td>
+            <td class="text-center">
+              {% if leadsource.is_active %}
+                <span class="badge bg-success" style="padding: 0.5rem 1rem;">
+                  <i class="fas fa-check-circle me-1"></i>Active
+                </span>
+              {% else %}
+                <span class="badge bg-danger" style="padding: 0.5rem 1rem;">
+                  <i class="fas fa-times-circle me-1"></i>Inactive
+                </span>
+              {% endif %}
+            </td>
+            <td>{{ leadsource.created_by|default:"System" }}</td>
+            <td>
+              <div class="action-buttons">
+                
+                <!-- ✅ PERMISSION CHECK: Edit Button -->
+                {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.permissions.can_edit_leadsource %}
+                <button type="button" class="btn btn-warning btn-action"
+                        data-bs-toggle="modal"
+                        data-bs-target="#leadSourceModal"
+                        data-lead-id="{{ leadsource.id }}"
+                        data-name="{{ leadsource.source_name }}"
+                        data-is-active="{{ leadsource.is_active|yesno:'true,false' }}">
+                  <i class="fas fa-edit me-1"></i>Edit
+                </button>
+                {% endif %}
+                
+                <!-- ✅ PERMISSION CHECK: Delete Button -->
+                {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.permissions.can_delete_leadsource %}
+                <button type="button" class="btn btn-danger btn-action" 
+                        data-bs-toggle="modal" 
+                        data-bs-target="#deleteModal"
+                        data-delete-url="{% url 'delete_leadsource' leadsource.id %}"
+                        data-delete-name="{{ leadsource.source_name }}">
+                  <i class="fas fa-trash me-1"></i>Delete
+                </button>
+                {% endif %}
+                
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="4" class="text-center py-5">
+              <i class="fas fa-chart-line fa-3x text-muted mb-3"></i>
+              <h5 class="text-muted">No lead sources found</h5>
+              <p class="text-muted">Start by adding your first lead source</p>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit Modal -->
+<div class="modal fade" id="leadSourceModal" tabindex="-1" aria-hidden="true" data-url-edit-prototype="{% url 'edit_leadsource' 9999 %}">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <form method="POST" action="" id="leadSourceForm">
+        {% csrf_token %}
+        
+        <div class="modal-header modal-header-gradient">
+          <h5 class="modal-title" id="leadSourceModalLabel">
+            <i class="fas fa-chart-line me-2"></i>Add New Lead Source
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label fw-bold">{{ form.source_name.label }} *</label>
+            {{ form.source_name|add_class:"form-control" }}
+            <small class="text-muted">e.g., Website, Facebook, Referral, Google Ads</small>
+          </div>
+          
+          <div class="mb-3">
+            <div class="form-check form-switch">
+              {{ form.is_active|add_class:"form-check-input" }}
+              <label class="form-check-label ms-2 fw-bold" for="id_is_active">
+                {{ form.is_active.label }}
+              </label>
+            </div>
+          </div>
+        </div>
+        
+        <div class="modal-footer border-0 pt-3">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            <i class="fas fa-times me-1"></i>Close
+          </button>
+          <button type="submit" class="btn" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; font-weight: 600;">
+            <i class="fas fa-save me-1"></i>Save Lead Source
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title">
+          <i class="fas fa-exclamation-triangle me-2"></i>Confirm Delete
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body text-center py-4">
+        <i class="fas fa-trash-alt fa-3x text-danger mb-3"></i>
+        <p class="mb-2">Are you sure you want to delete this lead source?</p>
+        <h5 class="text-danger" id="deleteModalItemName"></h5>
+        <p class="text-muted small mb-0">This action cannot be undone.</p>
+      </div>
+      <div class="modal-footer border-0">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          <i class="fas fa-times me-1"></i>Cancel
+        </button>
+        <form method="post" action="" id="deleteModalForm" class="d-inline">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger">
+            <i class="fas fa-trash me-1"></i>Delete
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function resetLeadSourceForm() {
+  const form = document.getElementById('leadSourceForm');
+  form.reset();
+  form.action = "{% url 'add_leadsource' %}";
+  document.getElementById('leadSourceModalLabel').innerHTML = '<i class="fas fa-chart-line me-2"></i>Add New Lead Source';
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+  const leadSourceModal = document.getElementById('leadSourceModal');
+  if (leadSourceModal) {
+    const modalTitle = document.getElementById('leadSourceModalLabel');
+    const leadSourceForm = document.getElementById('leadSourceForm');
+    const editUrlPrototype = leadSourceModal.getAttribute('data-url-edit-prototype');
+    const createUrl = "{% url 'add_leadsource' %}";
+
+    leadSourceModal.addEventListener('show.bs.modal', function (event) {
+      const button = event.relatedTarget;
+      const leadId = button.getAttribute('data-lead-id');
+
+      if (leadId) {
+        // EDIT MODE
+        modalTitle.innerHTML = '<i class="fas fa-edit me-2"></i>Edit Lead Source';
+        leadSourceForm.action = editUrlPrototype.replace('9999', leadId);
+        leadSourceForm.querySelector('[name="source_name"]').value = button.getAttribute('data-name');
+        leadSourceForm.querySelector('[name="is_active"]').checked = (button.getAttribute('data-is-active') === 'true');
+      } else {
+        // ADD NEW MODE
+        resetLeadSourceForm();
+      }
+    });
+  }
+
+  // Delete Modal
+  const deleteModal = document.getElementById('deleteModal');
+  if (deleteModal) {
+    const deleteModalForm = document.getElementById('deleteModalForm');
+    const deleteModalItemName = document.getElementById('deleteModalItemName');
+
+    deleteModal.addEventListener('show.bs.modal', function (event) {
+      const button = event.relatedTarget;
+      deleteModalForm.action = button.getAttribute('data-delete-url');
+      deleteModalItemName.textContent = button.getAttribute('data-delete-name');
+    });
+  }
+});
+
+// Search/Filter
+function filterLeadSources() {
+  const searchValue = document.getElementById('searchInput').value.toLowerCase();
+  const table = document.getElementById('leadSourcesTable');
+  const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i];
+    const text = row.textContent.toLowerCase();
+    row.style.display = text.includes(searchValue) ? '' : 'none';
+  }
+}
+
+function resetSearch() {
+  document.getElementById('searchInput').value = '';
+  filterLeadSources();
+}
+</script>
+
+{% endblock %}

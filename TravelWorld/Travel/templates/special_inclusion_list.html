@@ -1,0 +1,671 @@
+{% extends "base.html" %}
+{% load widget_tweaks %}
+
+{% block content %}
+
+<style>
+  .inclusions-header {
+    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    padding: 2rem;
+    border-radius: 15px;
+    margin-bottom: 2rem;
+    color: white;
+    box-shadow: 0 10px 30px rgba(250, 112, 154, 0.3);
+  }
+
+  .modern-table-container {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+  }
+
+  .modern-table thead {
+    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    color: white;
+  }
+
+  .modern-table thead th {
+    border: none;
+    padding: 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+  }
+
+  .modern-table tbody tr {
+    transition: all 0.3s ease;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .modern-table tbody tr:hover {
+    background: #fff9f0;
+    transform: scale(1.01);
+    box-shadow: 0 4px 12px rgba(250, 112, 154, 0.1);
+  }
+
+  .modern-table tbody td {
+    padding: 1rem;
+    vertical-align: middle;
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+  }
+
+  .btn-action {
+    padding: 0.4rem 0.8rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    border: none;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .btn-action:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  }
+
+  .modal-header-gradient {
+    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    color: white;
+  }
+
+  .form-section-title {
+    color: #fa709a;
+    font-weight: 600;
+    border-bottom: 2px solid #fee140;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .search-box {
+    background: white;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    margin-bottom: 1.5rem;
+  }
+
+  .info-alert {
+    background: linear-gradient(135deg, rgba(250, 112, 154, 0.1) 0%, rgba(254, 225, 64, 0.1) 100%);
+    border: 2px solid rgba(250, 112, 154, 0.2);
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .pricing-card {
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+  }
+
+  .pricing-card:hover {
+    border-color: #fa709a;
+    box-shadow: 0 4px 12px rgba(250, 112, 154, 0.15);
+  }
+
+  .inclusion-image {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 2px solid #fa709a;
+  }
+  .suppliers-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 2rem;
+    border-radius: 15px;
+    margin-bottom: 2rem;
+    color: white;
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+  }
+
+  /* Add this new style for back button */
+  .back-button-container {
+    padding: 1.5rem 2rem 0 2rem;
+    margin-bottom: -1rem;
+  }
+
+  .back-btn-modern {
+    padding: 0.6rem 1.2rem;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    border: 2px solid #667eea;
+    color: #667eea;
+    background: white;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .back-btn-modern:hover {
+    background: #667eea;
+    color: white;
+    transform: translateX(-5px);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  }
+
+  .back-btn-modern i {
+    font-size: 16px;
+  }
+
+  .search-filter-bar {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    margin-bottom: 1.5rem;
+  }
+
+  .modern-table {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+  }
+
+  .modern-table thead {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+  }
+
+  .modern-table thead th {
+    border: none;
+    padding: 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+  }
+
+  .modern-table tbody tr {
+    transition: all 0.3s ease;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .modern-table tbody tr:hover {
+    background: #f8f9ff;
+    transform: scale(1.01);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+  }
+
+  .modern-table tbody td {
+    padding: 1rem;
+    vertical-align: middle;
+  }
+
+  .action-btn-group {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .action-btn {
+    padding: 0.4rem 0.8rem;
+    border-radius: 8px;
+    border: none;
+    transition: all 0.3s ease;
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+
+  .badge-modern {
+    padding: 0.4rem 0.8rem;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 12px;
+  }
+
+  .stats-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    text-align: center;
+    transition: all 0.3s ease;
+  }
+
+  .stats-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+  }
+
+  .stats-card .icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    font-size: 24px;
+  }
+
+  .modal-header-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+  }
+
+  .form-section-title {
+    color: #667eea;
+    font-weight: 600;
+    border-bottom: 2px solid #667eea;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+  }
+</style>
+
+<!-- Back Button with Modern Styling -->
+<div class="back-button-container">
+    <a href="{% url 'admin_settings' %}" class="back-btn-modern">
+        <i class="fas fa-arrow-left"></i>
+        <span>Back to Admin Settings</span>
+    </a>
+</div>
+
+<div class="container-fluid" style="margin-top: 90px; padding: 0 2rem;">
+
+  <!-- Header -->
+  <div class="inclusions-header">
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <h2 class="mb-2">
+          <i class="fas fa-star"></i> General Special Inclusions
+        </h2>
+        <p class="mb-0" style="opacity: 0.9;">Manage standalone inclusions for bookings</p>
+      </div>
+      
+      <!-- ✅ PERMISSION CHECK: Add Inclusion Button -->
+      {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.permissions.can_add_special_inclusion %}
+      <button type="button" class="btn btn-light btn-lg shadow" data-bs-toggle="modal" data-bs-target="#inclusionModal">
+        <i class="fas fa-plus-circle me-2"></i>Add General Inclusion
+      </button>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Info Alert -->
+  <div class="info-alert">
+    <i class="fas fa-info-circle me-2" style="color: #fa709a;"></i>
+    <strong>General Inclusions</strong> are standalone services not linked to any specific hotel or houseboat. These can be used across multiple bookings.
+  </div>
+
+  <!-- Search Box -->
+  <div class="search-box">
+    <div class="input-group">
+      <span class="input-group-text bg-transparent border-0">
+        <i class="fas fa-search text-muted"></i>
+      </span>
+      <input type="text" class="form-control border-0" id="searchInput" placeholder="Search inclusions..." onkeyup="filterInclusions()">
+      <button class="btn btn-outline-secondary" onclick="resetSearch()">
+        <i class="fas fa-redo me-1"></i>Reset
+      </button>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="modern-table-container">
+    <div class="table-responsive">
+      <table class="table modern-table mb-0" id="inclusionsTable">
+        <thead>
+          <tr>
+            <th><i class="fas fa-star me-2"></i>Name</th>
+            <th><i class="fas fa-tag me-2"></i>Pricing Type</th>
+            <th><i class="fas fa-user me-2"></i>Adult Price</th>
+            <th><i class="fas fa-child me-2"></i>Child Pricing</th>
+            <th><i class="fas fa-info-circle me-2"></i>Details</th>
+            <th class="text-center"><i class="fas fa-toggle-on me-2"></i>Status</th>
+            <th class="text-center"><i class="fas fa-cogs me-2"></i>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for inclusion in inclusions %}
+          <tr>
+            <td>
+              <div class="d-flex align-items-center gap-2">
+                {% if inclusion.photo %}
+                  <img src="{{ inclusion.photo.url }}" alt="{{ inclusion.name }}" class="inclusion-image">
+                {% endif %}
+                <div>
+                  <div class="fw-bold">{{ inclusion.name }}</div>
+                  <small class="text-muted">ID: #INC{{ inclusion.id }}</small>
+                </div>
+              </div>
+            </td>
+            <td>
+              <span class="badge bg-secondary" style="padding: 0.5rem 0.8rem;">
+                {{ inclusion.get_pricing_type_display }}
+              </span>
+            </td>
+            <td>
+              {% if inclusion.pricing_type == 'free' %}
+                <span class="badge bg-success" style="padding: 0.5rem 1rem;">FREE</span>
+              {% else %}
+                <strong class="text-primary">₹{{ inclusion.adult_price|floatformat:2 }}</strong>
+              {% endif %}
+            </td>
+            <td>
+              {% if inclusion.child_pricing_type == 'same' %}
+                <small class="text-muted">Same as Adult</small>
+              {% elif inclusion.child_pricing_type == 'percentage' %}
+                <span class="badge bg-info">{{ inclusion.child_price_value }}%</span>
+              {% elif inclusion.child_pricing_type == 'fixed' %}
+                <strong class="text-warning">₹{{ inclusion.child_price_value|floatformat:2 }}</strong>
+              {% elif inclusion.child_pricing_type == 'free' %}
+                <span class="badge bg-success">FREE</span>
+              {% endif %}
+            </td>
+            <td>
+              <small class="text-muted">
+                {{ inclusion.details|truncatewords:10|default:"No details" }}
+              </small>
+            </td>
+            <td class="text-center">
+              {% if inclusion.status %}
+                <span class="badge bg-success" style="padding: 0.5rem 1rem;">
+                  <i class="fas fa-check-circle me-1"></i>Active
+                </span>
+              {% else %}
+                <span class="badge bg-danger" style="padding: 0.5rem 1rem;">
+                  <i class="fas fa-times-circle me-1"></i>Inactive
+                </span>
+              {% endif %}
+            </td>
+            <td>
+              <div class="action-buttons">
+                
+                <!-- ✅ PERMISSION CHECK: Edit Button -->
+                {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.permissions.can_edit_special_inclusion %}
+                <button type="button" class="btn btn-warning btn-action"
+                        data-bs-toggle="modal"
+                        data-bs-target="#inclusionModal"
+                        data-inclusion-id="{{ inclusion.id }}"
+                        data-name="{{ inclusion.name }}"
+                        data-pricing-type="{{ inclusion.pricing_type }}"
+                        data-adult-price="{{ inclusion.adult_price }}"
+                        data-child-pricing-type="{{ inclusion.child_pricing_type }}"
+                        data-child-price-value="{{ inclusion.child_price_value }}"
+                        data-min-age="{{ inclusion.min_age|default:'' }}"
+                        data-max-age="{{ inclusion.max_age|default:'' }}"
+                        data-details="{{ inclusion.details }}"
+                        data-status="{{ inclusion.status|yesno:'true,false' }}">
+                  <i class="fas fa-edit me-1"></i>Edit
+                </button>
+                {% endif %}
+                
+                <!-- ✅ PERMISSION CHECK: Delete Button -->
+                {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.permissions.can_delete_special_inclusion %}
+                <button type="button" class="btn btn-danger btn-action" 
+                        data-bs-toggle="modal" 
+                        data-bs-target="#deleteModal"
+                        data-delete-url="{% url 'delete_special_inclusion' inclusion.id %}"
+                        data-delete-name="{{ inclusion.name }}">
+                  <i class="fas fa-trash me-1"></i>Delete
+                </button>
+                {% endif %}
+                
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="7" class="text-center py-5">
+              <i class="fas fa-star fa-3x text-muted mb-3"></i>
+              <h5 class="text-muted">No General Inclusions Yet</h5>
+              <p class="text-muted">Click "Add General Inclusion" to create one</p>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit Inclusion Modal -->
+<div class="modal fade" id="inclusionModal" tabindex="-1" aria-hidden="true" data-url-edit-prototype="{% url 'edit_special_inclusion' 9999 %}">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header modal-header-gradient">
+        <h5 class="modal-title" id="inclusionModalLabel">
+          <i class="fas fa-star me-2"></i>Add General Inclusion
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form method="POST" action="" id="inclusionForm" enctype="multipart/form-data">
+          {% csrf_token %}
+          
+          <!-- Name -->
+          <div class="mb-4">
+            <h6 class="form-section-title">
+              <i class="fas fa-info-circle me-2"></i>Basic Information
+            </h6>
+            <div class="mb-3">
+              <label class="form-label fw-bold">Inclusion Name *</label>
+              {{ form.name|add_class:"form-control" }}
+              <small class="text-muted">e.g., Airport Transfer, Tour Guide, Insurance</small>
+            </div>
+          </div>
+
+          <hr>
+
+          <!-- Adult Pricing -->
+          <div class="mb-4">
+            <h6 class="form-section-title">
+              <i class="fas fa-user me-2"></i>Adult Pricing
+            </h6>
+            <div class="pricing-card p-3">
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label fw-bold">Pricing Type *</label>
+                  {{ form.pricing_type|add_class:"form-select" }}
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label fw-bold">Adult Price (₹)</label>
+                  {{ form.adult_price|add_class:"form-control" }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <hr>
+
+          <!-- Child Pricing -->
+          <div class="mb-4">
+            <h6 class="form-section-title">
+              <i class="fas fa-child me-2"></i>Child Pricing
+            </h6>
+            <div class="pricing-card p-3 border-warning">
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label fw-bold">Child Pricing Type *</label>
+                  {{ form.child_pricing_type|add_class:"form-select" }}
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label fw-bold">Child Price Value</label>
+                  {{ form.child_price_value|add_class:"form-control" }}
+                  <small class="text-muted">Enter % or fixed amount</small>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label fw-bold">Min Age (Optional)</label>
+                  {{ form.min_age|add_class:"form-control" }}
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label fw-bold">Max Age for Child Rate</label>
+                  {{ form.max_age|add_class:"form-control" }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <hr>
+
+          <!-- Details & Photo -->
+          <div class="mb-4">
+            <h6 class="form-section-title">
+              <i class="fas fa-file-alt me-2"></i>Additional Information
+            </h6>
+            
+            <div class="mb-3">
+              <label class="form-label fw-bold">Details & Description</label>
+              {{ form.details|add_class:"form-control" }}
+              <small class="text-muted">Describe what this inclusion offers</small>
+            </div>
+            
+            <div class="mb-3">
+              <label class="form-label fw-bold">Photo (Optional)</label>
+              {{ form.photo|add_class:"form-control" }}
+            </div>
+          </div>
+
+          <hr>
+
+          <!-- Status -->
+          <div class="mb-4">
+            <h6 class="form-section-title">
+              <i class="fas fa-toggle-on me-2"></i>Status
+            </h6>
+            <div class="form-check form-switch">
+              {{ form.status|add_class:"form-check-input" }}
+              <label class="form-check-label ms-2 fw-bold" for="id_status">
+                {{ form.status.label }}
+              </label>
+            </div>
+          </div>
+
+          <!-- Hidden field -->
+          <input type="hidden" name="inclusion_type" value="general">
+          
+        </form>
+      </div>
+      <div class="modal-footer border-0 pt-3">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          <i class="fas fa-times me-1"></i>Close
+        </button>
+        <button type="submit" form="inclusionForm" class="btn" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: white;">
+          <i class="fas fa-save me-1"></i>Save Inclusion
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title">
+          <i class="fas fa-exclamation-triangle me-2"></i>Confirm Delete
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body text-center py-4">
+        <i class="fas fa-trash-alt fa-3x text-danger mb-3"></i>
+        <p class="mb-2">Are you sure you want to delete this inclusion?</p>
+        <h5 class="text-danger" id="deleteModalItemName"></h5>
+        <p class="text-muted small mb-0">This action cannot be undone.</p>
+      </div>
+      <div class="modal-footer border-0">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          <i class="fas fa-times me-1"></i>Cancel
+        </button>
+        <form method="post" action="" id="deleteModalForm" class="d-inline">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger">
+            <i class="fas fa-trash me-1"></i>Delete
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const inclusionModal = document.getElementById('inclusionModal');
+  if (inclusionModal) {
+    const modalTitle = document.getElementById('inclusionModalLabel');
+    const inclusionForm = document.getElementById('inclusionForm');
+    const editUrlPrototype = inclusionModal.getAttribute('data-url-edit-prototype');
+    const createUrl = "{% url 'add_special_inclusion' %}";
+
+    inclusionModal.addEventListener('show.bs.modal', function (event) {
+      const button = event.relatedTarget;
+      const inclusionId = button.getAttribute('data-inclusion-id');
+
+      if (inclusionId) { 
+        // EDIT MODE
+        modalTitle.innerHTML = '<i class="fas fa-edit me-2"></i>Edit General Inclusion';
+        inclusionForm.action = editUrlPrototype.replace('9999', inclusionId);
+        
+        // Populate form fields
+        inclusionForm.querySelector('[name="name"]').value = button.getAttribute('data-name') || '';
+        inclusionForm.querySelector('[name="pricing_type"]').value = button.getAttribute('data-pricing-type') || 'free';
+        inclusionForm.querySelector('[name="adult_price"]').value = button.getAttribute('data-adult-price') || '0';
+        inclusionForm.querySelector('[name="child_pricing_type"]').value = button.getAttribute('data-child-pricing-type') || 'same';
+        inclusionForm.querySelector('[name="child_price_value"]').value = button.getAttribute('data-child-price-value') || '0';
+        inclusionForm.querySelector('[name="min_age"]').value = button.getAttribute('data-min-age') || '';
+        inclusionForm.querySelector('[name="max_age"]').value = button.getAttribute('data-max-age') || '';
+        inclusionForm.querySelector('[name="details"]').value = button.getAttribute('data-details') || '';
+        inclusionForm.querySelector('[name="status"]').checked = (button.getAttribute('data-status') === 'true');
+      } else { 
+        // ADD NEW MODE
+        modalTitle.innerHTML = '<i class="fas fa-star me-2"></i>Add General Inclusion';
+        inclusionForm.action = createUrl;
+        inclusionForm.reset();
+        inclusionForm.querySelector('[name="status"]').checked = true;
+      }
+    });
+  }
+
+  // Delete Modal
+  const deleteModal = document.getElementById('deleteModal');
+  if (deleteModal) {
+    const deleteModalForm = document.getElementById('deleteModalForm');
+    const deleteModalItemName = document.getElementById('deleteModalItemName');
+
+    deleteModal.addEventListener('show.bs.modal', function (event) {
+      const button = event.relatedTarget;
+      deleteModalForm.action = button.getAttribute('data-delete-url');
+      deleteModalItemName.textContent = button.getAttribute('data-delete-name');
+    });
+  }
+});
+
+// Search/Filter
+function filterInclusions() {
+  const searchValue = document.getElementById('searchInput').value.toLowerCase();
+  const table = document.getElementById('inclusionsTable');
+  const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i];
+    const text = row.textContent.toLowerCase();
+    row.style.display = text.includes(searchValue) ? '' : 'none';
+  }
+}
+
+function resetSearch() {
+  document.getElementById('searchInput').value = '';
+  filterInclusions();
+}
+</script>
+
+{% endblock %}

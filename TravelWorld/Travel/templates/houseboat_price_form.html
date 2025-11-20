@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block content %}
+<br><br>
+<div class="container mt-5" style="max-width: 950px;">
+    <!-- Page Title -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold text-primary">
+            💰 Add / Edit Houseboat Price
+        </h2>
+    </div>
+
+    <!-- Form Card -->
+    <div class="card shadow-lg border-0 rounded-3">
+        <div class="card-body p-5">
+            <form method="post" class="needs-validation" novalidate>
+                {% csrf_token %}
+
+                <!-- General Info -->
+                <h5 class="text-primary mb-3">
+                    <i class="bi bi-info-circle"></i> General Info
+                </h5>
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label">{{ form.room_type.label }}</label>
+                        {{ form.room_type|add_class:"form-select" }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">{{ form.meal_plan.label }}</label>
+                        {{ form.meal_plan|add_class:"form-select" }}
+                    </div>
+                </div>
+
+                <!-- Date Range -->
+                <h5 class="text-primary mb-3">
+                    <i class="bi bi-calendar-event"></i> Date Range
+                </h5>
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label">{{ form.from_date.label }}</label>
+                        {{ form.from_date|add_class:"form-control" }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">{{ form.to_date.label }}</label>
+                        {{ form.to_date|add_class:"form-control" }}
+                    </div>
+                </div>
+
+                <!-- Bed Prices -->
+                <h5 class="text-primary mb-3">
+                    <i class="bi bi-house-door"></i> Bed Prices
+                </h5>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">{{ form.one_bed.label }}</label>
+                        {{ form.one_bed|add_class:"form-control" }}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">{{ form.two_bed.label }}</label>
+                        {{ form.two_bed|add_class:"form-control" }}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">{{ form.three_bed.label }}</label>
+                        {{ form.three_bed|add_class:"form-control" }}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">{{ form.four_bed.label }}</label>
+                        {{ form.four_bed|add_class:"form-control" }}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">{{ form.five_bed.label }}</label>
+                        {{ form.five_bed|add_class:"form-control" }}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">{{ form.six_bed.label }}</label>
+                        {{ form.six_bed|add_class:"form-control" }}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">{{ form.seven_bed.label }}</label>
+                        {{ form.seven_bed|add_class:"form-control" }}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">{{ form.eight_bed.label }}</label>
+                        {{ form.eight_bed|add_class:"form-control" }}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">{{ form.nine_bed.label }}</label>
+                        {{ form.nine_bed|add_class:"form-control" }}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">{{ form.ten_bed.label }}</label>
+                        {{ form.ten_bed|add_class:"form-control" }}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">{{ form.extra_bed.label }}</label>
+                        {{ form.extra_bed|add_class:"form-control" }}
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="d-flex justify-content-end mt-5">
+                    <a href="{% url 'houseboat_list' %}" class="btn btn-secondary me-2">
+                        <i class="bi bi-arrow-left"></i> Cancel
+                    </a>
+                    <button type="submit" class="btn btn-success shadow-sm">
+                        <i class="bi bi-save"></i> Save
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

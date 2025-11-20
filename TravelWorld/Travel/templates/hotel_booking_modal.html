@@ -1,0 +1,15 @@
+<div class="modal-header">
+    <h5 class="modal-title">Book Hotel - {{ hotel.name }}</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+  </div>
+  
+  <form method="post" action="{% url 'book_hotel' itinerary.id day_number hotel.id %}">
+    <div class="modal-body">
+      {% csrf_token %}
+      {{ form.as_p }}
+    </div>
+    <div class="modal-footer">
+      <button type="submit" class="btn btn-primary">Confirm Booking</button>
+    </div>
+  </form>
+  

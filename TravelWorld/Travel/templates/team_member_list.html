@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% load widget_tweaks %}
+
+{% block content %}
+<br><br>
+<div class="container mt-5">
+    <div class="card shadow-lg rounded">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h4 class="card-title m-0">Team Members</h4>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#teamMemberModal">
+                <i class="fas fa-plus"></i> Add Team Member
+            </button>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Name</th><th>Email</th><th>Phone</th><th>Role</th><th class="text-center">Status</th><th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for member in team_members %}
+                        <tr>
+                            <td>{{ member.first_name }} {{ member.last_name }}</td>
+                            <td>{{ member.email }}</td>
+                            <td>{{ member.phone_number }}</td>
+                            <td>{{ member.get_role_display }}</td>
+                            <td class="text-center">
+                                {% if member.is_active %}<span class="badge bg-success">Active</span>{% else %}<span class="badge bg-danger">Inactive</span>{% endif %}
+                            </td>
+                            <td class="text-center">
+                                <button type="button" class="btn btn-sm btn-warning"
+                                        data-bs-toggle="modal" data-bs-target="#teamMemberModal"
+                                        data-member-id="{{ member.id }}"
+                                        data-first-name="{{ member.first_name }}"
+                                        data-last-name="{{ member.last_name }}"
+                                        data-email="{{ member.email }}"
+                                        data-phone-number="{{ member.phone_number }}"
+                                        data-role="{{ member.role }}"
+                                        data-is-active="{{ member.is_active|yesno:'true,false' }}">
+                                    <i class="fas fa-edit"></i> Edit
+                                </button>
+                                <button type="button" class="btn btn-sm btn-danger" 
+                                        data-bs-toggle="modal" data-bs-target="#deleteModal"
+                                        data-delete-url="{% url 'delete_team_member' member.id %}"
+                                        data-delete-name="{{ member.first_name }} {{ member.last_name }}">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="6" class="text-center text-muted">No team members found.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="teamMemberModal" tabindex="-1" aria-labelledby="teamMemberModalLabel" aria-hidden="true" data-url-edit-prototype="{% url 'edit_team_member' 9999 %}">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header"><h5 class="modal-title" id="teamMemberModalLabel">Add New Team Member</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body">
+                <form method="POST" action="" id="teamMemberForm">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-6 mb-3"><label class="form-label">{{ form.first_name.label }}</label>{{ form.first_name|add_class:"form-control" }}</div>
+                        <div class="col-md-6 mb-3"><label class="form-label">{{ form.last_name.label }}</label>{{ form.last_name|add_class:"form-control" }}</div>
+                    </div>
+                    <div class="mb-3"><label class="form-label">{{ form.email.label }}</label>{{ form.email|add_class:"form-control" }}</div>
+                    <div class="mb-3"><label class="form-label">{{ form.phone_number.label }}</label>{{ form.phone_number|add_class:"form-control" }}</div>
+                    <div class="mb-3"><label class="form-label">{{ form.role.label }}</label>{{ form.role|add_class:"form-select" }}</div>
+                    <div class="mb-3 form-check">{{ form.is_active|add_class:"form-check-input" }}<label class="form-check-label ms-2">{{ form.is_active.label }}</label></div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">...</div> <script>
+document.addEventListener("DOMContentLoaded", function () {
+    const teamMemberModal = document.getElementById('teamMemberModal');
+    if (teamMemberModal) {
+        const modalTitle = document.getElementById('teamMemberModalLabel');
+        const teamMemberForm = document.getElementById('teamMemberForm');
+        const editUrlPrototype = teamMemberModal.getAttribute('data-url-edit-prototype');
+        const createUrl = "{% url 'add_team_member' %}";
+
+        teamMemberModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const memberId = button.getAttribute('data-member-id');
+
+            if (memberId) { // EDIT MODE
+                modalTitle.textContent = 'Edit Team Member';
+                teamMemberForm.action = editUrlPrototype.replace('9999', memberId);
+                teamMemberForm.querySelector('[name="first_name"]').value = button.getAttribute('data-first-name');
+                teamMemberForm.querySelector('[name="last_name"]').value = button.getAttribute('data-last-name');
+                teamMemberForm.querySelector('[name="email"]').value = button.getAttribute('data-email');
+                teamMemberForm.querySelector('[name="phone_number"]').value = button.getAttribute('data-phone-number');
+                teamMemberForm.querySelector('[name="role"]').value = button.getAttribute('data-role');
+                teamMemberForm.querySelector('[name="is_active"]').checked = (button.getAttribute('data-is-active') === 'true');
+            } else { // ADD NEW MODE
+                modalTitle.textContent = 'Add New Team Member';
+                teamMemberForm.action = createUrl;
+                teamMemberForm.reset();
+            }
+        });
+    }
+
+    const deleteModal = document.getElementById('deleteModal');
+    if (deleteModal) { /* ... (Same delete modal script as other pages) ... */ }
+});
+</script>
+{% endblock %}

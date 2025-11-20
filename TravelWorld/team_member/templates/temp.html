@@ -1,0 +1,495 @@
+    <!-- ========================================== -->
+    <!-- MASTER DATA MANAGEMENT CARD (COMPACT VERSION) -->
+    <!-- ========================================== -->
+    <div class="card mb-4">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <h5 class="mb-0 text-secondary">
+      <i class="fas fa-database me-2"></i>Master Data Management
+    </h5>
+    <button class="btn btn-sm btn-outline-secondary select-all-btn" onclick="selectAllInCard({{ data.member.id }}, 'masterdata')">
+      <i class="fas fa-check-double me-1"></i>Select All
+    </button>
+  </div>
+  <div class="card-body">
+    <div class="row">
+
+      <!-- ========================================== -->
+      <!-- 1. SUPPLIERS -->
+      <!-- ========================================== -->
+      <div class="col-md-6 mb-3">
+        <div class="d-flex justify-content-between align-items-start">
+          <div class="flex-grow-1">
+            <label class="form-label fw-bold mb-1">
+              Manage Suppliers
+              <button class="btn btn-sm btn-link p-0 ms-1 text-decoration-none" 
+                      onclick="toggleSubPermissions('suppliers_{{ data.member.id }}')"
+                      title="Show detailed permissions">
+                <i class="fas fa-chevron-down" id="icon_suppliers_{{ data.member.id }}" style="font-size: 12px;"></i>
+              </button>
+            </label>
+            <p class="text-muted small mb-0">Full supplier management access</p>
+          </div>
+          <div class="form-check form-switch ms-3">
+            <input class="form-check-input permission-masterdata" type="checkbox"
+              id="{{ data.member.id }}_can_manage_suppliers"
+              data-permission="can_manage_suppliers"
+              {% if data.permissions_status.can_manage_suppliers %}checked{% endif %}
+              onchange="togglePermission({{ data.member.id }}, 'can_manage_suppliers', this.checked)"
+              style="width: 48px; height: 24px; cursor: pointer" />
+          </div>
+        </div>
+        
+        <!-- Sub-permissions -->
+        <div class="sub-permissions ms-3 mt-2" id="suppliers_{{ data.member.id }}" style="display: none;">
+          
+          <!-- ✅ SELECT ALL SUB-PERMISSIONS BUTTON -->
+          <div class="d-flex justify-content-end mb-2">
+            <button class="btn btn-sm btn-outline-primary" 
+                    onclick="selectAllSubPermissions({{ data.member.id }}, 'suppliers')"
+                    style="font-size: 11px; padding: 3px 10px;">
+              <i class="fas fa-check-double me-1"></i>Select All
+            </button>
+          </div>
+
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <small class="text-muted"><i class="fas fa-eye me-1"></i> View</small>
+            <div class="form-check form-switch">
+              <input class="form-check-input sub-perm-suppliers-{{ data.member.id }}" type="checkbox"
+                id="{{ data.member.id }}_can_view_suppliers"
+                data-permission="can_view_suppliers"
+                {% if data.permissions_status.can_view_suppliers %}checked{% endif %}
+                onchange="togglePermission({{ data.member.id }}, 'can_view_suppliers', this.checked)"
+                style="width: 40px; height: 20px; cursor: pointer" />
+            </div>
+          </div>
+          
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <small class="text-muted"><i class="fas fa-plus me-1"></i> Add</small>
+            <div class="form-check form-switch">
+              <input class="form-check-input sub-perm-suppliers-{{ data.member.id }}" type="checkbox"
+                id="{{ data.member.id }}_can_add_supplier"
+                data-permission="can_add_supplier"
+                {% if data.permissions_status.can_add_supplier %}checked{% endif %}
+                onchange="togglePermission({{ data.member.id }}, 'can_add_supplier', this.checked)"
+                style="width: 40px; height: 20px; cursor: pointer" />
+            </div>
+          </div>
+          
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <small class="text-muted"><i class="fas fa-edit me-1"></i> Edit</small>
+            <div class="form-check form-switch">
+              <input class="form-check-input sub-perm-suppliers-{{ data.member.id }}" type="checkbox"
+                id="{{ data.member.id }}_can_edit_supplier"
+                data-permission="can_edit_supplier"
+                {% if data.permissions_status.can_edit_supplier %}checked{% endif %}
+                onchange="togglePermission({{ data.member.id }}, 'can_edit_supplier', this.checked)"
+                style="width: 40px; height: 20px; cursor: pointer" />
+            </div>
+          </div>
+          
+          <div class="d-flex justify-content-between align-items-center">
+            <small class="text-muted"><i class="fas fa-trash me-1"></i> Delete</small>
+            <div class="form-check form-switch">
+              <input class="form-check-input sub-perm-suppliers-{{ data.member.id }}" type="checkbox"
+                id="{{ data.member.id }}_can_delete_supplier"
+                data-permission="can_delete_supplier"
+                {% if data.permissions_status.can_delete_supplier %}checked{% endif %}
+                onchange="togglePermission({{ data.member.id }}, 'can_delete_supplier', this.checked)"
+                style="width: 40px; height: 20px; cursor: pointer" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+
+
+
+
+<!-- JAVASCRIPT -->
+<script>
+  // Show selected user's permissions
+  function showUserPermissions(userId) {
+    const emptyState = document.getElementById("emptyState");
+
+    // Hide all user permission sections
+    document.querySelectorAll(".user-permissions").forEach((section) => {
+      section.style.display = "none";
+    });
+
+    // Show or hide empty state
+    if (!userId) {
+      emptyState.style.display = "block";
+      return;
+    } else {
+      emptyState.style.display = "none";
+    }
+
+    // Show selected user's permissions
+    const selectedUser = document.getElementById("user-" + userId);
+    if (selectedUser) {
+      selectedUser.style.display = "block";
+      // Smooth scroll to the permissions
+      selectedUser.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }
+
+  // Select all permissions in a specific card
+  function selectAllInCard(userId, cardType) {
+    const checkboxes = document.querySelectorAll(
+      `#user-${userId} .permission-${cardType}`
+    );
+    const allChecked = Array.from(checkboxes).every((cb) => cb.checked);
+    const btn = event.target.closest("button");
+
+    // Disable button during processing
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Processing...';
+
+    // Toggle all checkboxes in this card
+    let processedCount = 0;
+    const totalCheckboxes = checkboxes.length;
+
+    checkboxes.forEach((checkbox, index) => {
+      if (checkbox.checked !== !allChecked) {
+        checkbox.checked = !allChecked;
+        const permission = checkbox.getAttribute("data-permission");
+
+        // Add small delay between each request to avoid overwhelming the server
+        setTimeout(() => {
+          togglePermission(userId, permission, !allChecked, () => {
+            processedCount++;
+            if (processedCount === totalCheckboxes) {
+              // Re-enable button and update text
+              btn.disabled = false;
+              btn.innerHTML =
+                '<i class="fas fa-check-double me-1"></i>Select All';
+            }
+          });
+        }, index * 100);
+      }
+    });
+
+    // If no checkboxes need updating, re-enable button immediately
+    if (processedCount === totalCheckboxes || totalCheckboxes === 0) {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-check-double me-1"></i>Select All';
+    }
+  }
+
+  // Toggle sub-permissions visibility (expand/collapse)
+  function toggleSubPermissions(id) {
+    const element = document.getElementById(id);
+    const icon = document.getElementById('icon_' + id);
+    const button = icon.parentElement;
+    
+    if (element.style.display === 'none') {
+      element.style.display = 'block';
+      button.classList.add('expanded');
+    } else {
+      element.style.display = 'none';
+      button.classList.remove('expanded');
+    }
+  }
+
+  // ✅ NEW FUNCTION: Select all sub-permissions for a specific category
+  function selectAllSubPermissions(userId, category) {
+    // Get all checkboxes with the specific class
+    const checkboxes = document.querySelectorAll(`.sub-perm-${category}-${userId}`);
+    
+    // Check if all are already selected
+    const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+    
+    // Toggle: if all checked, uncheck all; otherwise, check all
+    const newState = !allChecked;
+    
+    // Get the button that was clicked
+    const button = event.target.closest('button');
+    
+    // Disable button during processing
+    button.disabled = true;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Processing...';
+    
+    let processedCount = 0;
+    const totalCheckboxes = checkboxes.length;
+    
+    checkboxes.forEach((checkbox, index) => {
+      if (checkbox.checked !== newState) {
+        checkbox.checked = newState;
+        
+        // Get the permission key from data attribute
+        const permission = checkbox.getAttribute('data-permission');
+        
+        // Add small delay between requests
+        setTimeout(() => {
+          togglePermission(userId, permission, newState, () => {
+            processedCount++;
+            if (processedCount === totalCheckboxes) {
+              // Re-enable button and update text/style
+              button.disabled = false;
+              if (newState) {
+                button.innerHTML = '<i class="fas fa-times me-1"></i>Deselect All';
+                button.classList.remove('btn-outline-primary');
+                button.classList.add('btn-outline-danger');
+              } else {
+                button.innerHTML = '<i class="fas fa-check-double me-1"></i>Select All';
+                button.classList.remove('btn-outline-danger');
+                button.classList.add('btn-outline-primary');
+              }
+            }
+          });
+        }, index * 100);
+      } else {
+        processedCount++;
+      }
+    });
+    
+    // If no checkboxes need updating, re-enable button immediately
+    if (processedCount === totalCheckboxes) {
+      button.disabled = false;
+      if (newState) {
+        button.innerHTML = '<i class="fas fa-times me-1"></i>Deselect All';
+        button.classList.remove('btn-outline-primary');
+        button.classList.add('btn-outline-danger');
+      } else {
+        button.innerHTML = '<i class="fas fa-check-double me-1"></i>Select All';
+        button.classList.remove('btn-outline-danger');
+        button.classList.add('btn-outline-primary');
+      }
+    }
+  }
+
+  // Toggle individual permission
+  function togglePermission(userId, permission, isGranted, callback) {
+    const action = isGranted ? "grant" : "revoke";
+    const checkbox = document.getElementById(`${userId}_${permission}`);
+    
+    if (checkbox) {
+      checkbox.disabled = true;
+    }
+
+    fetch('{% url "team_member:toggle_permission" %}', {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "X-CSRFToken": "{{ csrf_token }}",
+      },
+      body: `user_id=${userId}&permission=${permission}&action=${action}`,
+    })
+      .then((response) => {
+        if (checkbox) {
+          checkbox.disabled = false;
+        }
+        if (response.ok) {
+          return response.json();
+        } else {
+          throw new Error("Failed to update permission");
+        }
+      })
+      .then((data) => {
+        if (typeof callback === "function") {
+          callback();
+        }
+        // Optional: Show subtle success feedback without popup
+        console.log(`✅ ${data.message || "Permission updated successfully"}`);
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        if (checkbox) {
+          checkbox.disabled = false;
+          checkbox.checked = !isGranted;
+        }
+
+        if (typeof Swal !== "undefined") {
+          Swal.fire({
+            icon: "error",
+            title: "Error!",
+            text: "Failed to update permission. Please try again.",
+            toast: true,
+            position: "top-end",
+            showConfirmButton: false,
+            timer: 3000,
+          });
+        } else {
+          alert("Failed to update permission. Please try again.");
+        }
+      });
+  }
+</script>
+
+<style>
+  .form-check-input:checked {
+    background-color: #1572e8;
+    border-color: #1572e8;
+  }
+
+  .form-check-input {
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .form-check-input:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  .form-check-input:focus {
+    box-shadow: 0 0 0 0.2rem rgba(21, 114, 232, 0.25);
+  }
+
+  .card {
+    border: 1px solid #e3e6f0;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    transition: box-shadow 0.3s ease;
+  }
+
+  .card:hover {
+    box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1);
+  }
+
+  .card-header {
+    background-color: #f8f9fc;
+    border-bottom: 1px solid #e3e6f0;
+    padding: 1rem 1.25rem;
+  }
+
+  .badge-primary {
+    background-color: #1572e8;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .form-select:focus {
+    border-color: #1572e8;
+    box-shadow: 0 0 0 0.2rem rgba(21, 114, 232, 0.25);
+  }
+
+  .btn-outline-primary:hover {
+    background-color: #1572e8;
+    border-color: #1572e8;
+    color: white;
+  }
+
+  .btn-outline-danger:hover {
+    background-color: #dc3545;
+    border-color: #dc3545;
+    color: white;
+  }
+
+  .select-all-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  .user-permissions {
+    animation: fadeIn 0.4s ease-in;
+  }
+
+  #emptyState {
+    animation: fadeIn 0.3s ease-in;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Improve toggle switch appearance */
+  .form-check-input[type="checkbox"] {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e");
+  }
+
+  .form-check-input:checked[type="checkbox"] {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e");
+  }
+
+  /* Empty state styling */
+  #emptyState .fa-user-shield {
+    color: #858796;
+  }
+
+  /* Sub-permissions expandable section */
+  .sub-permissions {
+    background: #f8f9fa;
+    border-left: 3px solid #667eea;
+    padding: 10px;
+    border-radius: 6px;
+    margin-top: 8px;
+    animation: slideDown 0.3s ease;
+  }
+
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      max-height: 0;
+      padding: 0 10px;
+    }
+    to {
+      opacity: 1;
+      max-height: 500px;
+      padding: 10px;
+    }
+  }
+
+  /* Chevron button styling */
+  .btn-link {
+    color: #667eea;
+    transition: all 0.3s ease;
+    text-decoration: none;
+  }
+
+  .btn-link:hover {
+    color: #764ba2;
+    text-decoration: none;
+  }
+
+  .btn-link i {
+    transition: transform 0.3s ease;
+  }
+
+  .btn-link.expanded i {
+    transform: rotate(180deg);
+  }
+
+  /* Select All Sub-Permissions button */
+  .btn-outline-primary.btn-sm {
+    transition: all 0.3s ease;
+  }
+
+  .btn-outline-danger.btn-sm {
+    transition: all 0.3s ease;
+  }
+
+  /* Smooth hover effects */
+  .sub-permissions .form-check-input:hover {
+    transform: scale(1.05);
+  }
+
+  /* Loading state for buttons */
+  button:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  .fa-spinner.fa-spin {
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+</style>

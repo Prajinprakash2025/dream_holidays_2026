@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+{% block content %}
+<br><br>
+<div class="container mt-5">
+    <div class="card shadow-lg rounded">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h4 class="card-title m-0">Day Itineraries</h4>
+            <a href="{% url 'add_itinerary' %}" class="btn btn-success">
+                <i class="fas fa-plus"></i> Add New Itinerary
+            </a>
+        </div>
+        <div class="card-body">
+            <!-- Search Box -->
+            <div class="mb-3 position-relative">
+                <input type="text" id="search-box" class="form-control" placeholder="Search Itineraries..." autocomplete="off">
+                <div id="search-dropdown" class="dropdown-content"></div>
+            </div>
+
+            <!-- Table -->
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Title</th>
+                            <th>Destination</th>
+                            <th>Created By</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for itinerary in itineraries %}
+                        <tr>
+                            <td>{{ itinerary.title }}</td>
+                            <td>{{ itinerary.destination }}</td>
+                            <td>{{ itinerary.created_by }}</td>
+                            <td class="text-center">
+                                <a href="{% url 'edit_itinerary' itinerary.id %}" class="btn btn-sm btn-warning">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
+                                <a href="{% url 'delete_itinerary' itinerary.id %}" class="btn btn-sm btn-danger">
+                                    <i class="fas fa-trash"></i> Delete
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center text-muted">No itineraries found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Search Script -->
+<script>
+document.getElementById("search-box").addEventListener("input", function() {
+    let query = this.value.trim();
+    let dropdown = document.getElementById("search-dropdown");
+
+    if (query.length < 1) {
+        dropdown.innerHTML = "";
+        return;
+    }
+
+    fetch(`/search-itineraries/?q=${query}`)
+    .then(response => response.json())
+    .then(data => {
+        dropdown.innerHTML = "";
+        let regex = new RegExp(`(${query})`, "gi");
+
+        data.forEach(itinerary => {
+            let highlightedTitle = itinerary.title.replace(regex, `<span class="highlight">$1</span>`);
+            let highlightedDest = itinerary.destination.replace(regex, `<span class="highlight">$1</span>`);
+
+            let item = document.createElement("div");
+            item.classList.add("dropdown-item");
+            item.innerHTML = `<strong>${highlightedTitle}</strong> - ${highlightedDest}`;
+            item.onclick = function() {
+                document.getElementById("search-box").value = itinerary.title;
+                dropdown.innerHTML = "";
+            };
+            dropdown.appendChild(item);
+        });
+    });
+});
+
+// Hide dropdown when clicking outside
+document.addEventListener("click", function(e) {
+    if (!document.getElementById("search-box").contains(e.target)) {
+        document.getElementById("search-dropdown").innerHTML = "";
+    }
+});
+</script>
+
+<style>
+/* Dropdown */
+.dropdown-content {
+    position: absolute;
+    background: white;
+    border: 1px solid #ddd;
+    width: 100%;
+    max-height: 200px;
+    overflow-y: auto;
+    display: block;
+    z-index: 1000;
+}
+
+.dropdown-item {
+    padding: 8px;
+    cursor: pointer;
+    border-bottom: 1px solid #f1f1f1;
+}
+
+.dropdown-item:hover {
+    background: #f1f1f1;
+}
+
+.highlight {
+    background-color: yellow;
+    font-weight: bold;
+}
+</style>
+{% endblock %}

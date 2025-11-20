@@ -1,0 +1,500 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<style>
+  .currencies-header {
+    background: linear-gradient(135deg, #ffc371 0%, #ff5f6d 100%);
+    padding: 2rem;
+    border-radius: 15px;
+    margin-bottom: 2rem;
+    color: white;
+    box-shadow: 0 10px 30px rgba(255, 195, 113, 0.3);
+  }
+
+  .modern-table-container {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+  }
+
+  .modern-table thead {
+    background: linear-gradient(135deg, #ffc371 0%, #ff5f6d 100%);
+    color: white;
+  }
+
+  .modern-table thead th {
+    border: none;
+    padding: 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+  }
+
+  .modern-table tbody tr {
+    transition: all 0.3s ease;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .modern-table tbody tr:hover {
+    background: #fff8f0;
+    transform: scale(1.01);
+    box-shadow: 0 4px 12px rgba(255, 195, 113, 0.1);
+  }
+
+  .modern-table tbody td {
+    padding: 1rem;
+    vertical-align: middle;
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+  }
+
+  .btn-action {
+    padding: 0.4rem 0.8rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    border: none;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .btn-action:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  }
+
+  .modal-header-gradient {
+    background: linear-gradient(135deg, #ffc371 0%, #ff5f6d 100%);
+    color: white;
+  }
+
+  .form-section-title {
+    color: #ffc371;
+    font-weight: 600;
+    border-bottom: 2px solid #ff5f6d;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .search-box {
+    background: white;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    margin-bottom: 1.5rem;
+  }
+
+  .currency-badge {
+    font-size: 1.2rem;
+    font-weight: 700;
+    padding: 0.5rem 1rem;
+  }
+  .suppliers-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 2rem;
+    border-radius: 15px;
+    margin-bottom: 2rem;
+    color: white;
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+  }
+
+  /* Add this new style for back button */
+  .back-button-container {
+    padding: 1.5rem 2rem 0 2rem;
+    margin-bottom: -1rem;
+  }
+
+  .back-btn-modern {
+    padding: 0.6rem 1.2rem;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    border: 2px solid #667eea;
+    color: #667eea;
+    background: white;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .back-btn-modern:hover {
+    background: #667eea;
+    color: white;
+    transform: translateX(-5px);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  }
+
+  .back-btn-modern i {
+    font-size: 16px;
+  }
+
+  .search-filter-bar {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    margin-bottom: 1.5rem;
+  }
+
+  .modern-table {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+  }
+
+  .modern-table thead {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+  }
+
+  .modern-table thead th {
+    border: none;
+    padding: 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+  }
+
+  .modern-table tbody tr {
+    transition: all 0.3s ease;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .modern-table tbody tr:hover {
+    background: #f8f9ff;
+    transform: scale(1.01);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+  }
+
+  .modern-table tbody td {
+    padding: 1rem;
+    vertical-align: middle;
+  }
+
+  .action-btn-group {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .action-btn {
+    padding: 0.4rem 0.8rem;
+    border-radius: 8px;
+    border: none;
+    transition: all 0.3s ease;
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+
+  .badge-modern {
+    padding: 0.4rem 0.8rem;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 12px;
+  }
+
+  .stats-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    text-align: center;
+    transition: all 0.3s ease;
+  }
+
+  .stats-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+  }
+
+  .stats-card .icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    font-size: 24px;
+  }
+
+  .modal-header-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+  }
+
+  .form-section-title {
+    color: #667eea;
+    font-weight: 600;
+    border-bottom: 2px solid #667eea;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+  }
+</style>
+
+<!-- Back Button with Modern Styling -->
+<div class="back-button-container">
+    <a href="{% url 'admin_settings' %}" class="back-btn-modern">
+        <i class="fas fa-arrow-left"></i>
+        <span>Back to Admin Settings</span>
+    </a>
+</div>
+<div class="container-fluid" style="margin-top: 90px; padding: 0 2rem;">
+
+  <!-- Header -->
+  <div class="currencies-header">
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <h2 class="mb-2">
+          <i class="fas fa-coins"></i> Currencies Management
+        </h2>
+        <p class="mb-0" style="opacity: 0.9;">Manage currency rates and conversions</p>
+      </div>
+      
+      <!-- ✅ PERMISSION CHECK: Add Currency Button -->
+      {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.permissions.can_add_currency %}
+      <button type="button" class="btn btn-light btn-lg shadow" data-bs-toggle="modal" data-bs-target="#currencyModal" onclick="resetCurrencyForm()">
+        <i class="fas fa-plus-circle me-2"></i>Add Currency
+      </button>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Search Box -->
+  <div class="search-box">
+    <div class="input-group">
+      <span class="input-group-text bg-transparent border-0">
+        <i class="fas fa-search text-muted"></i>
+      </span>
+      <input type="text" class="form-control border-0" id="searchInput" placeholder="Search currencies..." onkeyup="filterCurrencies()">
+      <button class="btn btn-outline-secondary" onclick="resetSearch()">
+        <i class="fas fa-redo me-1"></i>Reset
+      </button>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="modern-table-container">
+    <div class="table-responsive">
+      <table class="table modern-table mb-0" id="currenciesTable">
+        <thead>
+          <tr>
+            <th><i class="fas fa-money-bill me-2"></i>Currency Name</th>
+            <th><i class="fas fa-exchange-alt me-2"></i>Currency Rate</th>
+            <th class="text-center"><i class="fas fa-toggle-on me-2"></i>Status</th>
+            <th><i class="fas fa-calendar me-2"></i>Created At</th>
+            <th class="text-center"><i class="fas fa-cogs me-2"></i>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for currency in currencies %}
+          <tr>
+            <td>
+              <div class="fw-bold fs-5">{{ currency.currency_name }}</div>
+              <small class="text-muted">ID: #CUR{{ currency.id }}</small>
+            </td>
+            <td>
+              <span class="currency-badge badge bg-primary">
+                {{ currency.currency_rate }}
+              </span>
+            </td>
+            <td class="text-center">
+              {% if currency.status %}
+                <span class="badge bg-success" style="padding: 0.5rem 1rem;">
+                  <i class="fas fa-check-circle me-1"></i>Active
+                </span>
+              {% else %}
+                <span class="badge bg-danger" style="padding: 0.5rem 1rem;">
+                  <i class="fas fa-times-circle me-1"></i>Inactive
+                </span>
+              {% endif %}
+            </td>
+            <td>
+              <i class="far fa-clock me-1"></i>{{ currency.created_at|date:"Y-m-d H:i" }}
+            </td>
+            <td>
+              <div class="action-buttons">
+                
+                <!-- ✅ PERMISSION CHECK: Edit Button -->
+                {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.permissions.can_edit_currency %}
+                <button type="button" class="btn btn-warning btn-action" onclick="editCurrency(this)"
+                        data-bs-toggle="modal" data-bs-target="#currencyModal"
+                        data-id="{{ currency.id }}"
+                        data-name="{{ currency.currency_name }}"
+                        data-rate="{{ currency.currency_rate }}"
+                        data-status="{{ currency.status|yesno:'true,false' }}">
+                  <i class="fas fa-edit me-1"></i>Edit
+                </button>
+                {% endif %}
+                
+                <!-- ✅ PERMISSION CHECK: Delete Button -->
+                {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.permissions.can_delete_currency %}
+                <button type="button" class="btn btn-danger btn-action"
+                        data-bs-toggle="modal"
+                        data-bs-target="#deleteModal"
+                        data-delete-url="{% url 'delete_currency' currency.id %}"
+                        data-delete-name="{{ currency.currency_name }}">
+                  <i class="fas fa-trash me-1"></i>Delete
+                </button>
+                {% endif %}
+                
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="5" class="text-center py-5">
+              <i class="fas fa-coins fa-3x text-muted mb-3"></i>
+              <h5 class="text-muted">No currencies found</h5>
+              <p class="text-muted">Start by adding your first currency</p>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit Currency Modal -->
+<div class="modal fade" id="currencyModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <form method="POST" id="currencyForm" action="{% url 'add_currency' %}">
+        {% csrf_token %}
+        
+        <div class="modal-header modal-header-gradient">
+          <h5 class="modal-title" id="currencyModalLabel">
+            <i class="fas fa-coins me-2"></i>Add New Currency
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="currency_name" class="form-label fw-bold">Currency Name *</label>
+            <input type="text" class="form-control" id="currency_name" name="currency_name" required placeholder="e.g., USD, EUR, INR">
+            <small class="text-muted">Enter currency code or name</small>
+          </div>
+          
+          <div class="mb-3">
+            <label for="currency_rate" class="form-label fw-bold">Currency Rate *</label>
+            <input type="number" step="0.0001" class="form-control" id="currency_rate" name="currency_rate" required placeholder="e.g., 83.50">
+            <small class="text-muted">Exchange rate relative to base currency</small>
+          </div>
+          
+          <div class="mb-3">
+            <div class="form-check form-switch">
+              <input type="checkbox" class="form-check-input" id="status" name="status" checked style="width: 48px; height: 24px; cursor: pointer;">
+              <label class="form-check-label ms-2 fw-bold" for="status">Active Status</label>
+            </div>
+          </div>
+        </div>
+        
+        <div class="modal-footer border-0 pt-3">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            <i class="fas fa-times me-1"></i>Close
+          </button>
+          <button type="submit" class="btn" style="background: linear-gradient(135deg, #ffc371 0%, #ff5f6d 100%); color: white; font-weight: 600;">
+            <i class="fas fa-save me-1"></i>Save Currency
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title">
+          <i class="fas fa-exclamation-triangle me-2"></i>Confirm Delete
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body text-center py-4">
+        <i class="fas fa-trash-alt fa-3x text-danger mb-3"></i>
+        <p class="mb-2">Are you sure you want to delete this currency?</p>
+        <h5 class="text-danger" id="deleteModalItemName"></h5>
+        <p class="text-muted small mb-0">This action cannot be undone.</p>
+      </div>
+      <div class="modal-footer border-0">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          <i class="fas fa-times me-1"></i>Cancel
+        </button>
+        <a href="" id="deleteModalLink" class="btn btn-danger">
+          <i class="fas fa-trash me-1"></i>Delete
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function resetCurrencyForm() {
+  const form = document.getElementById('currencyForm');
+  form.reset();
+  form.action = "{% url 'add_currency' %}";
+  document.getElementById('currencyModalLabel').innerHTML = '<i class="fas fa-coins me-2"></i>Add New Currency';
+  document.getElementById('status').checked = true;
+}
+
+function editCurrency(button) {
+  const form = document.getElementById('currencyForm');
+  const currencyId = button.getAttribute('data-id');
+  
+  form.action = `/currencies/edit/${currencyId}/`;
+  document.getElementById('currencyModalLabel').innerHTML = '<i class="fas fa-edit me-2"></i>Edit Currency';
+  
+  document.getElementById('currency_name').value = button.getAttribute('data-name') || '';
+  document.getElementById('currency_rate').value = button.getAttribute('data-rate') || '';
+  document.getElementById('status').checked = button.getAttribute('data-status') === 'true';
+}
+
+// Delete Modal
+const deleteModal = document.getElementById('deleteModal');
+if (deleteModal) {
+  deleteModal.addEventListener('show.bs.modal', function (event) {
+    const button = event.relatedTarget;
+    document.getElementById('deleteModalLink').href = button.getAttribute('data-delete-url');
+    document.getElementById('deleteModalItemName').textContent = button.getAttribute('data-delete-name');
+  });
+}
+
+// Search/Filter
+function filterCurrencies() {
+  const searchValue = document.getElementById('searchInput').value.toLowerCase();
+  const table = document.getElementById('currenciesTable');
+  const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i];
+    const text = row.textContent.toLowerCase();
+    row.style.display = text.includes(searchValue) ? '' : 'none';
+  }
+}
+
+function resetSearch() {
+  document.getElementById('searchInput').value = '';
+  filterCurrencies();
+}
+</script>
+
+{% endblock %}

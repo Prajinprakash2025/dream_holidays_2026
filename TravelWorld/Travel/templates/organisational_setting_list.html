@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-9">
+    <h1 class="mb-4">Organisational Settings</h1>
+    {% for setting in settings %}
+    <table class="table table-bordered mb-5">
+        <tr>
+            <th>Organization Name</th>
+            <td>{{ setting.organization_name }}</td>
+        </tr>
+        <tr>
+            <th>Email</th>
+            <td>{{ setting.email }}</td>
+        </tr>
+        <tr>
+            <th>Phone Number</th>
+            <td>{{ setting.phone_number }}</td>
+        </tr>
+        <tr>
+            <th>Address</th>
+            <td>{{ setting.address }}</td>
+        </tr>
+        <tr>
+            <th>GSTN</th>
+            <td>{{ setting.gstn }}</td>
+        </tr>
+        <tr>
+            <th>State</th>
+            <td>{{ setting.state }}</td>
+        </tr>
+        <tr>
+            <th>State Code</th>
+            <td>{{ setting.state_code }}</td>
+        </tr>
+        <tr>
+            <td colspan="2" class="text-center">
+                <a href="{% url 'organisational_setting_edit' setting.pk %}" class="btn btn-primary btn-sm">
+                    Edit
+                </a>
+            </td>
+        </tr>
+    </table>
+    {% empty %}
+    <p>No organisational settings found.</p>
+    {% endfor %}
+</div>
+{% endblock %}

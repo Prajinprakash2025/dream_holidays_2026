@@ -1,0 +1,1763 @@
+{% extends 'itinerary_base.html' %}
+  {% load custom_tags booking_tags %}
+{% load json_filters %}
+
+
+  {% block body %}
+
+
+  <style>
+      
+      .markup-option-card {
+          transition: all 0.3s ease;
+          border: 2px solid #dee2e6 !important;
+          cursor: pointer;
+      }
+      
+      .markup-option-card:hover {
+          border-color: #198754 !important;
+          background-color: #f8f9fa !important;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      }
+      
+      .markup-option-card:focus {
+          outline: 2px solid #0d6efd;
+          outline-offset: 2px;
+      }
+      
+      .markup-option-card.border-success {
+          border-color: #198754 !important;
+          background-color: #d1e7dd !important;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(25, 135, 84, 0.2);
+      }
+      
+      .form-check-input:checked {
+          background-color: #198754;
+          border-color: #198754;
+      }
+      
+      #globalMarkupModal .modal-dialog {
+          max-width: 700px;
+      }
+      
+      /* Hotel list styling */
+      .markup-option-card .bg-light {
+          border: 1px solid #e9ecef;
+          transition: all 0.2s ease;
+      }
+      
+      .markup-option-card.border-success .bg-light {
+          background-color: #f8f9fa !important;
+          border-color: #198754;
+      }
+
+
+      
+      .markup-option-card:hover {
+          border-color: #198754 !important;
+          background-color: #f8f9fa !important;
+      }
+      
+      .markup-option-card.border-success {
+          border-color: #198754 !important;
+          background-color: #d1e7dd !important;
+      }
+      
+      .form-check-input:checked {
+          background-color: #198754;
+          border-color: #198754;
+      }
+      
+      #globalMarkupModal .modal-dialog {
+          max-width: 600px;
+      }
+
+
+      .pricing-table th, .pricing-table td { vertical-align: middle; font-size: 0.9rem; }
+      .item-icon { font-size: 1.2rem; margin-right: 10px; color: #6c757d; }
+      .item-name { font-weight: 600; color: #343a40; }
+      .item-details { font-size: 0.8rem; color: #6c757d; }
+      .summary-table th, .summary-table td { font-size: 0.9rem; border: none; }
+      .summary-table thead th { border-bottom: 2px solid #dee2e6; }
+      .gst-panel .input-group-text { width: 110px; }
+      .houseboat-input {
+          background-color: white !important;
+          pointer-events: auto !important;
+      }
+      .houseboat-input:focus {
+          border-color: #80bdff !important;
+          outline: none !important;
+      }
+  </style>
+
+
+<div class="card shadow-sm">
+    <div class="card-body">
+  <!-- Items Table -->
+  <div class="table-responsive">
+    <table class="table pricing-table">
+      <thead>
+        <tr>
+          <th style="width:40%;">Item</th>
+          <th>Option</th>
+          <th>Type</th>
+          <th class="text-end">Net Price</th>
+          <th class="text-end">Markup</th>
+          <th class="text-end">Gross Price</th>
+          {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.role == 'manager' or current_user.permissions.can_view_item_actions %}
+          <th class="text-center">Actions</th>
+          {% endif %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in all_items %}
+        <tr id="item-row-{{ item.item_type }}-{{ item.id }}"
+            style="{% if item.item_type == 'Accommodation' %}background:#e8f4f8;
+                    {% elif item.item_type == 'Transportation' %}background:#f8f9fa;
+                    {% elif item.item_type == 'Activity' %}background:#e8f5e9;
+                    {% elif item.item_type == 'Houseboat' %}background:#d1e7dd;
+                    {% elif item.item_type == 'Standalone Activity' %}background:#fff3cd;{% endif %}"
+            {% if item.item_type == 'Accommodation' or item.item_type == 'Houseboat' %}
+              data-inclusions-total="{{ item.inclusion_price|default:0 }}"
+              data-inclusions='[{% for inc in item.inclusions_list %}{"id": {{ inc.special_inclusion.id }}, "name": "{{ inc.special_inclusion.name|escapejs }}", "price": {{ inc.get_total_price|default:0 }}, "num_adults": {{ inc.num_adults|default:0 }}, "num_children": {{ inc.num_children|default:0 }}}{% if not forloop.last %},{% endif %}{% endfor %}]'
+            {% endif %}>
+          
+          <!-- ITEM NAME & DETAILS -->
+          <td>
+            <div class="d-flex align-items-center">
+              <i class="fas fa-{% if item.item_type == 'Accommodation' %}hotel
+                {% elif item.item_type == 'Transportation' %}car
+                {% elif item.item_type == 'Activity' %}hiking
+                {% elif item.item_type == 'Houseboat' %}ship
+                {% elif item.item_type == 'Standalone Activity' %}mountain
+                {% endif %} item-icon me-2"></i>
+              <div>
+                <div class="item-name fw-bold">{{ item|get_item_name }}</div>
+                <div class="item-details text-muted small">{{ item|get_item_details }}</div>
+                
+                <!-- ✅ Show inclusions for Hotels/Houseboats -->
+                {% if item.item_type == 'Accommodation' or item.item_type == 'Houseboat' %}
+                  {% if item.inclusions_list %}
+                    <div class="mt-1">
+                      <small class="text-success">
+                        <i class="fas fa-gift me-1"></i>
+                        <strong>Inclusions (₹{{ item.inclusion_price|floatformat:2 }}):</strong>
+                        {% for inc_item in item.inclusions_list %}
+                          {{ inc_item.special_inclusion.name }}
+                          ({{ inc_item.num_adults }} A{% if inc_item.num_children %}, {{ inc_item.num_children }} C{% endif %}){% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                      </small>
+                    </div>
+                  {% endif %}
+                {% endif %}
+                
+                <!-- ✅ Show participants for Standalone Activities -->
+                {% if item.item_type == 'Standalone Activity' %}
+                  <div class="mt-1">
+                    <small class="text-muted">
+                      <i class="fas fa-users me-1"></i>
+                      {{ item.num_adults }} Adult{{ item.num_adults|pluralize }}
+                      {% if item.num_children > 0 %}
+                        + {{ item.num_children }} Child{{ item.num_children|pluralize:"ren" }}
+                      {% endif %}
+                    </small>
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+          </td>
+          
+          <!-- OPTION -->
+          <td>
+            {% if item.item_type == 'Accommodation' %}
+              <span class="badge bg-primary">{{ item.get_option_display }}</span>
+            {% else %}<span class="text-muted">-</span>{% endif %}
+          </td>
+          
+          <!-- TYPE -->
+          <td>
+            <span class="badge 
+              {% if item.item_type == 'Accommodation' %}bg-info
+              {% elif item.item_type == 'Transportation' %}bg-secondary
+              {% elif item.item_type == 'Activity' %}bg-success
+              {% elif item.item_type == 'Houseboat' %}bg-primary
+              {% elif item.item_type == 'Standalone Activity' %}bg-warning text-dark
+              {% endif %}">
+              {{ item.item_type }}
+            </span>
+          </td>
+          
+          <!-- NET PRICE -->
+          <td class="text-end net-price">₹{{ item.calculated_price.net|floatformat:2 }}</td>
+          
+          <!-- MARKUP -->
+          <td class="text-end markup-cell">₹{{ item.calculated_price.markup|floatformat:2 }}</td>
+          
+          <!-- GROSS PRICE -->
+          <td class="text-end fw-bold gross-price">₹{{ item.calculated_price.gross|floatformat:2 }}</td>
+          
+          <!-- ACTIONS COLUMN -->
+          {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.role == 'manager' or current_user.permissions.can_view_item_actions %}
+          <td class="text-center">
+            
+            <!-- ✅ HOTEL ACTIONS -->
+            {% if item.item_type == 'Accommodation' and item.price_record %}
+              <button class="btn btn-sm btn-outline-primary"
+                data-bs-toggle="modal"
+                data-bs-target="#editItemModal"
+                data-item-type="hotel"
+                data-booking-id="{{ item.id }}"
+                data-item-name="{{ item|get_item_name }}"
+                data-unit-double-bed="{{ item.price_record.double_bed|default:0 }}"
+                data-unit-extra-bed="{{ item.price_record.extra_bed|default:0 }}"
+                data-unit-child-with="{{ item.price_record.child_with_bed|default:0 }}"
+                data-unit-child-without="{{ item.price_record.child_without_bed|default:0 }}"
+                data-num-double-beds="{{ item.num_double_beds|default:0 }}"
+                data-extra-beds="{{ item.extra_beds|default:0 }}"
+                data-child-with-bed="{{ item.child_with_bed|default:0 }}"
+                data-child-without-bed="{{ item.child_without_bed|default:0 }}"
+                data-nights="{{ item.calculated_price.nights|default:1 }}"
+                data-markup-type="{{ item.markup_type|default:'fixed' }}"
+                data-markup-value="{{ item.markup_value|default:0 }}"
+                data-saved-double-bed-total="{{ item.custom_double_bed_total|default:0 }}"
+                data-saved-extra-bed-total="{{ item.custom_extra_bed_total|default:0 }}"
+                data-saved-child-with-total="{{ item.custom_child_with_bed_total|default:0 }}"
+                data-saved-child-without-total="{{ item.custom_child_without_bed_total|default:0 }}"
+                data-inclusions-total="{{ item.inclusion_price|default:0 }}"
+                data-inclusions='[{% for inc in item.inclusions_list %}{"id": {{ inc.special_inclusion.id }}, "name": "{{ inc.special_inclusion.name|escapejs }}", "price": {{ inc.get_total_price|default:0 }}, "num_adults": {{ inc.num_adults|default:0 }}, "num_children": {{ inc.num_children|default:0 }}}{% if not forloop.last %},{% endif %}{% endfor %}]'>
+                <i class="fas fa-edit"></i> Edit
+              </button>
+            
+            <!-- ✅ VEHICLE ACTIONS -->
+            {% elif item.item_type == 'Transportation' %}
+              <button class="btn btn-sm btn-outline-secondary"
+                data-bs-toggle="modal"
+                data-bs-target="#editItemModal"
+                data-item-type="vehicle"
+                data-booking-id="{{ item.id }}"
+                data-item-name="{{ item|get_item_name }}"
+                data-base-fee="{{ item.price_record.total_fee_100km|default:0 }}"
+                data-extra-km-fee="{{ item.price_record.extra_fee_per_km|default:0 }}"
+                data-total-km="{{ item.total_km|default:100 }}"
+                data-markup-type="{{ item.markup_type|default:'fixed' }}"
+                data-markup-value="{{ item.markup_value|default:0 }}"
+                data-saved-total-price="{{ item.custom_total_price|default:0 }}">
+                <i class="fas fa-edit"></i> Edit
+              </button>
+
+            <!-- ✅ ACTIVITY ACTIONS -->
+            {% elif item.item_type == 'Activity' %}
+              <button class="btn btn-sm btn-outline-success"
+                data-bs-toggle="modal"
+                data-bs-target="#editItemModal"
+                data-item-type="activity"
+                data-booking-id="{{ item.id }}"
+                data-item-name="{{ item|get_item_name }}"
+                data-unit-price="{{ item.price_record.per_person|default:0 }}"
+                data-quantity="{{ item.num_adults|add:item.num_children|default:1 }}"
+                data-markup-type="{{ item.markup_type|default:'fixed' }}"
+                data-markup-value="{{ item.markup_value|default:0 }}"
+                data-saved-total-price="{{ item.custom_total_price|default:0 }}">
+                <i class="fas fa-edit"></i> Edit
+              </button>
+
+            <!-- ✅ HOUSEBOAT ACTIONS -->
+            {% elif item.item_type == 'Houseboat' and item.price_record %}
+              <button class="btn btn-sm btn-outline-info"
+                data-bs-toggle="modal"
+                data-bs-target="#editItemModal"
+                data-item-type="houseboat"
+                data-booking-id="{{ item.id }}"
+                data-item-name="{{ item|get_item_name }}"
+                data-one-bed="{{ item.price_record.one_bed|default:0 }}"
+                data-two-bed="{{ item.price_record.two_bed|default:0 }}"
+                data-three-bed="{{ item.price_record.three_bed|default:0 }}"
+                data-four-bed="{{ item.price_record.four_bed|default:0 }}"
+                data-five-bed="{{ item.price_record.five_bed|default:0 }}"
+                data-six-bed="{{ item.price_record.six_bed|default:0 }}"
+                data-seven-bed="{{ item.price_record.seven_bed|default:0 }}"
+                data-eight-bed="{{ item.price_record.eight_bed|default:0 }}"
+                data-nine-bed="{{ item.price_record.nine_bed|default:0 }}"
+                data-ten-bed="{{ item.price_record.ten_bed|default:0 }}"
+                data-extra-bed-hb="{{ item.price_record.extra_bed|default:0 }}"
+                data-num-one-bed="{{ item.num_one_bed_rooms|default:0 }}"
+                data-num-two-bed="{{ item.num_two_bed_rooms|default:0 }}"
+                data-num-three-bed="{{ item.num_three_bed_rooms|default:0 }}"
+                data-num-four-bed="{{ item.num_four_bed_rooms|default:0 }}"
+                data-num-five-bed="{{ item.num_five_bed_rooms|default:0 }}"
+                data-num-six-bed="{{ item.num_six_bed_rooms|default:0 }}"
+                data-num-seven-bed="{{ item.num_seven_bed_rooms|default:0 }}"
+                data-num-eight-bed="{{ item.num_eight_bed_rooms|default:0 }}"
+                data-num-nine-bed="{{ item.num_nine_bed_rooms|default:0 }}"
+                data-num-ten-bed="{{ item.num_ten_bed_rooms|default:0 }}"
+                data-num-extra-beds-hb="{{ item.num_extra_beds|default:0 }}"
+                data-nights="{{ item.calculated_price.nights|default:1 }}"
+                data-markup-type="{{ item.markup_type|default:'fixed' }}"
+                data-markup-value="{{ item.markup_value|default:0 }}"
+                data-saved-one-bed-total="{{ item.custom_one_bed_total|default:0 }}"
+                data-saved-two-bed-total="{{ item.custom_two_bed_total|default:0 }}"
+                data-saved-three-bed-total="{{ item.custom_three_bed_total|default:0 }}"
+                data-saved-four-bed-total="{{ item.custom_four_bed_total|default:0 }}"
+                data-saved-five-bed-total="{{ item.custom_five_bed_total|default:0 }}"
+                data-saved-six-bed-total="{{ item.custom_six_bed_total|default:0 }}"
+                data-saved-seven-bed-total="{{ item.custom_seven_bed_total|default:0 }}"
+                data-saved-eight-bed-total="{{ item.custom_eight_bed_total|default:0 }}"
+                data-saved-nine-bed-total="{{ item.custom_nine_bed_total|default:0 }}"
+                data-saved-ten-bed-total="{{ item.custom_ten_bed_total|default:0 }}"
+                data-saved-extra-bed-hb-total="{{ item.custom_extra_bed_hb_total|default:0 }}"
+                data-inclusions-total="{{ item.inclusion_price|default:0 }}"
+                data-inclusions='[{% for inc in item.inclusions_list %}{"id": {{ inc.special_inclusion.id }}, "name": "{{ inc.special_inclusion.name|escapejs }}", "price": {{ inc.get_total_price|default:0 }}, "num_adults": {{ inc.num_adults|default:0 }}, "num_children": {{ inc.num_children|default:0 }}}{% if not forloop.last %},{% endif %}{% endfor %}]'>
+                <i class="fas fa-edit"></i> Edit
+              </button>
+            
+            <!-- ✅ STANDALONE ACTIVITY ACTIONS -->
+            {% elif item.item_type == 'Standalone Activity' %}
+              <button class="btn btn-sm btn-outline-warning"
+                      data-bs-toggle="modal" 
+                      data-bs-target="#editItemModal"
+                      data-item-type="standalone"
+                      data-booking-id="{{ item.id }}"
+                      data-item-name="{{ item.special_inclusion.name }}"
+                      data-total-price="{{ item.calculated_price.net|default:0 }}"
+                      data-num-adults="{{ item.num_adults }}"
+                      data-num-children="{{ item.num_children }}"
+                      data-booking-date="{{ item.booking_date|date:'Y-m-d' }}"
+                      data-markup-type="{{ item.markup_type|default:'fixed' }}"
+                      data-markup-value="{{ item.markup_value|default:0 }}">
+                  <i class="fas fa-edit"></i> Edit
+              </button>
+            
+            {% else %}
+              <span class="text-muted">-</span>
+            {% endif %}
+          </td>
+          {% endif %}
+          
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="{% if user_type == 'superuser' or current_user.role == 'admin' or current_user.role == 'manager' or current_user.permissions.can_view_item_actions %}7{% else %}6{% endif %}" 
+              class="text-center text-muted py-4">
+            <i class="fas fa-inbox fa-2x mb-2 d-block"></i>
+            No items booked yet.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+
+
+
+    <hr>
+
+
+ <div class="row">
+  <!-- Summary Table -->
+  <div class="col-md-8">
+    <div class="table-responsive">
+      <table class="table table-sm summary-table">
+        <thead class="table-dark">
+          <tr>
+            <th>SERVICE</th>
+            <th class="text-end">NET PRICE (₹)</th>
+            <th class="text-end">MARKUP (Indiv + Global)</th>
+            <th class="text-center">CGST ({{ current_cgst|floatformat:0 }}%)</th>
+            <th class="text-center">SGST ({{ current_sgst|floatformat:0 }}%)</th>
+            <th class="text-center">DISCOUNT</th>
+            <th class="text-end">TOTAL</th>
+          </tr>
+        </thead>
+        
+        <tbody>
+          {% if hotel_option_groups %}
+            {% for group in hotel_option_groups %}
+              <tr class="hotel-package-row {% if selected_option == forloop.counter|stringformat:'s' %}table-primary{% endif %}">
+                <td>
+                  <i class="fas fa-hotel text-primary me-2"></i>
+                  <strong>{{ group.option_name }}</strong>
+                  <br>
+                  <small class="text-muted">
+                    Combined Package 
+                    <span class="badge bg-secondary ms-1">{{ group.hotel_count }} hotel{{ group.hotel_count|pluralize }}</span>
+                    
+                    <!-- ✅ OPTIONAL: Show standalone activities count -->
+                    {% with standalone_count=all_items|length %}
+                      {% if standalone_count > 0 %}
+                        <span class="badge bg-warning text-dark ms-1">
+                          {{ standalone_count }} standalone activit{{ standalone_count|pluralize:"y,ies" }}
+                        </span>
+                      {% endif %}
+                    {% endwith %}
+                  </small>
+                </td>
+                <td class="text-end">₹{{ group.net_price|floatformat:2 }}</td>
+                
+                <td class="text-end">
+                  ₹{{ group.markup|floatformat:2 }} 
+                  <br>
+                  {% if group.global_markup > 0 %}
+                    <small class="text-success fw-bold">
+                      +₹{{ group.global_markup|floatformat:2 }} (Global)
+                    </small>
+                  {% else %}
+                    <small class="text-muted">
+                      +₹0.00 (Global)
+                    </small>
+                  {% endif %}
+                </td>
+                
+                <td class="text-center">₹{{ group.cgst_amount|floatformat:2 }}</td>
+                <td class="text-center">₹{{ group.sgst_amount|floatformat:2 }}</td>
+                <td class="text-center">₹{{ group.discount|floatformat:2 }}</td>
+                <td class="text-end">
+                  <strong class="{% if group.global_markup > 0 %}text-success{% else %}text-dark{% endif %}">
+                    ₹{{ group.gross_price|floatformat:2 }}
+                  </strong>
+                </td>
+              </tr>
+            {% endfor %}
+          {% else %}
+            <tr><td colspan="7" class="text-center text-muted py-3">No package options available.</td></tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div class="col-md-4">
+    <!-- ✅ Global Markup Button - WITH PERMISSION CHECK -->
+    {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.role == 'manager' or current_user.permissions.can_apply_global_markup %}
+    <div class="mb-3">
+      <button type="button" class="btn btn-success w-100" 
+              data-bs-toggle="modal" 
+              data-bs-target="#globalMarkupModal"
+              id="globalMarkupBtn">
+        <i class="fas fa-plus-circle me-2"></i>Global Markup Options
+      </button>
+    </div>
+    {% endif %}
+    
+<div class="alert alert-light mb-3">
+  <small>
+    <strong><i class="fas fa-info-circle me-1"></i>Package Summary:</strong><br>
+    Total Items: {{ all_items|length }}<br>
+    <span class="text-muted">Including hotels, vehicles, activities, and standalone services</span>
+  </small>
+</div>
+
+    
+    <!-- GST & Discount Form -->
+    <form method="GET" class="gst-panel">
+      <!-- Hidden markup fields -->
+      <input type="hidden" name="selected_option" value="{{ selected_option|default:'' }}" id="hiddenSelectedOption">
+      <input type="hidden" name="markup_type" value="{{ current_markup_type }}" id="hiddenMarkupType">
+      <input type="hidden" name="markup_value" value="{{ current_markup_value|floatformat:2 }}" id="hiddenMarkupValue">
+      
+      <!-- Current Markup Display -->
+      <div class="alert alert-success py-2 mb-3" id="currentMarkupDisplay">
+        <small>
+          <i class="fas fa-tag me-1"></i>
+          <strong>Applied Global Markup:</strong> 
+          <span id="markupDisplayText">
+            {% if current_markup_value == 0 %}
+              <span class="text-muted">No markup applied (₹0)</span>
+            {% else %}
+              {% if current_markup_type == 'percentage' %}{{ current_markup_value }}%{% else %}₹{{ current_markup_value }}{% endif %}
+            {% endif %}
+          </span>
+        </small>
+      </div>
+      
+      <!-- ✅ CGST Input -->
+      <div class="input-group mb-2">
+        <span class="input-group-text">CGST %</span>
+        {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.role == 'manager' or current_user.permissions.can_edit_taxes %}
+        <input type="number" 
+               step="0.01" 
+               name="cgst"
+               value="{{ current_cgst|floatformat:2 }}"
+               class="form-control text-end">
+        {% else %}
+        <input type="number" 
+               value="{{ current_cgst|floatformat:2 }}"
+               class="form-control text-end"
+               disabled>
+        <input type="hidden" name="cgst" value="{{ current_cgst|floatformat:2 }}">
+        {% endif %}
+      </div>
+      
+      <!-- ✅ SGST Input -->
+      <div class="input-group mb-2">
+        <span class="input-group-text">SGST %</span>
+        {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.role == 'manager' or current_user.permissions.can_edit_taxes %}
+        <input type="number" 
+               step="0.01" 
+               name="sgst"
+               value="{{ current_sgst|floatformat:2 }}"
+               class="form-control text-end">
+        {% else %}
+        <input type="number" 
+               value="{{ current_sgst|floatformat:2 }}"
+               class="form-control text-end"
+               disabled>
+        <input type="hidden" name="sgst" value="{{ current_sgst|floatformat:2 }}">
+        {% endif %}
+      </div>
+      
+      <!-- ✅ Discount Input -->
+      <div class="input-group mb-2">
+        <span class="input-group-text">Discount</span>
+        {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.role == 'manager' or current_user.permissions.can_apply_discount %}
+        <input type="number" 
+               step="0.01" 
+               name="discount"
+               value="{{ current_discount|floatformat:2 }}"
+               class="form-control text-end">
+        {% else %}
+        <input type="number" 
+               value="{{ current_discount|floatformat:2 }}"
+               class="form-control text-end"
+               disabled>
+        <input type="hidden" name="discount" value="{{ current_discount|floatformat:2 }}">
+        {% endif %}
+      </div>
+      
+      <!-- Calculate Button -->
+      <div class="d-grid mt-3">
+        <button type="submit" 
+                name="calculate" 
+                value="1" 
+                class="btn btn-info">
+          <i class="fas fa-calculator me-2"></i>Calculate Totals (Preview)
+        </button>
+      </div>
+    </form>
+
+    <hr>
+
+    <!-- ✅ Save & Finalize Section -->
+    {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.role == 'manager' or current_user.permissions.can_finalize_pricing %}
+      <form method="POST">
+        {% csrf_token %}
+        <input type="hidden" name="selected_option" value="{{ selected_option|default:'' }}"> 
+        <input type="hidden" name="markup_type" value="{{ current_markup_type }}">
+        <input type="hidden" name="markup_value" value="{{ current_markup_value|floatformat:2 }}">
+        <input type="hidden" name="cgst" value="{{ current_cgst|floatformat:2 }}">
+        <input type="hidden" name="sgst" value="{{ current_sgst|floatformat:2 }}">
+        <input type="hidden" name="discount" value="{{ current_discount|floatformat:2 }}">
+        
+        <button type="submit" class="btn btn-success w-100 btn-lg">
+          <i class="fas fa-save me-2"></i>Save & Finalize Prices
+        </button>
+      </form>
+    {% else %}
+      <div class="text-center py-3">
+        <i class="fas fa-lock text-muted mb-2" style="font-size: 2rem;"></i>
+        <p class="text-muted mb-0">
+          You don't have permission to finalize prices.<br>
+          <small>Contact your administrator.</small>
+        </p>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+
+
+
+
+
+<!-- Edit Item Modal -->
+<div class="modal fade" id="editItemModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <form id="editItemForm" method="POST">
+        {% csrf_token %}
+        <input type="hidden" name="booking_id" id="bookingIdInput">
+        <input type="hidden" name="item_type" id="itemTypeInput">
+        
+        <div class="modal-header">
+          <h5 class="modal-title">Edit Pricing - <span id="editItemName"></span></h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        
+        <div class="modal-body">
+          <div class="row">
+            <!-- Line Item Totals Column -->
+            <div class="col-md-6">
+              <h6>Line Item Totals</h6>
+              
+              <!-- Hotel Line Items -->
+              <div id="hotelPricingSection" style="display:none;">
+                <div class="alert alert-light mb-3">
+                  <small><strong>Current Breakdown:</strong></small><br>
+                  <div id="currentBreakdown"></div>
+                </div>
+                
+                <div class="mb-3" id="doubleBedTotalSection">
+                  <label class="form-label">Double Beds Total</label>
+                  <div class="input-group">
+                    <input type="number" step="0.01" class="form-control" 
+                           name="double_bed_total" id="doubleBedTotalInput">
+                    <span class="input-group-text" id="doubleBedDetails">0 × ₹0 × 0 nights</span>
+                  </div>
+                </div>
+                
+                <div class="mb-3" id="extraBedTotalSection" style="display:none;">
+                  <label class="form-label">Extra Beds Total</label>
+                  <div class="input-group">
+                    <input type="number" step="0.01" class="form-control" 
+                           name="extra_bed_total" id="extraBedTotalInput">
+                    <span class="input-group-text" id="extraBedDetails">0 × ₹0 × 0 nights</span>
+                  </div>
+                </div>
+
+                <div class="mb-3" id="childWithBedTotalSection" style="display:none;">
+                  <label class="form-label">Child With Bed Total</label>
+                  <div class="input-group">
+                    <input type="number" step="0.01" class="form-control" 
+                           name="child_with_bed_total" id="childWithBedTotalInput">
+                    <span class="input-group-text" id="childWithBedDetails">0 × ₹0 × 0 nights</span>
+                  </div>
+                </div>
+
+                <div class="mb-3" id="childWithoutBedTotalSection" style="display:none;">
+                  <label class="form-label">Child Without Bed Total</label>
+                  <div class="input-group">
+                    <input type="number" step="0.01" class="form-control" 
+                           name="child_without_bed_total" id="childWithoutBedTotalInput">
+                    <span class="input-group-text" id="childWithoutBedDetails">0 × ₹0 × 0 nights</span>
+                  </div>
+                </div>
+
+                <!-- Hotel Special Inclusions Section -->
+                <div class="mb-3" id="hotelInclusionsSection" style="display:none;">
+                  <hr class="my-3">
+                  <h6 class="text-success">
+                    <i class="fas fa-gift me-2"></i>Special Inclusions
+                  </h6>
+                  
+                  <div class="alert alert-success py-2 mb-3" id="hotelInclusionsSummary">
+                    <div class="d-flex justify-content-between align-items-center">
+                      <small><strong>Total Inclusions Price:</strong></small>
+                      <strong class="fs-6">₹<span id="hotelInclusionsTotal">0.00</span></strong>
+                    </div>
+                  </div>
+                  
+                  <div id="hotelInclusionsList" class="small"></div>
+                </div>
+              </div>
+
+              <!-- Vehicle Total Pricing -->
+              <div id="vehiclePricingSection" style="display:none;">
+                <div class="alert alert-light mb-3">
+                  <small><strong>Current Calculation:</strong></small><br>
+                  <div id="vehicleCurrentCalc"></div>
+                </div>
+                
+                <div class="mb-3">
+                  <label class="form-label">Total Vehicle Cost</label>
+                  <input type="number" 
+                         step="0.01" 
+                         class="form-control" 
+                         name="vehicle_total_price"
+                         id="totalNetPriceInputVehicle"
+                         placeholder="Enter amount">
+                </div>
+              </div>
+
+              <!-- Activity Total Pricing -->
+              <div id="activityPricingSection" style="display:none;">
+                <div class="alert alert-light mb-3">
+                  <small><strong>Current Calculation:</strong></small><br>
+                  <div id="activityCurrentCalc"></div>
+                </div>
+                
+                <div class="mb-3">
+                  <label class="form-label">Total Activity Cost</label>
+                  <input type="number" step="0.01" class="form-control" 
+                         name="activity_total_price" id="totalNetPriceInputActivity">
+                </div>
+              </div>
+
+              <!-- Houseboat Total Pricing -->
+              <div id="houseboatPricingSection" style="display:none;">
+                <div class="alert alert-light mb-3">
+                  <small><strong>Current Breakdown:</strong></small><br>
+                  <div id="houseboatCurrentBreakdown"></div>
+                </div>
+                
+                <div id="houseboatTotals"></div>
+
+                <!-- Houseboat Special Inclusions Section -->
+                <div class="mb-3" id="houseboatInclusionsSection" style="display:none;">
+                  <hr class="my-3">
+                  <h6 class="text-success">
+                    <i class="fas fa-gift me-2"></i>Special Inclusions
+                  </h6>
+                  
+                  <div class="alert alert-success py-2 mb-3" id="houseboatInclusionsSummary">
+                    <div class="d-flex justify-content-between align-items-center">
+                      <small><strong>Total Inclusions Price:</strong></small>
+                      <strong class="fs-6">₹<span id="houseboatInclusionsTotal">0.00</span></strong>
+                    </div>
+                  </div>
+                  
+                  <div id="houseboatInclusionsList" class="small"></div>
+                </div>
+              </div>
+
+              <!-- ✅ STANDALONE ACTIVITY PRICING SECTION -->
+              <div id="standalonePricingSection" style="display:none;">
+                <div class="alert alert-warning mb-3">
+                  <small><strong><i class="fas fa-mountain me-1"></i>Standalone Activity Details:</strong></small><br>
+                  <div id="standaloneCurrentDetails">
+                    <div class="d-flex justify-content-between py-1">
+                      <span>Activity:</span>
+                      <strong id="standaloneActivityName">-</strong>
+                    </div>
+                    <div class="d-flex justify-content-between py-1">
+                      <span>Date:</span>
+                      <strong id="standaloneActivityDate">-</strong>
+                    </div>
+                    <div class="d-flex justify-content-between py-1">
+                      <span>Participants:</span>
+                      <strong id="standaloneParticipants">-</strong>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="alert alert-info py-2 mb-3">
+                  <div class="d-flex justify-content-between">
+                    <small><strong>Activity Total:</strong></small>
+                    <strong>₹<span id="standaloneActivityTotal">0.00</span></strong>
+                  </div>
+                </div>
+                
+                <div class="alert alert-light border">
+                  <small class="text-muted">
+                    <i class="fas fa-info-circle me-1"></i>
+                    <strong>Note:</strong> Standalone activity prices are pre-calculated based on participant counts. 
+                    Price cannot be edited here. To modify, delete and recreate the booking.
+                  </small>
+                </div>
+              </div>
+
+              <!-- Individual Markup Section -->
+              <h6 class="mt-4">Individual Markup</h6>
+              <div class="input-group mb-3">
+                <select name="markup_type" class="form-select" id="editMarkupType" style="flex:0 0 130px;">
+                  <option value="fixed">Markup (₹)</option>
+                  <option value="percentage">Markup (%)</option>
+                </select>
+                <input type="number" step="0.01" name="markup_value" class="form-control text-end" id="editMarkupValue">
+              </div>
+            </div>
+
+            <!-- Live Calculation Preview -->
+            <div class="col-md-6">
+              <h6>Live Preview</h6>
+              <div class="alert alert-info">
+                <div id="liveItemBreakdown"></div>
+                
+                <!-- Inclusions Preview -->
+                <div id="liveInclusionsPreview" style="display:none;">
+                  <small class="text-success">
+                    <i class="fas fa-gift me-1"></i>
+                    Inclusions: ₹<span id="liveInclusionsAmount">0.00</span>
+                  </small>
+                </div>
+                
+                <!-- Standalone Activity Preview -->
+                <div id="liveStandalonePreview" style="display:none;">
+                  <small class="text-warning">
+                    <i class="fas fa-mountain me-1"></i>
+                    Activity Price: ₹<span id="liveStandaloneAmount">0.00</span>
+                  </small>
+                </div>
+                
+                <hr>
+                <strong>Subtotal: ₹<span id="previewTotalNet">0</span></strong><br>
+                <strong>Individual Markup: ₹<span id="previewMarkup">0.00</span></strong><br>
+                <strong style="font-size: 1.1em;">Item Gross: ₹<span id="previewGross">0.00</span></strong>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="saveChangesBtn">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Global Markup Options Modal -->
+<div class="modal fade" id="globalMarkupModal" tabindex="-1" aria-labelledby="globalMarkupModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title" id="globalMarkupModalLabel">
+          <i class="fas fa-percentage me-2"></i>Global Markup for Hotel Options
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      
+      <div class="modal-body">
+        <div id="markupModalAlerts"></div>
+        
+        <div class="row">
+          <div class="col-12">
+            <h6 class="fw-bold mb-3">Select Hotel Package Option:</h6>
+            
+            {% if hotel_option_groups %}
+              {% for group in hotel_option_groups %}
+              <div class="card mb-3 markup-option-card border" 
+                   data-option="{{ forloop.counter }}" 
+                   role="button" 
+                   tabindex="0">
+                <div class="card-body">
+                  <div class="d-flex align-items-center">
+                    <input type="radio" name="markup_option" value="{{ forloop.counter }}" 
+                           id="option{{ forloop.counter }}" class="form-check-input me-3">
+                    <div class="flex-grow-1">
+                      <label for="option{{ forloop.counter }}" class="form-check-label w-100">
+                        <!-- Option Header -->
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                          <div class="fw-bold text-primary fs-5">
+                            <i class="fas fa-hotel me-2"></i>{{ group.option_name }}
+                          </div>
+                          <span class="badge bg-secondary">{{ group.hotel_count }} hotel{{ group.hotel_count|pluralize }}</span>
+                        </div>
+                        
+                        <!-- Hotels in this option -->
+                        <div class="row mb-3">
+                          {% for hotel in group.hotels %}
+                          <div class="col-md-6 mb-1">
+                            <div class="d-flex justify-content-between align-items-center py-1 px-2 bg-light rounded">
+                              <span class="small text-dark">{{ hotel.name }}</span>
+                              <span class="badge bg-primary small">₹{{ hotel.net_price|floatformat:2 }}</span>
+                            </div>
+                          </div>
+                          {% endfor %}
+                        </div>
+                        
+                        <!-- Combined Total -->
+                        <div class="alert alert-success py-2 mb-0">
+                          <div class="row">
+                            <div class="col-md-8">
+                              <strong>Combined Package Total:</strong>
+                              <small class="d-block text-muted">
+                                Hotels: ₹{{ group.option_net_total|floatformat:2 }} + Other Services
+                              </small>
+                            </div>
+                            <div class="col-md-4 text-end">
+                              <strong class="fs-6">₹{{ group.net_price|floatformat:2 }}</strong>
+                            </div>
+                          </div>
+                        </div>
+                      </label>
+                      
+                      <!-- Markup Input Section -->
+                      <div class="row mt-3">
+                        <div class="col-md-6">
+                          <label class="form-label small fw-semibold">Markup Type</label>
+                          <select class="form-select form-select-sm" id="option{{ forloop.counter }}_type">
+                            <option value="fixed">Fixed Amount (₹)</option>
+                            <option value="percentage">Percentage (%)</option>
+                          </select>
+                        </div>
+                        <div class="col-md-6">
+                          <label class="form-label small fw-semibold">Markup Value</label>
+                          <input type="number" step="0.01" min="0" class="form-control form-control-sm" 
+                                 id="option{{ forloop.counter }}_value" 
+                                 placeholder="Enter markup"
+                                 data-net-price="{{ group.net_price }}"
+                                 data-hotel-count="{{ group.hotel_count }}"
+                                 data-option-name="{{ group.option_name }}">
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {% endfor %}
+              
+              <!-- Preview Section -->
+              <div class="alert alert-info mt-4" id="markupPreview" style="display: none;">
+                <h6><i class="fas fa-calculator me-2"></i>Markup Preview:</h6>
+                <div id="previewContent">
+                  Select an option to see markup calculation
+                </div>
+              </div>
+            {% else %}
+              <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                No hotel options found. Please ensure you have booked accommodations.
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          <i class="fas fa-times me-1"></i>Cancel
+        </button>
+        {% if hotel_option_groups %}
+        <button type="button" id="applyMarkupOption" class="btn btn-primary" disabled>
+          <i class="fas fa-check me-1"></i>Apply Global Markup
+        </button>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  // ===== EDIT ITEM MODAL SCRIPT =====
+  const modal = document.getElementById('editItemModal');
+  if (modal) {
+    const form = modal.querySelector('form');
+    const nameEl = document.getElementById('editItemName');
+    const typeSel = document.getElementById('editMarkupType');
+    const valInp = document.getElementById('editMarkupValue');
+    
+    let currentBooking = {};
+    let currentItemType = '';
+    let isUpdatingPreview = false;
+    let currentInclusions = { total: 0, items: [] };
+    let currentButton = null;
+
+    // Helper functions
+    function safeParseInt(value, defaultValue = 0) {
+      const parsed = parseInt(value);
+      return isNaN(parsed) || value === '' || value === null || value === undefined ? defaultValue : parsed;
+    }
+
+    function safeParseFloat(value, defaultValue = 0) {
+      const parsed = parseFloat(value);
+      return isNaN(parsed) || value === '' || value === null || value === undefined ? defaultValue : parsed;
+    }
+
+    function updatePreview() {
+      if (isUpdatingPreview) return;
+      isUpdatingPreview = true;
+
+      try {
+        let subtotal = 0;
+        let itemBreakdown = '';
+        
+        if (currentItemType === 'hotel') {
+          const doubleBedTotal = safeParseFloat(document.getElementById('doubleBedTotalInput')?.value);
+          const extraBedTotal = safeParseFloat(document.getElementById('extraBedTotalInput')?.value);
+          const childWithBedTotal = safeParseFloat(document.getElementById('childWithBedTotalInput')?.value);
+          const childWithoutBedTotal = safeParseFloat(document.getElementById('childWithoutBedTotalInput')?.value);
+          
+          subtotal = doubleBedTotal + extraBedTotal + childWithBedTotal + childWithoutBedTotal;
+          subtotal += currentInclusions.total;
+          
+          if (currentBooking.numDoubleBeds > 0) itemBreakdown += `Double Beds: ₹${doubleBedTotal.toFixed(2)}<br>`;
+          if (currentBooking.extraBeds > 0) itemBreakdown += `Extra Beds: ₹${extraBedTotal.toFixed(2)}<br>`;
+          if (currentBooking.childWithBed > 0) itemBreakdown += `Child w/ Bed: ₹${childWithBedTotal.toFixed(2)}<br>`;
+          if (currentBooking.childWithoutBed > 0) itemBreakdown += `Child w/o Bed: ₹${childWithoutBedTotal.toFixed(2)}<br>`;
+          
+          if (currentInclusions.total > 0) {
+            itemBreakdown += `<span class="text-success"><i class="fas fa-gift me-1"></i>Inclusions: ₹${currentInclusions.total.toFixed(2)}</span><br>`;
+          }
+          
+        } else if (currentItemType === 'vehicle') {
+          subtotal = safeParseFloat(document.getElementById('totalNetPriceInputVehicle')?.value);
+          itemBreakdown = `Vehicle Total: ₹${subtotal.toFixed(2)}`;
+          
+        } else if (currentItemType === 'activity') {
+          subtotal = safeParseFloat(document.getElementById('totalNetPriceInputActivity')?.value);
+          itemBreakdown = `Activity Total: ₹${subtotal.toFixed(2)}`;
+          
+        } else if (currentItemType === 'houseboat') {
+          const roomInputs = document.querySelectorAll('#houseboatTotals input[type="number"]');
+          roomInputs.forEach(input => {
+            const value = safeParseFloat(input.value);
+            subtotal += value;
+            if (value > 0) {
+              const roomType = input.dataset.roomType;
+              itemBreakdown += `${roomType}: ₹${value.toFixed(2)}<br>`;
+            }
+          });
+          
+          subtotal += currentInclusions.total;
+          
+          if (currentInclusions.total > 0) {
+            itemBreakdown += `<span class="text-success"><i class="fas fa-gift me-1"></i>Inclusions: ₹${currentInclusions.total.toFixed(2)}</span><br>`;
+          }
+          
+          if (itemBreakdown === '') itemBreakdown = `Houseboat Total: ₹${subtotal.toFixed(2)}`;
+          
+        } else if (currentItemType === 'standalone') {
+          subtotal = currentBooking.standaloneTotal || 0;
+          itemBreakdown = `<span class="text-warning"><i class="fas fa-mountain me-1"></i>Activity Total: ₹${subtotal.toFixed(2)}</span>`;
+          
+          const liveStandalonePreview = document.getElementById('liveStandalonePreview');
+          const liveStandaloneAmount = document.getElementById('liveStandaloneAmount');
+          if (liveStandalonePreview && liveStandaloneAmount) {
+            liveStandaloneAmount.textContent = subtotal.toFixed(2);
+            liveStandalonePreview.style.display = 'block';
+          }
+        }
+
+        const markupValue = safeParseFloat(valInp?.value);
+        const markupType = typeSel?.value || 'fixed';
+        const markupAmount = markupType === 'percentage' ? subtotal * (markupValue / 100) : markupValue;
+        const grossPrice = subtotal + markupAmount;
+
+        const liveBreakdown = document.getElementById('liveItemBreakdown');
+        const prevNet = document.getElementById('previewTotalNet');
+        const prevMark = document.getElementById('previewMarkup');
+        const prevGross = document.getElementById('previewGross');
+        
+        const liveInclusionsPreview = document.getElementById('liveInclusionsPreview');
+        const liveInclusionsAmount = document.getElementById('liveInclusionsAmount');
+        if (liveInclusionsPreview && liveInclusionsAmount) {
+          if (currentInclusions.total > 0) {
+            liveInclusionsAmount.textContent = currentInclusions.total.toFixed(2);
+            liveInclusionsPreview.style.display = 'block';
+          } else {
+            liveInclusionsPreview.style.display = 'none';
+          }
+        }
+        
+        if (liveBreakdown) liveBreakdown.innerHTML = itemBreakdown;
+        if (prevNet) prevNet.textContent = subtotal.toFixed(2);
+        if (prevMark) prevMark.textContent = markupAmount.toFixed(2);
+        if (prevGross) prevGross.textContent = grossPrice.toFixed(2);
+        
+      } catch (error) {
+        console.error('Error updating preview:', error);
+      } finally {
+        isUpdatingPreview = false;
+      }
+    }
+
+    function addInputListener(element) {
+      if (element) {
+        let timeout;
+        element.addEventListener('input', function() {
+          clearTimeout(timeout);
+          timeout = setTimeout(updatePreview, 100);
+        });
+      }
+    }
+
+    function loadInclusions(btn, itemType) {
+      console.log('🔍 Loading inclusions for:', itemType);
+      
+      currentInclusions = { total: 0, items: [] };
+      
+      const sectionId = itemType === 'hotel' ? 'hotelInclusionsSection' : 'houseboatInclusionsSection';
+      const listId = itemType === 'hotel' ? 'hotelInclusionsList' : 'houseboatInclusionsList';
+      const totalId = itemType === 'hotel' ? 'hotelInclusionsTotal' : 'houseboatInclusionsTotal';
+      
+      const section = document.getElementById(sectionId);
+      const list = document.getElementById(listId);
+      const totalEl = document.getElementById(totalId);
+      
+      if (!section || !list || !totalEl) {
+        console.log('⚠️ Inclusion elements not found');
+        return;
+      }
+      
+      const inclusionsTotal = parseFloat(btn.dataset.inclusionsTotal || 0);
+      const inclusionsData = btn.dataset.inclusions;
+      
+      console.log('📥 Inclusions Total:', inclusionsTotal);
+      console.log('📥 Inclusions Data:', inclusionsData);
+      
+      if (inclusionsTotal > 0 && inclusionsData) {
+        try {
+          currentInclusions.items = JSON.parse(inclusionsData);
+          currentInclusions.total = inclusionsTotal;
+          
+          console.log('✅ Parsed inclusions:', currentInclusions.items);
+          
+          totalEl.textContent = currentInclusions.total.toFixed(2);
+          
+          let inclusionsHTML = '';
+          currentInclusions.items.forEach(inc => {
+            inclusionsHTML += `
+              <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                <div>
+                  <i class="fas fa-gift text-success me-2"></i>
+                  <span class="small fw-medium">${inc.name}</span>
+                  <small class="text-muted d-block ms-4">
+                    ${inc.num_adults > 0 ? `${inc.num_adults} Adult${inc.num_adults > 1 ? 's' : ''}` : ''}
+                    ${inc.num_adults > 0 && inc.num_children > 0 ? ', ' : ''}
+                    ${inc.num_children > 0 ? `${inc.num_children} Child${inc.num_children > 1 ? 'ren' : ''}` : ''}
+                  </small>
+                </div>
+                <span class="text-success fw-bold">₹${parseFloat(inc.price).toFixed(2)}</span>
+              </div>
+            `;
+          });
+          
+          list.innerHTML = inclusionsHTML;
+          section.style.display = 'block';
+          
+          console.log('✅ Inclusions section shown');
+        } catch (e) {
+          console.error('❌ Error parsing inclusions:', e);
+          console.error('   Raw data:', inclusionsData);
+          section.style.display = 'none';
+        }
+      } else {
+        section.style.display = 'none';
+        console.log('ℹ️ No inclusions');
+      }
+    }
+
+    function resetFormSections() {
+      const sections = [
+        'hotelPricingSection', 
+        'vehiclePricingSection', 
+        'activityPricingSection', 
+        'houseboatPricingSection',
+        'standalonePricingSection'
+      ];
+      sections.forEach(sectionId => {
+        const section = document.getElementById(sectionId);
+        if (section) section.style.display = 'none';
+      });
+
+      const hotelSections = ['doubleBedTotalSection', 'extraBedTotalSection', 'childWithBedTotalSection', 'childWithoutBedTotalSection'];
+      hotelSections.forEach(sectionId => {
+        const section = document.getElementById(sectionId);
+        if (section) section.style.display = 'none';
+      });
+
+      const inclusionSections = ['hotelInclusionsSection', 'houseboatInclusionsSection'];
+      inclusionSections.forEach(sectionId => {
+        const section = document.getElementById(sectionId);
+        if (section) section.style.display = 'none';
+      });
+
+      const houseboatTotals = document.getElementById('houseboatTotals');
+      if (houseboatTotals) houseboatTotals.innerHTML = '';
+
+      const inputs = modal.querySelectorAll('input[type="number"]');
+      inputs.forEach(input => input.value = '');
+      
+      const liveBreakdown = document.getElementById('liveItemBreakdown');
+      if (liveBreakdown) liveBreakdown.innerHTML = '';
+      
+      const liveStandalonePreview = document.getElementById('liveStandalonePreview');
+      if (liveStandalonePreview) liveStandalonePreview.style.display = 'none';
+      
+      currentInclusions = { total: 0, items: [] };
+    }
+
+    modal.addEventListener('show.bs.modal', e => {
+      const btn = e.relatedTarget;
+      if (!btn) return;
+      
+      currentButton = btn;
+      currentItemType = btn.dataset.itemType;
+
+      console.log('=== MODAL OPENING ===');
+      console.log('Booking ID:', btn.dataset.bookingId);
+      console.log('Item Type:', currentItemType);
+
+      resetFormSections();
+
+      if (document.getElementById('bookingIdInput')) {
+        document.getElementById('bookingIdInput').value = btn.dataset.bookingId || '';
+      }
+      if (document.getElementById('itemTypeInput')) {
+        document.getElementById('itemTypeInput').value = currentItemType;
+      }
+      if (nameEl) nameEl.textContent = btn.dataset.itemName || '';
+      if (typeSel) typeSel.value = btn.dataset.markupType || 'fixed';
+      if (valInp) valInp.value = btn.dataset.markupValue || '0';
+
+      switch (currentItemType) {
+        case 'hotel':
+          showHotelTotals(btn);
+          loadInclusions(btn, 'hotel');
+          break;
+        case 'vehicle':
+          showVehicleTotals(btn);
+          break;
+        case 'activity':
+          showActivityTotals(btn);
+          break;
+        case 'houseboat':
+          showHouseboatTotals(btn);
+          loadInclusions(btn, 'houseboat');
+          break;
+        case 'standalone':
+          showStandaloneTotals(btn);
+          break;
+      }
+
+      setTimeout(updatePreview, 150);
+    });
+
+    function showHotelTotals(btn) {
+      form.action = "{% url 'update_booking_totals' %}";
+      
+      const hotelSection = document.getElementById('hotelPricingSection');
+      if (hotelSection) hotelSection.style.display = 'block';
+
+      currentBooking = {
+        numDoubleBeds: safeParseInt(btn.dataset.numDoubleBeds),
+        extraBeds: safeParseInt(btn.dataset.extraBeds),
+        childWithBed: safeParseInt(btn.dataset.childWithBed),
+        childWithoutBed: safeParseInt(btn.dataset.childWithoutBed),
+        nights: safeParseInt(btn.dataset.nights, 1)
+      };
+
+      const unitDoubleBed = safeParseFloat(btn.dataset.unitDoubleBed);
+      const unitExtraBed = safeParseFloat(btn.dataset.unitExtraBed);
+      const unitChildWith = safeParseFloat(btn.dataset.unitChildWith);
+      const unitChildWithout = safeParseFloat(btn.dataset.unitChildWithout);
+
+      const savedDoubleBedTotal = safeParseFloat(btn.dataset.savedDoubleBedTotal);
+      const savedExtraBedTotal = safeParseFloat(btn.dataset.savedExtraBedTotal);
+      const savedChildWithTotal = safeParseFloat(btn.dataset.savedChildWithTotal);
+      const savedChildWithoutTotal = safeParseFloat(btn.dataset.savedChildWithoutTotal);
+
+      if (currentBooking.numDoubleBeds > 0) {
+        const calculatedTotal = currentBooking.numDoubleBeds * unitDoubleBed * currentBooking.nights;
+        const displayTotal = savedDoubleBedTotal > 0 ? savedDoubleBedTotal : calculatedTotal;
+        const input = document.getElementById('doubleBedTotalInput');
+        const details = document.getElementById('doubleBedDetails');
+        const section = document.getElementById('doubleBedTotalSection');
+        
+        if (input) input.value = displayTotal.toFixed(2);
+        if (details) details.textContent = `${currentBooking.numDoubleBeds} × ₹${unitDoubleBed} × ${currentBooking.nights} nights`;
+        if (section) section.style.display = 'block';
+        if (input) addInputListener(input);
+      }
+      
+      if (currentBooking.extraBeds > 0) {
+        const calculatedTotal = currentBooking.extraBeds * unitExtraBed * currentBooking.nights;
+        const displayTotal = savedExtraBedTotal > 0 ? savedExtraBedTotal : calculatedTotal;
+        const input = document.getElementById('extraBedTotalInput');
+        const details = document.getElementById('extraBedDetails');
+        const section = document.getElementById('extraBedTotalSection');
+        
+        if (input) input.value = displayTotal.toFixed(2);
+        if (details) details.textContent = `${currentBooking.extraBeds} × ₹${unitExtraBed} × ${currentBooking.nights} nights`;
+        if (section) section.style.display = 'block';
+        if (input) addInputListener(input);
+      }
+      
+      if (currentBooking.childWithBed > 0) {
+        const calculatedTotal = currentBooking.childWithBed * unitChildWith * currentBooking.nights;
+        const displayTotal = savedChildWithTotal > 0 ? savedChildWithTotal : calculatedTotal;
+        const input = document.getElementById('childWithBedTotalInput');
+        const details = document.getElementById('childWithBedDetails');
+        const section = document.getElementById('childWithBedTotalSection');
+        
+        if (input) input.value = displayTotal.toFixed(2);
+        if (details) details.textContent = `${currentBooking.childWithBed} × ₹${unitChildWith} × ${currentBooking.nights} nights`;
+        if (section) section.style.display = 'block';
+        if (input) addInputListener(input);
+      }
+      
+      if (currentBooking.childWithoutBed > 0) {
+        const calculatedTotal = currentBooking.childWithoutBed * unitChildWithout * currentBooking.nights;
+        const displayTotal = savedChildWithoutTotal > 0 ? savedChildWithoutTotal : calculatedTotal;
+        const input = document.getElementById('childWithoutBedTotalInput');
+        const details = document.getElementById('childWithoutBedDetails');
+        const section = document.getElementById('childWithoutBedTotalSection');
+        
+        if (input) input.value = displayTotal.toFixed(2);
+        if (details) details.textContent = `${currentBooking.childWithoutBed} × ₹${unitChildWithout} × ${currentBooking.nights} nights`;
+        if (section) section.style.display = 'block';
+        if (input) addInputListener(input);
+      }
+
+      let breakdown = '';
+      if (currentBooking.numDoubleBeds > 0) {
+        const calc = currentBooking.numDoubleBeds * unitDoubleBed * currentBooking.nights;
+        const display = savedDoubleBedTotal > 0 ? savedDoubleBedTotal : calc;
+        breakdown += `Double Beds: ${currentBooking.numDoubleBeds} × ₹${unitDoubleBed} × ${currentBooking.nights} nights = ₹${display.toFixed(2)}${savedDoubleBedTotal > 0 ? ' (Custom)' : ''}<br>`;
+      }
+      if (currentBooking.extraBeds > 0) {
+        const calc = currentBooking.extraBeds * unitExtraBed * currentBooking.nights;
+        const display = savedExtraBedTotal > 0 ? savedExtraBedTotal : calc;
+        breakdown += `Extra Beds: ${currentBooking.extraBeds} × ₹${unitExtraBed} × ${currentBooking.nights} nights = ₹${display.toFixed(2)}${savedExtraBedTotal > 0 ? ' (Custom)' : ''}<br>`;
+      }
+      if (currentBooking.childWithBed > 0) {
+        const calc = currentBooking.childWithBed * unitChildWith * currentBooking.nights;
+        const display = savedChildWithTotal > 0 ? savedChildWithTotal : calc;
+        breakdown += `Child w/ Bed: ${currentBooking.childWithBed} × ₹${unitChildWith} × ${currentBooking.nights} nights = ₹${display.toFixed(2)}${savedChildWithTotal > 0 ? ' (Custom)' : ''}<br>`;
+      }
+      if (currentBooking.childWithoutBed > 0) {
+        const calc = currentBooking.childWithoutBed * unitChildWithout * currentBooking.nights;
+        const display = savedChildWithoutTotal > 0 ? savedChildWithoutTotal : calc;
+        breakdown += `Child w/o Bed: ${currentBooking.childWithoutBed} × ₹${unitChildWithout} × ${currentBooking.nights} nights = ₹${display.toFixed(2)}${savedChildWithoutTotal > 0 ? ' (Custom)' : ''}<br>`;
+      }
+      
+      const breakdownEl = document.getElementById('currentBreakdown');
+      if (breakdownEl) breakdownEl.innerHTML = breakdown;
+    }
+
+    function showVehicleTotals(btn) {
+      form.action = "{% url 'update_booking_totals' %}";
+      
+      const vehicleSection = document.getElementById('vehiclePricingSection');
+      if (vehicleSection) vehicleSection.style.display = 'block';
+
+      const baseFee = safeParseFloat(btn.dataset.baseFee);
+      const extraKmFee = safeParseFloat(btn.dataset.extraKmFee);
+      const totalKm = safeParseInt(btn.dataset.totalKm);
+      const savedTotalPrice = safeParseFloat(btn.dataset.savedTotalPrice);
+      
+      const extraKm = totalKm > 100 ? totalKm - 100 : 0;
+      const extraCost = extraKm * extraKmFee;
+      const calculatedCost = baseFee + extraCost;
+      const displayCost = (savedTotalPrice && savedTotalPrice > 0) ? savedTotalPrice : calculatedCost;
+      
+      const input = document.getElementById('totalNetPriceInputVehicle');
+      if (input) {
+        input.value = displayCost.toFixed(2);
+        addInputListener(input);
+      }
+      
+      const calc = `Base Fee (≤100km): ₹${baseFee.toFixed(2)}<br>Extra KM: ${extraKm} × ₹${extraKmFee.toFixed(2)} = ₹${extraCost.toFixed(2)}<br><strong>Total: ₹${displayCost.toFixed(2)}${savedTotalPrice > 0 ? ' (Custom)' : ' (Calculated)'}</strong>`;
+      const calcEl = document.getElementById('vehicleCurrentCalc');
+      if (calcEl) calcEl.innerHTML = calc;
+    }
+
+    function showActivityTotals(btn) {
+      form.action = "{% url 'update_booking_totals' %}";
+      
+      const activitySection = document.getElementById('activityPricingSection');
+      if (activitySection) activitySection.style.display = 'block';
+
+      const unitPrice = safeParseFloat(btn.dataset.unitPrice);
+      const quantity = safeParseInt(btn.dataset.quantity, 1);
+      const savedTotalPrice = safeParseFloat(btn.dataset.savedTotalPrice);
+      
+      const calculatedCost = unitPrice * quantity;
+      const displayCost = savedTotalPrice > 0 ? savedTotalPrice : calculatedCost;
+      
+      const input = document.getElementById('totalNetPriceInputActivity');
+      if (input) {
+        input.value = displayCost.toFixed(2);
+        addInputListener(input);
+      }
+      
+      const calc = `Unit Price: ₹${unitPrice.toFixed(2)}<br>Quantity: ${quantity}<br><strong>Total: ₹${displayCost.toFixed(2)}${savedTotalPrice > 0 ? ' (Custom)' : ''}</strong>`;
+      const calcEl = document.getElementById('activityCurrentCalc');
+      if (calcEl) calcEl.innerHTML = calc;
+    }
+
+    function showHouseboatTotals(btn) {
+      form.action = "{% url 'update_booking_totals' %}";
+      
+      const houseboatSection = document.getElementById('houseboatPricingSection');
+      if (houseboatSection) houseboatSection.style.display = 'block';
+
+      currentBooking = {
+        nights: safeParseInt(btn.dataset.nights, 1),
+        numOneBed: safeParseInt(btn.dataset.numOneBed),
+        numTwoBed: safeParseInt(btn.dataset.numTwoBed),
+        numThreeBed: safeParseInt(btn.dataset.numThreeBed),
+        numFourBed: safeParseInt(btn.dataset.numFourBed),
+        numFiveBed: safeParseInt(btn.dataset.numFiveBed),
+        numSixBed: safeParseInt(btn.dataset.numSixBed),
+        numSevenBed: safeParseInt(btn.dataset.numSevenBed),
+        numEightBed: safeParseInt(btn.dataset.numEightBed),
+        numNineBed: safeParseInt(btn.dataset.numNineBed),
+        numTenBed: safeParseInt(btn.dataset.numTenBed),
+        numExtraBedsHb: safeParseInt(btn.dataset.numExtraBedsHb)
+      };
+
+      const unitPrices = {
+        oneBed: safeParseFloat(btn.dataset.oneBed),
+        twoBed: safeParseFloat(btn.dataset.twoBed),
+        threeBed: safeParseFloat(btn.dataset.threeBed),
+        fourBed: safeParseFloat(btn.dataset.fourBed),
+        fiveBed: safeParseFloat(btn.dataset.fiveBed),
+        sixBed: safeParseFloat(btn.dataset.sixBed),
+        sevenBed: safeParseFloat(btn.dataset.sevenBed),
+        eightBed: safeParseFloat(btn.dataset.eightBed),
+        nineBed: safeParseFloat(btn.dataset.nineBed),
+        tenBed: safeParseFloat(btn.dataset.tenBed),
+        extraBedHb: safeParseFloat(btn.dataset.extraBedHb)
+      };
+
+      const savedTotals = {
+        oneBed: safeParseFloat(btn.dataset.savedOneBedTotal),
+        twoBed: safeParseFloat(btn.dataset.savedTwoBedTotal),
+        threeBed: safeParseFloat(btn.dataset.savedThreeBedTotal),
+        fourBed: safeParseFloat(btn.dataset.savedFourBedTotal),
+        fiveBed: safeParseFloat(btn.dataset.savedFiveBedTotal),
+        sixBed: safeParseFloat(btn.dataset.savedSixBedTotal),
+        sevenBed: safeParseFloat(btn.dataset.savedSevenBedTotal),
+        eightBed: safeParseFloat(btn.dataset.savedEightBedTotal),
+        nineBed: safeParseFloat(btn.dataset.savedNineBedTotal),
+        tenBed: safeParseFloat(btn.dataset.savedTenBedTotal),
+        extraBedHb: safeParseFloat(btn.dataset.savedExtraBedHbTotal)
+      };
+
+      const houseboatTotals = document.getElementById('houseboatTotals');
+      let breakdown = '';
+      let htmlContent = '';
+
+      const roomTypes = [
+        {key: 'oneBed', name: 'one_bed_total', label: '1-Bed Room', count: currentBooking.numOneBed, price: unitPrices.oneBed, saved: savedTotals.oneBed},
+        {key: 'twoBed', name: 'two_bed_total', label: '2-Bed Room', count: currentBooking.numTwoBed, price: unitPrices.twoBed, saved: savedTotals.twoBed},
+        {key: 'threeBed', name: 'three_bed_total', label: '3-Bed Room', count: currentBooking.numThreeBed, price: unitPrices.threeBed, saved: savedTotals.threeBed},
+        {key: 'fourBed', name: 'four_bed_total', label: '4-Bed Room', count: currentBooking.numFourBed, price: unitPrices.fourBed, saved: savedTotals.fourBed},
+        {key: 'fiveBed', name: 'five_bed_total', label: '5-Bed Room', count: currentBooking.numFiveBed, price: unitPrices.fiveBed, saved: savedTotals.fiveBed},
+        {key: 'sixBed', name: 'six_bed_total', label: '6-Bed Room', count: currentBooking.numSixBed, price: unitPrices.sixBed, saved: savedTotals.sixBed},
+        {key: 'sevenBed', name: 'seven_bed_total', label: '7-Bed Room', count: currentBooking.numSevenBed, price: unitPrices.sevenBed, saved: savedTotals.sevenBed},
+        {key: 'eightBed', name: 'eight_bed_total', label: '8-Bed Room', count: currentBooking.numEightBed, price: unitPrices.eightBed, saved: savedTotals.eightBed},
+        {key: 'nineBed', name: 'nine_bed_total', label: '9-Bed Room', count: currentBooking.numNineBed, price: unitPrices.nineBed, saved: savedTotals.nineBed},
+        {key: 'tenBed', name: 'ten_bed_total', label: '10-Bed Room', count: currentBooking.numTenBed, price: unitPrices.tenBed, saved: savedTotals.tenBed},
+        {key: 'extraBedHb', name: 'extra_bed_hb_total', label: 'Extra Beds', count: currentBooking.numExtraBedsHb, price: unitPrices.extraBedHb, saved: savedTotals.extraBedHb}
+      ];
+
+      roomTypes.forEach(room => {
+        if (room.count > 0) {
+          const calculatedTotal = room.count * room.price * currentBooking.nights;
+          const displayTotal = room.saved > 0 ? room.saved : calculatedTotal;
+          
+          htmlContent += `
+            <div class="mb-3">
+              <label class="form-label">${room.label} Total</label>
+              <div class="input-group">
+                <input type="number" 
+                       step="0.01" 
+                       class="form-control houseboat-input" 
+                       name="${room.name}"
+                       id="${room.key}TotalInput"
+                       data-room-type="${room.label}"
+                       value="${displayTotal.toFixed(2)}"
+                       placeholder="Enter amount">
+                <span class="input-group-text">${room.count} × ₹${room.price.toFixed(2)} × ${currentBooking.nights} nights</span>
+              </div>
+            </div>
+          `;
+          
+          breakdown += `${room.label}: ${room.count} × ₹${room.price.toFixed(2)} × ${currentBooking.nights} nights = ₹${displayTotal.toFixed(2)}${room.saved > 0 ? ' (Custom)' : ''}<br>`;
+        }
+      });
+
+      if (houseboatTotals) houseboatTotals.innerHTML = htmlContent;
+
+      setTimeout(() => {
+        const inputs = document.querySelectorAll('.houseboat-input');
+        inputs.forEach((input) => {
+          input.removeAttribute('readonly');
+          input.removeAttribute('disabled');
+          addInputListener(input);
+        });
+      }, 100);
+
+      const breakdownEl = document.getElementById('houseboatCurrentBreakdown');
+      if (breakdownEl) breakdownEl.innerHTML = breakdown;
+    }
+
+    function showStandaloneTotals(btn) {
+    form.action = "{% url 'update_booking_totals' %}";
+    
+    const standaloneSection = document.getElementById('standalonePricingSection');
+        if (standaloneSection) standaloneSection.style.display = 'block';
+        
+        const activityName = btn.dataset.itemName || 'Unknown Activity';
+        const bookingDate = btn.dataset.bookingDate || '-';
+        const numAdults = safeParseInt(btn.dataset.numAdults);
+        const numChildren = safeParseInt(btn.dataset.numChildren);
+        const totalPrice = safeParseFloat(btn.dataset.totalPrice);
+        
+        // ✅ POPULATE DETAILS
+        const nameEl = document.getElementById('standaloneActivityName');
+        const dateEl = document.getElementById('standaloneActivityDate');
+        const participantsEl = document.getElementById('standaloneParticipants');
+        const totalEl = document.getElementById('standaloneActivityTotal');
+        
+        if (nameEl) nameEl.textContent = activityName;
+        if (dateEl) {
+            try {
+                dateEl.textContent = new Date(bookingDate).toLocaleDateString('en-IN', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric'
+                });
+            } catch(e) {
+                dateEl.textContent = bookingDate;
+            }
+        }
+        
+        const participantsText = `${numAdults} Adult${numAdults !== 1 ? 's' : ''}${numChildren > 0 ? ` + ${numChildren} Child${numChildren !== 1 ? 'ren' : ''}` : ''}`;
+        if (participantsEl) participantsEl.textContent = participantsText;
+        if (totalEl) totalEl.textContent = totalPrice.toFixed(2);
+        
+        // ✅ Store for preview
+        currentBooking.standaloneTotal = totalPrice;
+        
+        console.log('✅ Standalone activity loaded:', {
+            name: activityName,
+            date: bookingDate,
+            adults: numAdults,
+            children: numChildren,
+            total: totalPrice,
+            markup_type: btn.dataset.markupType,
+            markup_value: btn.dataset.markupValue
+        });
+    }
+
+
+
+    addInputListener(valInp);
+    if (typeSel) {
+      typeSel.addEventListener('change', updatePreview);
+    }
+
+    if (form) {
+      form.addEventListener('submit', e => {
+        e.preventDefault();
+        
+        const formData = new FormData(form);
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+        
+        if (!csrfToken) {
+          alert('CSRF token missing. Please refresh the page.');
+          return;
+        }
+        
+        if (currentInclusions && currentInclusions.items && currentInclusions.items.length > 0) {
+          const cleanInclusions = currentInclusions.items.map(inc => ({
+            id: parseInt(inc.id),
+            adults: parseInt(inc.num_adults) || 0,
+            children: parseInt(inc.num_children) || 0
+          }));
+          
+          const inclusionsJSON = JSON.stringify(cleanInclusions);
+          console.log('📤 Sending inclusions:', inclusionsJSON);
+          
+          formData.set('inclusions_data', inclusionsJSON);
+        } else {
+          formData.set('inclusions_data', '[]');
+          console.log('📤 No inclusions to send');
+        }
+        
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Saving...';
+        
+        fetch(form.action, {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'X-CSRFToken': csrfToken,
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        })
+        .then(response => {
+          const contentType = response.headers.get('content-type');
+          if (contentType && contentType.includes('application/json')) {
+            return response.json();
+          } else {
+            return response.text().then(html => {
+              console.error('❌ HTML Response:', html.substring(0, 500));
+              throw new Error('Server returned HTML instead of JSON');
+            });
+          }
+        })
+        .then(data => {
+          if (data.success) {
+            submitBtn.innerHTML = '<i class="fas fa-check me-2"></i>Saved!';
+            submitBtn.classList.remove('btn-primary');
+            submitBtn.classList.add('btn-success');
+            
+            const modalInstance = bootstrap.Modal.getInstance(modal);
+            if (modalInstance) modalInstance.hide();
+            
+            setTimeout(() => location.reload(), 800);
+          } else {
+            throw new Error(data.message || 'Unknown error');
+          }
+        })
+        .catch(err => {
+          console.error('❌ Form submission error:', err);
+          alert('Error: ' + err.message);
+          
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalText;
+        });
+      });
+    }
+
+    modal.addEventListener('hidden.bs.modal', function () {
+      resetFormSections();
+      currentBooking = {};
+      currentItemType = '';
+      currentInclusions = { total: 0, items: [] };
+      currentButton = null;
+      
+      const submitBtn = form?.querySelector('button[type="submit"]');
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Save Changes';
+        submitBtn.classList.remove('btn-success');
+        submitBtn.classList.add('btn-primary');
+      }
+    });
+  }
+
+  // ===== GLOBAL MARKUP MODAL SCRIPT =====
+  const globalModal = document.getElementById('globalMarkupModal');
+  if (globalModal) {
+    const gstForm = document.querySelector('form.gst-panel');
+    const hiddenSelectedOption = document.getElementById('hiddenSelectedOption');
+    const hiddenMarkupType = document.getElementById('hiddenMarkupType');
+    const hiddenMarkupValue = document.getElementById('hiddenMarkupValue');
+
+    const optionCards = globalModal.querySelectorAll('.markup-option-card');
+    const applyBtn = document.getElementById('applyMarkupOption');
+    const previewBox = document.getElementById('markupPreview');
+    const previewContent = document.getElementById('previewContent');
+
+    let selectedOptionData = {
+      option: null, type: 'fixed', value: 0, netPrice: 0, optionName: ''
+    };
+
+    function updateGlobalMarkupPreview() {
+      const selectedRadio = globalModal.querySelector('input[name="markup_option"]:checked');
+      if (!selectedRadio) {
+        if(previewBox) previewBox.style.display = 'none';
+        if(applyBtn) applyBtn.disabled = true;
+        return;
+      }
+
+      const card = selectedRadio.closest('.markup-option-card');
+      const typeSelect = card.querySelector('select');
+      const valueInput = card.querySelector('input[type="number"]');
+
+      selectedOptionData = {
+        option: selectedRadio.value,
+        type: typeSelect.value,
+        value: valueInput.value,
+        netPrice: valueInput.dataset.netPrice,
+        optionName: valueInput.dataset.optionName,
+      };
+
+      const { type, value, netPrice, optionName } = selectedOptionData;
+
+      if (value === '' || value === null || value === undefined || parseFloat(value) < 0) {
+        if(previewBox) previewBox.style.display = 'none';
+        if(applyBtn) applyBtn.disabled = true;
+        return;
+      }
+      
+      if(applyBtn) applyBtn.disabled = false;
+      
+      const netPriceFloat = parseFloat(netPrice);
+      const markupAmount = (type === 'percentage') ? (netPriceFloat * (parseFloat(value) / 100)) : parseFloat(value);
+      const finalPrice = netPriceFloat + markupAmount;
+
+      if(previewContent) {
+        previewContent.innerHTML = `
+          <div class="row">
+            <div class="col-md-6">
+              <div class="fw-bold text-primary">${optionName}</div>
+              <small><strong>Base for Markup:</strong> ₹${netPriceFloat.toLocaleString('en-IN', {minimumFractionDigits: 2})}</small><br>
+              <small><strong>Applied Markup:</strong> ${type === 'fixed' ? '₹' : ''}${value}${type === 'percentage' ? '%' : ''}</small>
+            </div>
+            <div class="col-md-6 text-end">
+              <div class="text-success mb-2">
+                <strong>Markup Amount:</strong><br>₹${markupAmount.toLocaleString('en-IN', {minimumFractionDigits: 2})}
+              </div>
+              <div class="text-primary">
+                <strong>New Total (before GST):</strong><br><span class="h5 text-success">₹${finalPrice.toLocaleString('en-IN', {minimumFractionDigits: 2})}</span>
+              </div>
+            </div>
+          </div>`;
+      }
+      if(previewBox) previewBox.style.display = 'block';
+    }
+
+    optionCards.forEach(card => {
+      card.addEventListener('click', function(e) {
+        if (['INPUT', 'SELECT', 'LABEL'].includes(e.target.tagName)) return;
+        const radio = this.querySelector('input[type="radio"]');
+        if (radio && !radio.checked) {
+          radio.checked = true;
+          radio.dispatchEvent(new Event('change'));
+        }
+      });
+
+      const radio = card.querySelector('input[type="radio"]');
+      radio.addEventListener('change', () => {
+        optionCards.forEach(c => c.classList.remove('border-primary', 'border-3'));
+        card.classList.add('border-primary', 'border-3');
+        updateGlobalMarkupPreview();
+      });
+
+      card.querySelector('select').addEventListener('input', updateGlobalMarkupPreview);
+      card.querySelector('input[type="number"]').addEventListener('input', updateGlobalMarkupPreview);
+    });
+
+    if (applyBtn) {
+      applyBtn.addEventListener('click', function() {
+        if (!selectedOptionData.option || !gstForm) return alert('An error occurred. Please ensure an option is selected.');
+        if (selectedOptionData.value === '' || selectedOptionData.value === null || selectedOptionData.value === undefined || parseFloat(selectedOptionData.value) < 0) {
+          return alert('Please enter a valid markup value (0 or greater).');
+        }
+
+        hiddenSelectedOption.value = selectedOptionData.option;
+        hiddenMarkupType.value = selectedOptionData.type;
+        hiddenMarkupValue.value = selectedOptionData.value;
+        
+        gstForm.submit();
+
+        const modalInstance = bootstrap.Modal.getInstance(globalModal);
+        if (modalInstance) modalInstance.hide();
+      });
+    }
+
+    globalModal.addEventListener('show.bs.modal', () => {
+      if(applyBtn) applyBtn.disabled = true;
+      if(previewBox) previewBox.style.display = 'none';
+      optionCards.forEach(c => c.classList.remove('border-primary', 'border-3'));
+
+      const initialSelectedOption = hiddenSelectedOption.value;
+      if (initialSelectedOption) {
+        const radio = globalModal.querySelector(`input[name="markup_option"][value="${initialSelectedOption}"]`);
+        if (radio) {
+          const card = radio.closest('.markup-option-card');
+          card.querySelector('select').value = hiddenMarkupType.value;
+          card.querySelector('input[type="number"]').value = hiddenMarkupValue.value;
+          radio.checked = true;
+          radio.dispatchEvent(new Event('change'));
+        }
+      }
+    });
+  }
+});
+</script>
+
+
+
+
+
+
+
+{% endblock %}

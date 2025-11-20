@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+{% block content %}
+<div class="container mt-9">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">{{ title }}</h4>
+        </div>
+        <div class="card-body">
+            <form method="post" novalidate>
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="id_branch_name" class="form-label">Branch Name</label>
+                    {{ form.branch_name|add_class:"form-control" }}
+                </div>
+                <div class="mb-3">
+                    <label for="id_location" class="form-label">Location</label>
+                    {{ form.location|add_class:"form-control" }}
+                </div>
+                <div class="mb-3">
+                    <label class="form-check-label">
+                        {{ form.status }} Active
+                    </label>
+                </div>
+                <button type="submit" class="btn btn-success">Save</button>
+                <a href="{% url 'branch_list' %}" class="btn btn-secondary">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

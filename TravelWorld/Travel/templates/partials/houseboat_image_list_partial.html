@@ -1,0 +1,8 @@
+{% for image in images %}
+<div class="col-md-4 mb-2" id="image-item-{{ image.id }}">
+    <div class="card bg-light position-relative">
+        <img src="{{ image.image.url }}" class="img-fluid rounded" alt="Houseboat Image" style="height: 100px; object-fit: cover;">
+        <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 m-1 delete-image-btn" data-image-id="{{ image.id }}">&times;</button>
+    </div>
+</div>
+{% endfor %}
