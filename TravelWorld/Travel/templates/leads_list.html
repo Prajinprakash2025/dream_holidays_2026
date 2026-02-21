@@ -1,0 +1,375 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+  :root{
+    --brand:#0B4F8A;       /* deep blue */
+    --accent:#22C55E;      /* green */
+    --amber:#F59E0B;       /* amber */
+    --indigo:#6366F1;      /* indigo */
+    --rose:#F43F5E;        /* rose */
+    --muted:#64748b;
+    --card-border:#e6ecf5;
+    --bg-hero:#F8FAFF;
+
+    /* table theme */
+    --tbl-head-grad: linear-gradient(90deg,#e9f2ff, #f0fff4 60%, #fff7ed);
+    --row-ads:#fff1f2;     /* rose-50 */
+    --row-seo:#eff6ff;     /* sky-50 */
+    --ads-accent:#f43f5e;  /* rose-500 */
+    --seo-accent:#0ea5e9;  /* sky-500 */
+    --thead-border:#d7e3f4;
+  }
+
+  /* HERO */
+  .leads-hero{
+    background:
+      radial-gradient(900px 420px at -10% -20%, rgba(34,197,94,.16), transparent 60%),
+      radial-gradient(900px 420px at 110% 0%, rgba(99,102,241,.14), transparent 55%),
+      linear-gradient(180deg, #fff, var(--bg-hero));
+    border:1px solid var(--card-border);
+    border-radius:16px;
+    box-shadow:0 12px 28px rgba(11,79,138,.08);
+  }
+  .hero-pill{
+    display:inline-flex;align-items:center;gap:.5rem;
+    padding:.35rem .7rem;border-radius:999px;
+    background:linear-gradient(90deg, rgba(99,102,241,.14), rgba(34,197,94,.14));
+    border:1px solid rgba(99,102,241,.25);
+    font-weight:600;color:#1f2937;
+  }
+
+  /* CARDS & BUTTONS */
+  .card{ border:1px solid var(--card-border); border-radius:14px; box-shadow:0 6px 24px rgba(2,6,23,.06); }
+  .btn-primary{ background:var(--brand); border-color:var(--brand); }
+  .btn-primary:hover{ filter:brightness(1.07); }
+  .btn-outline-primary{ color:var(--brand); border-color:var(--brand); }
+  .btn-outline-primary:hover{ background:rgba(11,79,138,.08); }
+
+  /* TABLE */
+  .table thead th{ position:sticky; top:0; z-index:5; background:#fff; }
+  .table thead th{
+    background: var(--tbl-head-grad) !important;
+    border-bottom: 1px solid var(--thead-border) !important;
+    color:#0f172a;
+  }
+  .table-hover tbody tr:hover{ background:#f1f7ff; }
+  .table-striped tbody tr:nth-of-type(odd){ background-color:#fbfdff; }
+
+  /* channel-tinted rows (left ribbon & soft background) */
+  tr.row-ads { background: var(--row-ads); box-shadow: inset 4px 0 0 var(--ads-accent); }
+  tr.row-seo { background: var(--row-seo); box-shadow: inset 4px 0 0 var(--seo-accent); }
+
+  /* badges richer color */
+  .badge-ads { background:#ffe4e6; color:#9f1239; border:1px solid #fecdd3; }
+  .badge-seo { background:#e0f2fe; color:#075985; border:1px solid #bae6fd; }
+
+  /* action buttons */
+  .btn-outline-secondary.copy-btn:hover{ background:#eef2ff; border-color:#c7d2fe; }
+
+  /* pagination */
+  .pagination .page-link{ color:#0b4f8a; }
+  .pagination .page-item.active .page-link{ background:#0b4f8a; border-color:#0b4f8a; }
+  .pagination .page-link:hover{ background:#eaf3ff; }
+
+  /* date dot (optional) */
+  td[data-ts]{ position:relative; }
+  td[data-ts]::after{
+    content:""; position:absolute; right:8px; top:50%; width:6px; height:6px;
+    border-radius:50%; background:#a5b4fc; transform:translateY(-50%); opacity:.5;
+  }
+
+  /* mobile tweaks */
+  @media (max-width: 768px){
+    .text-nowrap{ white-space:nowrap; }
+  }
+</style>
+
+<div class="container-fluid py-3 py-md-4">
+
+  <!-- HERO -->
+  <section class="leads-hero p-3 p-md-4 mb-3">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+      <div>
+        <div class="hero-pill mb-2">📋 Leads • Unified Inbox</div>
+        <h1 class="h4 mb-1" style="color:var(--brand)">Leads from PHP Site</h1>
+        <div class="text-muted">
+          {% if is_paginated %}
+            Showing <strong>{{ page_obj.start_index }}–{{ page_obj.end_index }}</strong> of <strong>{{ page_obj.paginator.count }}</strong> leads
+          {% else %}
+            Total: <strong>{{ object_list|length }}</strong> leads
+          {% endif %}
+        </div>
+      </div>
+      <div class="d-flex flex-wrap gap-2">
+        <a href="#" class="btn btn-outline-secondary">
+          <i class="bi bi-arrow-left me-1"></i> Back
+        </a>
+        <a href="{% url 'lead_assign' %}" class="btn btn-primary">
+          <i class="bi bi-send-check me-1"></i> Assign Leads to CRE
+        </a>
+        <a href="?{% if request.GET.channel %}channel={{ request.GET.channel }}{% endif %}" class="btn btn-outline-secondary">
+          <i class="bi bi-arrow-clockwise me-1"></i> Reset
+        </a>
+        <a href="{% url 'leads_excel_all' %}" class="btn btn-outline-primary" target="_blank">
+            <i class="bi bi-file-earmark-pdf me-1"></i> Download All Leads (PDF)
+        </a>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- FILTERS -->
+  <form method="get" class="card mb-4" id="filtersForm">
+    <div class="card-body">
+      <div class="row g-3 align-items-end">
+        <div class="col-12 col-md-4">
+          <label class="form-label">Search (name / email / phone)</label>
+          <input type="text" name="q" class="form-control"
+                 value="{{ request.GET.q|default_if_none:'' }}"
+                 placeholder="Type and press Enter">
+        </div>
+        <div class="col-6 col-md-2">
+          <label class="form-label">From</label>
+          <input type="date" name="start" class="form-control"
+                 value="{{ request.GET.start|default_if_none:'' }}">
+        </div>
+        <div class="col-6 col-md-2">
+          <label class="form-label">To</label>
+          <input type="date" name="end" class="form-control"
+                 value="{{ request.GET.end|default_if_none:'' }}">
+        </div>
+
+        <!-- Channel filter: only Ads vs SEO -->
+        <div class="col-12 col-md-3">
+          <label class="form-label">Channel</label>
+          <select name="channel" class="form-select">
+            <option value="" {% if not request.GET.channel %}selected{% endif %}>All</option>
+            <option value="ads" {% if request.GET.channel == 'ads' %}selected{% endif %}>Google Ads</option>
+            <option value="seo" {% if request.GET.channel == 'seo' %}selected{% endif %}>SEO</option>
+          </select>
+        </div>
+
+        <div class="col-12 col-md-1 d-grid">
+          <button class="btn btn-primary">
+            <i class="bi bi-filter me-1"></i> Filter
+          </button>
+        </div>
+      </div>
+    </div>
+  </form>
+
+  <!-- TABLE -->
+  <div class="card">
+    <div class="table-responsive">
+      <table class="table table-hover table-striped align-middle mb-0">
+        <thead class="table-light">
+          <tr class="text-nowrap">
+            <th class="text-center" style="min-width: 80px;">Sl No</th>
+            <th style="min-width: 160px;">Nam</th>
+            <th style="min-width: 220px;">Email</th>
+            <th style="min-width: 160px;">Phone</th>
+            <th style="min-width: 260px;">Form URL</th>
+            <th style="min-width: 140px;">Channel</th>
+            <th style="min-width: 160px;">Date</th>
+            <th class="text-end" style="min-width: 120px;">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for lead in leads %}
+
+          <tr class="
+              {% if lead.chan_is_ads %}row-ads{% else %}row-seo{% endif %}
+              {% if lead.dup_count > 1 %} duplicate-row {% endif %}
+          ">
+            <td class="text-center fw-semibold">{{ forloop.counter }}</td>
+
+            <td class="fw-semibold">
+              {{ lead.name|default:"—" }}
+
+              {% if lead.dup_count > 1 %}
+                <span class="badge dup-badge ms-1"
+                      title="Submitted {{ lead.dup_count }} times">
+                  {{ lead.dup_count }}
+                </span>
+              {% endif %}
+            </td>
+
+
+            <td>
+              {% if lead.email %}
+                <a href="mailto:{{ lead.email }}" class="text-decoration-none">
+                  <i class="bi bi-envelope-open me-1"></i>{{ lead.email }}
+                </a>
+              {% else %}
+                <span class="text-muted">—</span>
+              {% endif %}
+            </td>
+
+            <td>
+              {% if lead.phone %}
+                <a href="tel:{{ lead.phone }}" class="text-decoration-none">
+                  <i class="bi bi-telephone me-1"></i>{{ lead.phone }}
+                </a>
+              {% else %}
+                <span class="text-muted">—</span>
+              {% endif %}
+            </td>
+
+            <!-- Form URL -->
+            <td class="text-truncate" style="max-width: 320px;" title="{{ lead.from_url }}">
+              {% if lead.from_url %}
+                <a href="{{ lead.from_url }}" class="text-decoration-none" target="_blank" rel="noopener">
+                  {{ lead.from_url }}
+                  <i class="bi bi-box-arrow-up-right ms-1"></i>
+                </a>
+              {% else %}
+                <span class="text-muted">—</span>
+              {% endif %}
+            </td>
+
+            <!-- Channel badge (two buckets only) -->
+            <td>
+              {% if lead.chan_is_ads %}
+                <span class="badge badge-ads">Google Ads</span>
+              {% else %}
+                <span class="badge badge-seo">SEO</span>
+              {% endif %}
+            </td>
+
+            <td class="text-muted small" data-ts="{{ lead.created_at|date:'c' }}">
+              {{ lead.created_at|date:"Y-m-d H:i" }}
+            </td>
+
+            <td class="text-end">
+              <div class="btn-group">
+                {% if lead.email %}
+                  <button class="btn btn-sm btn-outline-secondary copy-btn"
+                          data-copy="{{ lead.email }}" data-label="Email"
+                          title="Copy email">
+                    <i class="bi bi-clipboard"></i>
+                  </button>
+                {% endif %}
+                {% if lead.phone %}
+                  <button class="btn btn-sm btn-outline-secondary copy-btn"
+                          data-copy="{{ lead.phone }}" data-label="Phone"
+                          title="Copy phone">
+                    <i class="bi bi-clipboard2"></i>
+                  </button>
+                {% endif %}
+
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="8" class="py-5">
+              <div class="text-center text-muted">
+                <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                <div class="fw-semibold">No leads yet</div>
+                <div>Leads submitted from your PHP site will appear here.</div>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% if is_paginated %}
+    <div class="card-footer bg-white">
+      <nav aria-label="Pagination">
+        <ul class="pagination justify-content-end mb-0">
+          {% if page_obj.has_previous %}
+          <li class="page-item">
+            <a class="page-link"
+               href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.start %}&start={{ request.GET.start }}{% endif %}{% if request.GET.end %}&end={{ request.GET.end }}{% endif %}{% if request.GET.channel %}&channel={{ request.GET.channel }}{% endif %}">
+              Prev
+            </a>
+          </li>
+          {% endif %}
+          <li class="page-item active"><span class="page-link">{{ page_obj.number }}</span></li>
+          {% if page_obj.has_next %}
+          <li class="page-item">
+            <a class="page-link"
+               href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.start %}&start={{ request.GET.start }}{% endif %}{% if request.GET.end %}&end={{ request.GET.end }}{% endif %}{% if request.GET.channel %}&channel={{ request.GET.channel }}{% endif %}">
+              Next
+            </a>
+          </li>
+          {% endif %}
+        </ul>
+      </nav>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Copy toast -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index:1080">
+  <div id="copyToast" class="toast align-items-center text-bg-dark border-0"
+       role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="d-flex">
+      <div class="toast-body" id="copyToastBody">Copied!</div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto"
+              data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function(){
+    const toastEl = document.getElementById('copyToast');
+    const toastBody = document.getElementById('copyToastBody');
+    const toast = toastEl ? new bootstrap.Toast(toastEl) : null;
+
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const value = btn.getAttribute('data-copy') || '';
+               const label = btn.getAttribute('data-label') || 'Value';
+        if (!value) return;
+        navigator.clipboard.writeText(value).then(() => {
+          if (toast && toastBody) { toastBody.textContent = `${label} copied`; toast.show(); }
+          else { alert(`${label} copied: ${value}`); }
+        }).catch(() => {
+          const ta = document.createElement('textarea'); ta.value = value;
+          document.body.appendChild(ta); ta.select();
+          try { document.execCommand('copy'); } catch(e) {}
+          document.body.removeChild(ta);
+          if (toast && toastBody) { toastBody.textContent = `${label} copied`; toast.show(); }
+          else { alert(`${label} copied: ${value}`); }
+        });
+      });
+    });
+
+    // CSV export of visible rows (Sl No, Name, Email, Phone, Form URL, Channel, Date)
+    document.getElementById('exportCsvBtn')?.addEventListener('click', function(){
+      const table = document.querySelector('table');
+      const rows = Array.from(table.querySelectorAll('tbody tr'));
+      const headers = ["Sl No","Name","Email","Phone","Form URL","Channel","Date"];
+      const data = [headers];
+
+      rows.forEach(tr => {
+        const cells = tr.querySelectorAll('td');
+        if (cells.length < 8) return; // skip empty/placeholder rows
+        const sl     = cells[0]?.innerText.trim() || "";
+        const name   = cells[1]?.innerText.trim() || "";
+        const email  = cells[2]?.innerText.trim() || "";
+        const phone  = cells[3]?.innerText.trim() || "";
+        const link   = cells[4]?.querySelector('a');
+        const formUrl= link ? (link.getAttribute('href') || link.textContent.trim()) : (cells[4]?.innerText.trim() || "");
+        const channel= cells[5]?.innerText.trim() || "";
+        const date   = cells[6]?.innerText.trim() || "";
+        data.push([sl, name, email, phone, formUrl, channel, date]);
+      });
+
+      const csv = data.map(r => r.map(v => `"${(v||'').replace(/"/g,'""')}"`).join(',')).join('\n');
+      const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `leads_${new Date().toISOString().slice(0,10)}.csv`;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    });
+  })();
+</script>
+
+{% endblock %}

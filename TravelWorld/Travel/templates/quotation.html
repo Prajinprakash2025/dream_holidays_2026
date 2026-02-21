@@ -2,435 +2,835 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Quotation - {{ itinerary.id }}</title>
-  
-  <!-- Bootstrap CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  
-  <style>
-    body {
-      background: #e9ecef;
-      font-family: Arial, sans-serif;
-      padding: 0;
-      margin: 0;
-    }
+<meta charset="UTF-8" />
+<title>Quotation - {{ itinerary.id }}</title>
+<link rel="icon" href="{% static 'assets/img/dreamholiday_logo.png' %}">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital@1&display=swap" rel="stylesheet">
 
-    /* Action bar */
+<style>
+body{
+    background:#e9ecef;
+    font-family: "Times New Roman", Times, serif;
+    margin:0;
+    padding:0;
+    color: #000;
+    line-height: 1.6;
+    font-size: 14px;
+
+}
+/* MAIN WRAPPER */
+#pdf-content{
+    width:100%;
+    max-width:900px;
+    margin:0 auto;
+    background:#fff;
+    padding:20px 20px;
+}
+/* SECTION */
+.section{
+    padding:20px 40px;
+}
+/* NO PAGE BREAK */
+.avoid-break{
+    page-break-inside:avoid!important;
+    break-inside:avoid!important;
+}
+.page-break {
+    page-break-before: always;
+    break-before: page;
+}
+/* Day plan blocks - keep title, image, and description together */
+.day-plan-block {
+    margin-bottom: 40px;
+    page-break-inside: avoid;
+    break-inside: avoid;
+}
+img{
+    max-width:100%;
+    height:auto;
+}
+/* HEADER */
+.header-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+.logo-img{width:350px;}
+.header-text{
+    text-align:right;
+    font-size:24px;
+    line-height:1.4;
+}
+.brand-name{
+    font-size:24px;
+    color:#000;
+}
+/* MAIN TOP LINE (BLACK) */
+.brown-line {
+    border: none;
+    border-top: 3px solid #000;
+    opacity: 1 !important;
+    margin: 12px 0 35px;
+}
+/* CREATED BY underline */
+.created-underline{
+    width:305px;
+    height:1px;
+    background:#000;
+    margin:4px 0 8px 0;
+}
+table.details-table {
+    width: 95%;          /* reduce width */
+    margin-left: 0;     /* stick to left */
+    margin-right: auto; /* cut space from right */
+}
+/* DETAILS TABLE */
+table.details-table td,
+table.details-table th{
+    border: 0.4px solid rgba(0,0,0,0.12);
+    background:#f7faf0;
+    padding:6px 8px;
+    font-size:14px;
+    line-height: 0.;
+}
+/* SOCIAL */
+.social-row{
+    display:flex;
+    justify-content:space-between;
+    margin-top:25px;
+}
+.social-box{
+    width:32%;
+    text-align:center;
+    font-size:14px;
+}
+.social-box img{
+    width:130px;
+    display:block;
+    margin:0 auto 8px auto;
+}
+/* BULLETS */
+.bullet-section p{
+    margin:0 0 6px;
+    padding-left:15px;
+    text-indent:-10px;
+    font-size:14px;
+}
+.bullet-section p::before{
+    content:"• ";
+    font-weight:bold;
+}
+.list-gap{
+    margin-top:5px;
+}
+/* Compact paragraph spacing */
+.compact-text p{
+    color:#111;
+    margin:2px 0;
+    font-size:16px;
+    font-weight: 500;
+
+}
+/* FINAL FOOTER */
+.footer-final {
+    text-align: center;
+    margin-top: 10px;
+    padding-top: 10px;
+    page-break-inside: avoid !important;
+}
+/* Thank you line */
+.footer-thank {
+    font-family: 'Open Sans', sans-serif;
+    font-style: italic;
+    font-size: 16px;
+    color: #074b7b;
+    margin-bottom: 10px;
+    font-weight: 550;
+}
+/* Logo */
+.footer-logo {
+    width: 250px;
+    display: block;
+    margin: 8px auto;
+    margin-bottom: 10px;
+}
+/* Corporate office heading */
+.footer-office-title {
+    font-weight: bold;
+    font-size: 17px;
+    display: inline-block;
+    border-bottom: 2px solid #000;
+    padding-bottom: 1px;
+    margin-bottom: 4px;
+}
+/* Address text */
+.footer-address {
+    font-size: 13px;
+    margin: 4px 0 2px;
+    line-height: 1.4;
+}
+/* Contact line */
+.footer-contact {
+    font-size: 12px;
+    margin: 4px 0;
+    line-height: 1.4;
+}
+/* Section heading */
+.section img {
+    border-radius: 8px;
+}
+.red-heading {
+    color: #c00000;
+    font-weight: bold;
+    margin: 0;
+    padding: 0;
+    margin-top: 20px;
+}
+/* Bullet list alignment */
+.bullet-section {
+    padding-left: 5ch;
+}
+.bullet-section p {
+    margin: 0 0 6px 0;
+    padding: 0;
+    font-size: 14px;
+}
+.bullet-section p:first-of-type {
+    margin-top: 6px;
+}
+.bullet-section p::before {
+    content: "• ";
+    font-weight: bold;
+}
+/* FIXED QR PAYMENT SECTION */
+.qr-payment {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    margin-top: 12px;
+}
+.qr-payment img {
+    width: 120px;
+    height: auto;
+    border: 1px solid #000;
+    padding: 6px;
+    background: #fff;
+}
+.qr-payment-text {
+    font-size: 13px;
+    line-height: 1.6;
+}
+.qr-payment-text .label {
+    font-weight: normal;
+}
+/* ACTION BAR */
+.action-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: #ffffff;
+    padding: 12px;
+    text-align: center;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+    z-index: 9999;
+}
+.destination-text {
+    font-size: 20px;
+    font-weight: normal;
+    color: #1e4a7a;
+    margin-top: 5px;
+}
+/* Hide action bar while printing / PDF */
+@media print {
     .action-bar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      background: #fff;
-      padding: 15px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      z-index: 9999;
-      text-align: center;
-    }
-
-    /* Main container - looks like A4 */
-    .quotation-wrapper {
-      max-width: 794px;
-      margin: 80px auto 30px;
-      background: white;
-      box-shadow: 0 0 20px rgba(0,0,0,0.15);
-      padding: 40px 50px;
-    }
-
-    /* Page break markers */
-    .page-break {
-      border-top: 2px dashed #ccc;
-      margin: 40px -50px;
-      padding-top: 40px;
-      position: relative;
-    }
-
-    .page-break::before {
-      content: "--- Page Break ---";
-      position: absolute;
-      top: -12px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: white;
-      padding: 0 15px;
-      color: #999;
-      font-size: 11px;
-    }
-
-    /* Logo and header */
-    .logo-img {
-      width: 280px;
-      height: auto;
-    }
-
-    .contact-info {
-      font-size: 11px;
-      color: #1c42ef;
-      line-height: 1.6;
-    }
-
-    .divider {
-      border: 0;
-      border-top: 12px solid #0066a1;
-      margin: 20px 0;
-    }
-
-    /* Tables */
-    .details-table th {
-      background: #dbe9ed;
-      font-weight: 600;
-      border: 1px solid #000;
-    }
-
-    .details-table td {
-      background: #dbe9ed;
-      border: 1px solid #000;
-    }
-
-    .accommodation-table th {
-      background: #3eb8c5;
-      color: white;
-      border: 1px solid #000;
-    }
-
-    .accommodation-table td {
-      border: 1px solid #000;
-    }
-
-    /* Section headers */
-    .blue-header {
-      background: #1e4a7a;
-      color: white;
-      font-weight: bold;
-      padding: 10px;
-      text-align: center;
-      margin: 20px 0 10px;
-    }
-
-    /* Day sections */
-    .day-card {
-      margin-bottom: 20px;
-    }
-
-    .day-title {
-      color: #1e4a7a;
-      font-size: 13px;
-      font-weight: bold;
-      margin-bottom: 8px;
-    }
-
-    .day-img {
-      width: 100%;
-      height: 200px;
-      object-fit: cover;
-      border-radius: 5px;
-      margin-bottom: 8px;
-    }
-
-    .day-description {
-      font-size: 11px;
-      line-height: 1.5;
-      text-align: justify;
-    }
-
-    /* Package box */
-    .package-box {
-      border: 2px solid #000;
-      padding: 15px;
-      margin: 15px 0;
-    }
-
-    /* Content sections */
-    .content-section {
-      font-size: 11px;
-      line-height: 1.5;
-    }
-
-    .content-section ul {
-      padding-left: 20px;
-    }
-
-    .content-section li {
-      margin: 3px 0;
-    }
-
-    /* QR code */
-    .qr-img {
-      max-width: 500px;
-      width: 100%;
-      border: 2px solid #ccc;
-      padding: 10px;
-    }
-
-    /* Footer */
-    .footer-logo {
-      width: 220px;
-      margin-bottom: 10px;
-    }
-
-    /* Print styles */
-    @media print {
-      body {
-        background: white;
-      }
-
-      .action-bar {
         display: none !important;
-      }
-
-      .quotation-wrapper {
-        margin: 0;
-        box-shadow: none;
-        max-width: 100%;
-      }
-
-      .page-break {
-        page-break-before: always;
-        border: none;
-        margin: 0;
-        padding: 0;
-      }
-
-      .page-break::before {
-        display: none;
-      }
-
-      @page {
-        size: A4;
-        margin: 15mm;
-      }
     }
-  </style>
+}
+.day-plan-image {
+    width: 100%;
+    height: 140px;
+    object-fit: cover;
+    border-radius: 8px;
+    display: block;
+    margin-bottom: 10px;
+}
+.footer-bottom-group {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    text-align: center;
+    margin-top: 10px;
+}
+table.details-table td:nth-child(2) {
+    text-align: left;
+    vertical-align: middle;
+}
+/* --- SUMMARY TABLE STYLE --- */
+.summary-table {
+    width: 95%;
+    border-collapse: collapse;
+    background-color: #f7faf0; /* Light greenish/beige background */
+    margin-bottom: 15px;
+    font-family: "Times New Roman", Georgia, serif;
+    font-size: 15px;
+    border: 1px solid #b7b7b7;
+}
+.summary-table tr {
+    border-bottom: 1px solid #d3d3d3; /* Light gray horizontal line */
+}
+/* Remove border from the last row to look cleaner */
+.summary-table tr:last-child {
+    border-bottom: 1px solid #d3d3d3; /* Keep or remove based on preference */
+}
+.summary-table td {
+    padding: 3px 12px;   /* Reduced top/bottom padding (was 8px) */
+    line-height: 1.1;
+    color: #000;
+    vertical-align: middle;
+    border: none; /* Removes the box/grid borders */
+}
+/* First Column: Label */
+.summary-table td:nth-child(1) { width: 40%; text-align: left; font-weight: normal; }
+/* Second Column: Colon */
+.summary-table td:nth-child(2) { width: 5%; text-align: center; font-weight: bold; }
+/* Third Column: Value */
+.summary-table td:nth-child(3) { width: 55%; text-align: left; font-weight: normal; }
+/* ========================================= */
+/* YOUTUBE BUTTON WITH IMAGE CROPPER FIX    */
+/* ========================================= */
+.youtube-btn {
+    display: inline-flex;       /* Keeps text and image aligned */
+    align-items: center;        /* Vertically centers them */
+    padding: 5px 25px;          /* Keep button size reasonable */
+    background-color: #fff;
+    border: 2px solid red;
+    border-radius: 50px;
+    text-decoration: none;
+    color: #000 !important;
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    font-weight: bold;
+    height: 42px;               /* Fixed height prevents button from exploding */
+    box-sizing: border-box;
+}
+/* The Container that "Cuts" the extra background */
+.logo-cropper {
+    width: 90px;                /* The visible width of the logo */
+    height: 26px;               /* The visible height of the logo */
+    overflow: hidden;           /* This cuts off the large background */
+    position: relative;         /* Necessary for centering the big image */
+    display: inline-block;
+    margin-left: 8px;           /* Space between text and logo */
+    vertical-align: middle;
+}
+/* The Big Image itself */
+.youtube-icon-img {
+    height: 78px;               /* Zoom level: Make it much taller than container */
+    width: auto;                /* Maintain Aspect Ratio */
+    max-width: none;            /* Prevent bootstrap from shrinking it */
+    position: absolute;         /* Take it out of flow to center it */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* Perfectly center the logo in the crop box */
+}
+.square-bullets p::before{
+    content:"■ ";
+    font-weight:bold;
+    color:#000;
+}
+.stars{
+    color: #FFD700;   /* gold yellow */
+    font-size: 16px;  /* optional */
+}
+
+</style>
 </head>
 <body>
+    <div class="action-bar">
+    <button class="btn btn-dark" onclick="downloadPDF()">
+        ⬇ Download Quotation PDF
+    </button>
+</div>
+<br><br>
+<div id="pdf-content">
+<div class="section ">
+    <div class="header-row avoid-break">
+        <img src="{% static 'assets/img/dreamholiday_logo.png' %}" class="logo-img"/>
+        <div class="header-text">
+            Thank for making enquiry with <br>
+            <span class="brand-name">Dream Holidays Kerala</span><br>
+            A Premium Travel Planner
+        </div>
+    </div>
+    <hr class="brown-line"/>
+    <div class="text-center avoid-break" style="margin: 25px 0;">
+        <a href="https://www.youtube.com/@dreamholidayskeralakochi" target="_blank" class="youtube-btn">
+            Watch guest reviews on
+            <div class="logo-cropper">
+                <img src="{% static 'assets/img/youtube_logo1.png' %}" class="youtube-icon-img" alt="YouTube">
+            </div>
+        </a>
+    </div>
+    <div class="d-flex justify-content-between avoid-break">
+        <div>
+            <div style="color:#1e4a7a; font-size:27px; margin-top: 15px;">
+                Ms/Mr. {{ query.client_name }} trip to
+            </div>
+            <div class="destination-text">{{ itinerary.destination_list }}</div>
+        </div>
+    <div class="created-box" style="padding:6px 0px 0px 25px; font-size:15px; width:321px; margin-right: -15px;">
+        <b>Created By</b>
+        <div class="created-underline"></div>
+        Tours consultant name: {{ created_by_name }}<br>
+        Call: 9539370404<br>
+        Email: salesone@dreamkeralapackages.com<br>
+        Quotation Created on: {% now "d-M-Y" %}
+    </div>
+    </div>
+    <br>
+    <div class="compact-text">
+        <p>We are hereby sending the tour cost and itinerary.</p>
+        <p>Travel ID: {{ itinerary.id }}</p>
+        <p>Dear Sir,</p>
+        <p>Greetings from Dream Holidays Kerala!!!!!</p>
+    <p>
+        Many thanks for your enquiry; we are pleased to provide the best details<br>
+        with cos from <span style="color:black;">{{ itinerary.start_date|date:"j M Y" }}</span>
+        <b>to</b> <span style="color:black;">{{ itinerary.end_date|date:"j M Y" }}</span>.
+    </p>
+    </div>
+    <br>
+<table class="summary-table avoid-break">
+    <tr>
+        <td>Number of persons</td>
+        <td>:</td>
+        <td>{{ itinerary.adults }} Adult + {{ itinerary.childrens|default:"0" }} Child + {{ itinerary.infants|default:"0" }} Infant</td>
+    </tr>
+    <tr>
+        <td>Type of vehicle</td>
+        <td>:</td>
+        <td>{{ selected_option.vehicle_type }}</td>
+    </tr>
+    <tr>
+        <td>Number of rooms</td>
+        <td>:</td>
+        <td>{{ selected_option.number_of_rooms }}</td>
+    </tr>
+    <tr>
+        <td>Number of extra Bed</td>
+        <td>:</td>
+        <td>{{ selected_option.extra_beds }}</td>
+    </tr>
+    <tr>
+        <td>Child Without Extra Bed</td>
+        <td>:</td>
+        <td>{{ selected_option.child_without_bed }}</td>
+    </tr>
+    <tr>
+        <td>Child With Extra Bed</td>
+        <td>:</td>
+        <td>{{ selected_option.child_with_bed }}</td>
+    </tr>
+</table>
+    <br>
+    <p><b>Place to visit :</b> {{ itinerary.destination_list }}</p>
+    <div class="avoid-break">
+        <p style="margin-top:20px; font-size:15px;color:#277993;">If you have future clarification or assistant needed please contact,</p>
+        <p style="font-size:14px; line-height:1.6;">
+            📞 Name:Mr. Mansoor Majeed (Director)– <span style="color:#277993;">09562435213</span><br>
+            📞 Name:Mr. Arun K Mohan (Manager Operations)– <span style= "color:#277993;">08592890404</span>
+        </p>
+    </div>
+    <div class="social-row avoid-break">
 
-<!-- Action Bar -->
-<div class="action-bar">
-  <a href="{% url 'download_quotation_pdf' itinerary.id %}" class="btn btn-primary btn-lg me-2">
-    📥 Download PDF
-  </a>
-  <button onclick="window.print()" class="btn btn-success btn-lg">
-    🖨️ Print
-  </button>
+    <div class="social-box">
+        <img src="{% static 'assets/img/google.jpg' %}">
+        Dream Holidays Kerala<br>
+        4.8 <span class="stars">★★★★★</span> (3,500+)<br>
+        10+ years in business
+    </div>
+
+    <div class="social-box">
+        <img src="{% static 'assets/img/facebook.jpg' %}">
+        Dream Holidays Kerala<br>
+        4.5 <span class="stars">★★★★☆</span> 15K followers<br>
+        10+ years in business
+    </div>
+
+    <div class="social-box">
+        <img src="{% static 'assets/img/instagram.jpg' %}">
+        Dream Holidays Kerala<br>
+        46K followers<br>
+        10+ years in business
+    </div>
+
 </div>
 
-<!-- Main Quotation Content -->
-<div class="quotation-wrapper">
-
-  <!-- Header -->
-  <div class="row mb-3">
-    <div class="col-6">
-      <img src="{% static 'assets/img/travel_hope.png' %}" alt="Logo" class="logo-img" />
-    </div>
-    <div class="col-6 text-end contact-info">
-      <strong>Name:</strong> {{ query.assign }}<br>
-      <strong>Designation:</strong> {{ query.assign.role }}<br>
-      <strong>Phone:</strong> 09048949303<br>
-      <strong>Email:</strong> salesone@travelhope.in
-    </div>
-  </div>
-
-  <hr class="divider" />
-
-  <!-- Greeting -->
-  <div class="mb-3">
-    <p class="fw-bold mb-1">Dear Guest,</p>
-    <p class="fw-bold mb-2">Greetings of Travel hope!!!!!</p>
-    <p>Thank you for giving us the opportunity to plan your holiday. We are pleased to provide you with the best details with cost from <strong style="color: red;">{{ query.from_date|date:"jS M Y" }}</strong> to <strong style="color: red;">{{ query.to_date|date:"jS M Y" }} ({{ query.total_days }} Days)</strong></p>
-  </div>
-
-  <!-- Details Table -->
-  <p class="fw-bold">Please find the details of your proposed travel plans:</p>
-  
-  <table class="table table-bordered details-table">
-    <tr>
-      <th style="width: 40%;">Number of persons</th>
-      <td>{{ query.adult|default:0 }} Adult{{ query.adult|pluralize }}{% if query.children %} + {{ query.children }} Child{{ query.children|pluralize:"ren" }}{% endif %}</td>
-    </tr>
-    {% if query.children %}
-    <tr>
-      <th>Number of children (With age)</th>
-      <td>{{ query.children }}</td>
-    </tr>
-    {% endif %}
-    <tr>
-      <th>Type of vehicle</th>
-      <td>{{ selected_option.vehicle_type|default:"A/C Ertiga" }}</td>
-    </tr>
-    <tr>
-      <th>Number of rooms</th>
-      <td>{{ selected_option.number_of_rooms|default:"0" }}</td>
-    </tr>
-    {% if selected_option.extra_beds > 0 %}
-    <tr>
-      <th>Number of extra bed{{ selected_option.extra_beds|pluralize }}</th>
-      <td>{{ selected_option.extra_beds }}</td>
-    </tr>
-    {% endif %}
-  </table>
-
-  <p class="fw-bold text-primary">Places to visit: {{ itinerary.destination_list }}</p>
-
-  <div class="mb-4" style="font-size: 15px; font-style: italic; color: #d4a017; line-height: 2;">
-    <em>If you have future clarification or assistant needed, please contact,</em><br>
-    <strong style="color: #333;">Mrs. Shimna N S</strong> <em>(Director) Mob – 09048950303</em><br>
-    <strong style="color: #333;">Mr. Sreekumar Sukumaran</strong> <em>(Manager - Operations) Mob- 09048210303</em>
-  </div>
-
-  <!-- Page Break -->
-  <div class="page-break"></div>
-
-  <!-- Accommodation -->
-  <div class="blue-header">ACCOMMODATION</div>
-  
-  <div class="package-box">
-    <p class="fw-bold text-center mb-3">Standard Package</p>
-    
-    <table class="table table-bordered accommodation-table">
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Destination</th>
-          <th>Hotels</th>
-          <th>Room Type</th>
-          <th>Meal Plan</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for booking in hotel_bookings %}
-        <tr>
-          <td>{{ booking.check_in_date|date:"d M Y" }}</td>
-          <td>{{ booking.destination.name|default:"-" }}</td>
-          <td>{{ booking.hotel.name|default:"-" }}</td>
-          <td>{{ booking.room_type.name|default:"-" }}</td>
-          <td>{{ booking.meal_plan.name|default:"-" }}</td>
-        </tr>
-        {% empty %}
-        <tr>
-          <td colspan="5" class="text-center">No accommodation details</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-    
-    <p class="fw-bold text-center mt-3 pt-3 border-top border-dark">
-      Total Package Price: ₹{{ total_package_price|floatformat:0 }} for {{ query.adult|default:0 }} Adult{{ query.adult|pluralize }}{% if query.children %} + {{ query.children }} Child{{ query.children|pluralize:"ren" }}{% endif %}
-    </p>
-  </div>
-
-  <!-- Day Plans -->
-  <div class="blue-header">DAY TO DAY TRAVEL PLANNING</div>
-
-  {% for day in day_plans %}
-    <div class="day-card">
-      <div class="day-title">Day {{ day.day_number|stringformat:"02d" }}{% if day.title %} - {{ day.title }}{% endif %}</div>
-      
-      {% if day.get_image %}
-      <img src="{{ day.get_image.url }}" alt="Day {{ day.day_number }}" class="day-img">
-      {% endif %}
-      
-      {% if day.get_description %}
-      <div class="day-description">{{ day.get_description|linebreaks }}</div>
-      {% endif %}
-    </div>
-
-    {# Add page break every 2 days #}
-    {% if forloop.counter|divisibleby:"2" and not forloop.last %}
-    <div class="page-break"></div>
-    {% endif %}
-  {% endfor %}
-
-  <!-- Page break before terms -->
-  <div class="page-break"></div>
-
-  <!-- Package Terms -->
-  {% if package_terms %}
-    
-    {% if package_terms.special_inclusion %}
-    <div class="blue-header">SPECIAL INCLUSION</div>
-    <div class="content-section">{{ package_terms.special_inclusion|safe }}</div>
+</div>
+<div class="section avoid-break">
+    <h4 style="color:#206981; font-weight:bold;"><u>ACCOMMODATION</u></h4>
+    {% if itinerary.status == 'confirmed' %}
+        <p style="font-weight:bold; margin-bottom:5px; color:#198754;">
+            Confirmed Package: {{ confirmed_package_name }}
+        </p>
+        <table class="details-table avoid-break" width="100%">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Destination</th>
+                    <th>Hotel</th>
+                    <th>Room Type</th>
+                    <th>Meal Plan</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for booking in hotel_bookings %}
+                <tr>
+                    <td>{{ booking.check_in_date|date:"d M Y" }}</td>
+                    <td>{{ booking.destination.name }}</td>
+                    <td>
+                        {% if booking.hotel %}{{ booking.hotel.name }}
+                        {% else %}{{ booking.custom_hotel_name }}{% endif %}
+                    </td>
+                    <td>
+                        {% if booking.room_type %}{{ booking.room_type.name }}
+                        {% else %}{{ booking.custom_room_type }}{% endif %}
+                    </td>
+                    <td>{{ booking.meal_plan.name }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="5" class="text-center text-muted">No details available.</td></tr>
+                {% endfor %}
+                <tr>
+                    <td colspan="5" style="text-align:center; color:#e41616; font-weight:bold; padding:10px; background:#ffffff;">
+                        Final Package Price: ₹{{ total_package_price|floatformat:0 }}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    {% else %}
+        {% if option1_hotels %}
+        <div style="margin-bottom: 20px;">
+            <p style="font-weight:bold; margin-bottom:5px; color:#000000;"> Standard</p>
+            <table class="details-table avoid-break" width="100%">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Destination</th>
+                        <th>Hotel</th>
+                        <th>Room Type</th>
+                        <th>Meal Plan</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for booking in option1_hotels %}
+                    <tr>
+                        <td>{{ booking.check_in_date|date:"d M Y" }}</td>
+                        <td>{{ booking.destination.name }}</td>
+                        <td>
+                            {% if booking.hotel %}{{ booking.hotel.name }}
+                            {% else %}{{ booking.custom_hotel_name }}{% endif %}
+                        </td>
+                        <td>
+                            {% if booking.room_type %}{{ booking.room_type.name }}
+                            {% else %}{{ booking.custom_room_type }}{% endif %}
+                        </td>
+                        <td>{{ booking.meal_plan.name }}</td>
+                    </tr>
+                    {% endfor %}
+                    <tr>
+                        <td colspan="5" style="text-align:center; color:#e41616; font-weight:bold; padding:8px; background:#ffffff;">
+                            Total Package Price: ₹{{ option1_price|floatformat:0 }}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+        {% if option2_hotels %}
+        <div style="margin-bottom: 20px;">
+            <p style="font-weight:bold; margin-bottom:5px; color:#000000;">Deluxe</p>
+            <table class="details-table avoid-break" width="100%">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Destination</th>
+                        <th>Hotel</th>
+                        <th>Room Type</th>
+                        <th>Meal Plan</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for booking in option2_hotels %}
+                    <tr>
+                        <td>{{ booking.check_in_date|date:"d M Y" }}</td>
+                        <td>{{ booking.destination.name }}</td>
+                        <td>
+                            {% if booking.hotel %}{{ booking.hotel.name }}
+                            {% else %}{{ booking.custom_hotel_name }}{% endif %}
+                        </td>
+                        <td>
+                            {% if booking.room_type %}{{ booking.room_type.name }}
+                            {% else %}{{ booking.custom_room_type }}{% endif %}
+                        </td>
+                        <td>{{ booking.meal_plan.name }}</td>
+                    </tr>
+                    {% endfor %}
+                    <tr>
+                        <td colspan="5" style="text-align:center; color:#e41616; font-weight:bold; padding:8px; background:#ffffff;">
+                            Total Package Price: ₹{{ option2_price|floatformat:0 }}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+        {% if option3_hotels %}
+        <div style="margin-bottom: 20px;">
+            <p style="font-weight:bold; margin-bottom:5px; color:#000000;">Premium</p>
+            <table class="details-table avoid-break" width="100%">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Destination</th>
+                        <th>Hotel</th>
+                        <th>Room Type</th>
+                        <th>Meal Plan</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for booking in option3_hotels %}
+                    <tr>
+                        <td>{{ booking.check_in_date|date:"d M Y" }}</td>
+                        <td>{{ booking.destination.name }}</td>
+                        <td>
+                            {% if booking.hotel %}{{ booking.hotel.name }}
+                            {% else %}{{ booking.custom_hotel_name }}{% endif %}
+                        </td>
+                        <td>
+                            {% if booking.room_type %}{{ booking.room_type.name }}
+                            {% else %}{{ booking.custom_room_type }}{% endif %}
+                        </td>
+                        <td>{{ booking.meal_plan.name }}</td>
+                    </tr>
+                    {% endfor %}
+                    <tr>
+                        <td colspan="5" style="text-align:center; color:#e41616; font-weight:bold; padding:8px; background:#ffffff;">
+                            Total Package Price: ₹{{ option3_price|floatformat:0 }}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+        {% if option4_hotels %}
+        <div style="margin-bottom: 20px;">
+            <p style="font-weight:bold; margin-bottom:5px; color:#000000;">Luxury</p> <table class="details-table avoid-break" width="100%">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Destination</th>
+                        <th>Hotel</th>
+                        <th>Room Type</th>
+                        <th>Meal Plan</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for booking in option4_hotels %}
+                    <tr>
+                        <td>{{ booking.check_in_date|date:"d M Y" }}</td>
+                        <td>{{ booking.destination.name }}</td>
+                        <td>
+                            {% if booking.hotel %}{{ booking.hotel.name }}
+                            {% else %}{{ booking.custom_hotel_name }}{% endif %}
+                        </td>
+                        <td>
+                            {% if booking.room_type %}{{ booking.room_type.name }}
+                            {% else %}{{ booking.custom_room_type }}{% endif %}
+                        </td>
+                        <td>{{ booking.meal_plan.name }}</td>
+                    </tr>
+                    {% endfor %}
+                    <tr>
+                        <td colspan="5" style="text-align:center; color:#e41616; font-weight:bold; padding:8px; background:#ffffff;">
+                            Total Package Price: ₹{{ option4_price|floatformat:0 }}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
     {% endif %}
 
     {% if package_terms.package_inclusion %}
-    <div class="blue-header">INCLUSION</div>
-    <div class="content-section">{{ package_terms.package_inclusion|safe }}</div>
-    {% endif %}
-
+    <h5 class="red-heading">Inclusions</h5>
+    <div class="bullet-section avoid-break">
+        {% for line in incl_clean %}
+        <p>{{ line }}</p>
+        {% endfor %}
+    </div>
+   {% endif %}
     {% if package_terms.package_exclusion %}
-    <div class="blue-header">EXCLUSION</div>
-    <div class="content-section">{{ package_terms.package_exclusion|safe }}</div>
+    <h5 class="red-heading">Exclusions</h5>
+    <div class="bullet-section avoid-break">
+        {% for line in excl_clean %}
+        <p>{{ line }}</p>
+        {% endfor %}
+    </div>
     {% endif %}
-
-  {% endif %}
-
-  <!-- Page break before policies -->
-  <div class="page-break"></div>
-
-  {% if package_terms %}
-    
-    {% if package_terms.terms_and_conditions %}
-    <div class="blue-header">TERMS AND CONDITIONS</div>
-    <div class="content-section">{{ package_terms.terms_and_conditions|safe }}</div>
-    {% endif %}
-
-    {% if package_terms.payment_policy %}
-    <div class="blue-header">PAYMENT POLICY</div>
-    <div class="content-section">{{ package_terms.payment_policy|safe }}</div>
-    {% endif %}
-
-    {% if package_terms.cancellation_policy %}
-    <div class="blue-header">CANCELLATION POLICY</div>
-    <div class="content-section">{{ package_terms.cancellation_policy|safe }}</div>
-    {% endif %}
-
-    {% if package_terms.refund_policy %}
-    <div class="blue-header">REFUND AFTER CANCELLATION</div>
-    <div class="content-section">{{ package_terms.refund_policy|safe }}</div>
-    {% endif %}
-
-  {% endif %}
-
-  <!-- Page break before bank details -->
-  <div class="page-break"></div>
-
-  <!-- Bank Details -->
-  <div class="blue-header">BANK DETAILS</div>
-  
-  <div class="text-center my-4">
-    <img src="{% static 'assets/img/low.png' %}" alt="Bank QR Code" class="qr-img">
-  </div>
-
-  <p class="content-section">
-    This is an initial quote based on our most popular holiday package to your chosen destination. 
-    The pricing is indicative and can change depending on the hotels etc. chosen. Once your Travel 
-    Expert gets in touch with you, feel free to ask for any customization in this itinerary or have 
-    a fresh itinerary designed just for you.
-  </p>
-
-  <!-- Closing Message -->
-  <div class="text-center my-4 py-3 border-top border-bottom" style="border-style: dotted !important; border-color: #0066a1 !important;">
-    <p class="fw-bold" style="color: #0066a1; font-style: italic; margin: 0;">
-      Travel Hope Team wishes you a memorable holiday with us...
-    </p>
-  </div>
-
-  <!-- Footer -->
-  <div class="text-center mt-4 pt-3 border-top">
-    <img src="{% static 'assets/img/travel_hope.png' %}" alt="Logo" class="footer-logo">
-    <p style="font-size: 10px; line-height: 1.6; margin: 5px 0;">
-      2nd Floor, Mayeli Arcade, Metro pillar no: 800, S A Road, Kalavantin, Kochi-682020.
-    </p>
-    <p style="font-size: 10px;">
-      Mail: info@travelhope.in | Website: www.travelhope.in | Mob: 90489 10303
-    </p>
-  </div>
-
 </div>
+{% if option1_hotels and option2_hotels and option3_hotels and option4_hotels %}
+    <div class="page-break"></div>
+{% endif %}
+<div class="section">
+    <h4 style="color:#c00000; font-size:20px; font-weight:bold; margin-top: 20px;">
+        Day To Day Travel Planning
+    </h4>
+    {% for day in day_plans %}
+        <div class="day-plan-block">
+            <h6 style="color:#c00000; margin-top:15px; font-weight:normal; font-size: 16px;">
+                Day {{ day.day_number }}{% if day.title %} - {{ day.title }}{% endif %}
+            </h6>
+            {% if day.get_image %}
+            <div style="margin: 10px 0;">
+                <img src="{{ day.get_image.url }}" class="day-plan-image" style="max-width: 100%; height: auto; border-radius: 5px;">
+            </div>
+            {% endif %}
+            <div style="font-size:14px; line-height:1.6; text-align: justify;">
+                {{ day.get_description|linebreaks }}
+            </div>
+        </div>
+    {% empty %}
+        <p style="color: #666; font-style: italic;">No detailed day plans added yet.</p>
+    {% endfor %}
+</div>
+<div class="page-break"></div>
+<div class="section">
+    {% if package_terms.terms_and_conditions %}
+    <h5 class="red-heading">Terms and Conditions</h5>
+    <div class="bullet-section square-bullets">
+        {% for line in terms_clean %}
+        <p>{{ line }}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% if package_terms.cancellation_policy %}
+    <h5 class="red-heading">Cancellation Policy</h5>
+    <div class="bullet-section square-bullets">
+        {% for line in cancel_clean %}
+        <p>{{ line }}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+<div class="page-break"></div>
+<div class="section">
+    <h5 style="color:#c00000; font-weight:bold;">Bank Details</h5>
+    <table class="details-table avoid-break" width="100%">
+        <tr><td><b>Account Holder Name</b></td><td><b>Dream Holidays</b></td></tr>
+        <tr><td><b>Type Of Account</b></td><td><b>Current Account</b></td></tr>
+        <tr><td><b>Account Number</b></td><td><b>028905500281</b></td></tr>
+        <tr><td><b>Bank Name/Branch</b></td><td><b>ICICI / Aluva </b></td></tr>
+        <tr><td><b>IFSC Code</b></td><td><b>ICIC0000289</b></td></tr>
+    </table>
+    <h5 style="color:#c00000; font-weight:bold; margin-top: 30px;">Payment QR Code</h5>
+    <div class="qr-payment avoid-break">
+        <img src="{% static 'assets/img/Payment QR copy.png' %}" alt="UPI QR Code">
+        <div class="qr-payment-text">
+            <div><span class="label">Merchant Name :</span> Dream Holidays Kerala</div>
+            <div><span class="label">UPI ID :</span> dreamholidaysqr@icici</div>
+            <div class="label" style="margin-top:6px;">Steps to Pay UPI QR Code</div>
+            <div>
+                Open UPI app &gt; Select "Tap to Pay" &gt; Scan QR Code &gt; Enter Amount
+            </div>
+        </div>
+     </div>
+</div>
+<div style="padding-top: 40px;">
+    <div class="footer-final avoid-break">
+        <p class="footer-thank">
+            Dream Holidays Kerala Team wishes you a memorable holiday with us…
+        </p>
+        <img src="{{ request.scheme }}://{{ request.get_host }}{% static 'assets/img/dreamholiday_logo.png' %}"
+             class="footer-logo"
+             crossorigin="anonymous">
+        <div class="footer-bottom-group avoid-break">
+            <div class="footer-office-title">Corporate office</div>
+            <p class="footer-address">
+                Address: Door No.626/B, 1st Floor, National Highway 47 Thottumugham,
+                Kochi, Thottumugham, Aluva, Kerala 683101
+            </p>
+            <p class="footer-contact">
+                Ph: 09562435213, 09142590404,
+                mail: info@dreamholidayskerala.com
+                Website: www.dreamholidayskerala.com
+            </p>
+        </div>
+    </div>
+</div>
+    <div style="height: 80px; width: 100%; clear: both; color: transparent; font-size: 1px;">.</div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script>
+function downloadPDF() {
 
-<!-- Bootstrap JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    window.scrollTo(0, 0);
+
+    const actionBar = document.querySelector('.action-bar');
+    actionBar.style.display = 'none';
+
+    const element = document.getElementById('pdf-content');
+
+    const opt = {
+        margin: [0, 0, 0, 0],
+
+        filename: 'Quotation_{{ query.client_name|slugify }}_{{ itinerary.id }}.pdf',
+
+        /* Image compression balanced */
+        image: {
+            type: 'jpeg',     // back to jpeg (smaller)
+            quality: 0.95     // high but compressed
+        },
+
+        /* Canvas quality tuned */
+        html2canvas: {
+            scale: 2.5,       // balanced (2 = blur, 4 = huge)
+            dpi: 192,         // print-safe but lighter than 300
+            letterRendering: true,
+            useCORS: true,
+            scrollY: 0,
+            logging: false
+        },
+
+        /* PDF compression enabled */
+        jsPDF: {
+            unit: 'mm',
+            format: 'a4',
+            orientation: 'portrait',
+            compress: true
+        },
+
+        /* Page break logic unchanged */
+        pagebreak: {
+            mode: ['css', 'legacy'],
+            before: '.page-break',
+            avoid: '.day-plan-block'
+        }
+    };
+
+    setTimeout(() => {
+        html2pdf()
+            .set(opt)
+            .from(element)
+            .save()
+            .then(() => {
+                actionBar.style.display = 'block';
+            });
+    }, 2000);
+}
+</script>
 
 </body>
 </html>

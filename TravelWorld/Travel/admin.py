@@ -171,3 +171,6 @@ class VehicleAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         }),
     )
+
+
+admin.site.register(Lead)

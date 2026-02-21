@@ -140,16 +140,8 @@
   .modal-body::-webkit-scrollbar-thumb:hover {
     background: #764ba2;
   }
-  .suppliers-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    padding: 2rem;
-    border-radius: 15px;
-    margin-bottom: 2rem;
-    color: white;
-    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
-  }
 
-  /* Add this new style for back button */
+  /* Back button */
   .back-button-container {
     padding: 1.5rem 2rem 0 2rem;
     margin-bottom: -1rem;
@@ -181,113 +173,139 @@
     font-size: 16px;
   }
 
-  .search-filter-bar {
-    background: white;
-    padding: 1.5rem;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-    margin-bottom: 1.5rem;
-  }
-
-  .modern-table {
-    background: white;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-  }
-
-  .modern-table thead {
+  /* Serial Number Styling */
+  .serial-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 35px;
+    height: 35px;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
-  }
-
-  .modern-table thead th {
-    border: none;
-    padding: 1rem;
+    border-radius: 8px;
     font-weight: 600;
-    text-transform: uppercase;
-    font-size: 13px;
-    letter-spacing: 0.5px;
-  }
-
-  .modern-table tbody tr {
+    font-size: 14px;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
     transition: all 0.3s ease;
-    border-bottom: 1px solid #f0f0f0;
   }
 
-  .modern-table tbody tr:hover {
-    background: #f8f9ff;
-    transform: scale(1.01);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+  .modern-table tbody tr:hover .serial-number {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
   }
 
-  .modern-table tbody td {
-    padding: 1rem;
-    vertical-align: middle;
-  }
-
-  .action-btn-group {
-    display: flex;
-    gap: 0.5rem;
-  }
-
-  .action-btn {
-    padding: 0.4rem 0.8rem;
-    border-radius: 8px;
-    border: none;
-    transition: all 0.3s ease;
-    font-size: 13px;
-    font-weight: 500;
-  }
-
-  .action-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-  }
-
-  .badge-modern {
-    padding: 0.4rem 0.8rem;
-    border-radius: 8px;
-    font-weight: 500;
-    font-size: 12px;
-  }
-
-  .stats-card {
+  /* Pagination Styles */
+  .pagination-container {
     background: white;
     padding: 1.5rem;
     border-radius: 12px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    margin-top: 1.5rem;
     text-align: center;
+  }
+
+  .pagination-modern {
+    display: inline-flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    padding: 0;
+    list-style: none;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .page-item-modern {
+    display: inline-block;
+  }
+
+  .page-link-modern {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    background: white;
+    border: 2px solid #e0e0e0;
+    color: #333;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 14px;
     transition: all 0.3s ease;
+    cursor: pointer;
   }
 
-  .stats-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+  .page-link-modern:hover {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-color: #667eea;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
   }
 
-  .stats-card .icon {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
+  .page-item-modern.active .page-link-modern {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-color: #667eea;
+    color: white;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    font-weight: 600;
+  }
+
+  .page-item-modern.disabled .page-link-modern {
+    background: #f5f5f5;
+    border-color: #e0e0e0;
+    color: #999;
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  .page-item-modern.disabled .page-link-modern:hover {
+    transform: none;
+    box-shadow: none;
+    background: #f5f5f5;
+    color: #999;
+  }
+
+  .page-info {
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 0 auto 1rem;
-    font-size: 24px;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
   }
 
-  .modal-header-gradient {
+  .page-info .badge {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-weight: 500;
     color: white;
   }
 
-  .form-section-title {
-    color: #667eea;
+  .pagination-ellipsis {
+    padding: 0.6rem 1rem;
+    color: #999;
     font-weight: 600;
-    border-bottom: 2px solid #667eea;
-    padding-bottom: 0.5rem;
-    margin-bottom: 1rem;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .pagination-modern {
+      font-size: 12px;
+    }
+    
+    .page-link-modern {
+      padding: 0.5rem 0.75rem;
+      font-size: 12px;
+    }
+
+    .page-link-modern span {
+      display: none;
+    }
+
+    .page-info {
+      font-size: 13px;
+    }
   }
 </style>
 
@@ -298,6 +316,7 @@
         <span>Back to Admin Settings</span>
     </a>
 </div>
+
 <div class="container-fluid" style="margin-top: 90px; padding: 0 2rem;">
 
   <!-- Header -->
@@ -348,6 +367,7 @@
       <table class="table modern-table mb-0" id="vehiclesTable">
         <thead>
           <tr>
+            <th style="width: 60px;"><i class="fas fa-hashtag me-2"></i>#</th>
             <th><i class="fas fa-image me-2"></i>Image</th>
             <th><i class="fas fa-car me-2"></i>Vehicle Name</th>
             <th><i class="fas fa-tag me-2"></i>Type</th>
@@ -361,6 +381,12 @@
         <tbody>
           {% for vehicle in vehicles %}
           <tr>
+            <!-- Serial Number -->
+            <td>
+              <span class="serial-number">{{ forloop.counter|add:page_obj.start_index|add:"-1" }}</span>
+            </td>
+            
+            <!-- Image -->
             <td>
               {% if vehicle.photo %}
                 <img src="{{ vehicle.photo.url }}" alt="{{ vehicle.name }}" class="vehicle-image">
@@ -370,16 +396,24 @@
                 </div>
               {% endif %}
             </td>
+            
+            <!-- Vehicle Name -->
             <td>
               <div class="fw-bold">{{ vehicle.name }}</div>
               <small class="text-muted">ID: #VEH{{ vehicle.id }}</small>
             </td>
+            
+            <!-- Type -->
             <td>
               <span class="badge bg-info" style="padding: 0.5rem 0.8rem;">
                 {{ vehicle.get_vehicle_type_display }}
               </span>
             </td>
+            
+            <!-- Destination -->
             <td>{{ vehicle.destination.name }}</td>
+            
+            <!-- Supplier -->
             <td>
               {% if vehicle.supplier %}
                 <span class="badge bg-warning text-dark" style="padding: 0.5rem 0.8rem;">
@@ -389,9 +423,13 @@
                 <span class="text-muted"><em>No Supplier</em></span>
               {% endif %}
             </td>
+            
+            <!-- Capacity -->
             <td>
               <strong>{{ vehicle.capacity }}</strong> seats
             </td>
+            
+            <!-- Status -->
             <td class="text-center">
               {% if vehicle.status %}
                 <span class="badge bg-success" style="padding: 0.5rem 1rem;">
@@ -403,6 +441,8 @@
                 </span>
               {% endif %}
             </td>
+            
+            <!-- Actions -->
             <td>
               <div class="action-buttons">
                 
@@ -435,13 +475,17 @@
                   <i class="fas fa-trash me-1"></i>Delete
                 </button>
                 {% endif %}
-                
+
+                <!-- Pricing Button -->
+                <a href="{% url 'vehicle_pricing_list' vehicle.id %}" class="btn btn-primary btn-action">
+                  <i class="fas fa-dollar-sign me-1"></i>Pricing
+                </a>
               </div>
             </td>
           </tr>
           {% empty %}
           <tr>
-            <td colspan="8" class="text-center py-5">
+            <td colspan="9" class="text-center py-5">
               <i class="fas fa-car fa-3x text-muted mb-3"></i>
               <h5 class="text-muted">No vehicles found</h5>
               <p class="text-muted">Start by adding your first vehicle</p>
@@ -452,6 +496,103 @@
       </table>
     </div>
   </div>
+
+  <!-- Pagination Section -->
+  {% if page_obj.has_other_pages %}
+  <div class="pagination-container" id="paginationContainer">
+      <nav aria-label="Page navigation">
+          <ul class="pagination-modern">
+              
+              <!-- First Page -->
+              {% if page_obj.has_previous %}
+              <li class="page-item-modern">
+                  <a href="?page=1" class="page-link-modern" title="First Page">
+                      <i class="fas fa-angle-double-left"></i>
+                  </a>
+              </li>
+              {% endif %}
+              
+              <!-- Previous -->
+              {% if page_obj.has_previous %}
+              <li class="page-item-modern">
+                  <a href="?page={{ page_obj.previous_page_number }}" class="page-link-modern" title="Previous">
+                      <i class="fas fa-angle-left"></i>
+                      <span>Previous</span>
+                  </a>
+              </li>
+              {% else %}
+              <li class="page-item-modern disabled">
+                  <span class="page-link-modern">
+                      <i class="fas fa-angle-left"></i>
+                      <span>Previous</span>
+                  </span>
+              </li>
+              {% endif %}
+              
+              <!-- Page Numbers -->
+              {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                  <li class="page-item-modern active">
+                      <span class="page-link-modern">{{ num }}</span>
+                  </li>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                  <li class="page-item-modern">
+                      <a href="?page={{ num }}" class="page-link-modern">{{ num }}</a>
+                  </li>
+                {% elif num == 1 or num == page_obj.paginator.num_pages %}
+                  <li class="page-item-modern">
+                      <a href="?page={{ num }}" class="page-link-modern">{{ num }}</a>
+                  </li>
+                {% elif num == page_obj.number|add:'-3' or num == page_obj.number|add:'3' %}
+                  <li class="page-item-modern disabled">
+                      <span class="pagination-ellipsis">...</span>
+                  </li>
+                {% endif %}
+              {% endfor %}
+              
+              <!-- Next -->
+              {% if page_obj.has_next %}
+              <li class="page-item-modern">
+                  <a href="?page={{ page_obj.next_page_number }}" class="page-link-modern" title="Next">
+                      <span>Next</span>
+                      <i class="fas fa-angle-right"></i>
+                  </a>
+              </li>
+              {% else %}
+              <li class="page-item-modern disabled">
+                  <span class="page-link-modern">
+                      <span>Next</span>
+                      <i class="fas fa-angle-right"></i>
+                  </span>
+              </li>
+              {% endif %}
+              
+              <!-- Last Page -->
+              {% if page_obj.has_next %}
+              <li class="page-item-modern">
+                  <a href="?page={{ page_obj.paginator.num_pages }}" class="page-link-modern" title="Last Page">
+                      <i class="fas fa-angle-double-right"></i>
+                  </a>
+              </li>
+              {% endif %}
+              
+          </ul>
+          
+          <!-- Page Info -->
+          <div class="page-info">
+              <span class="badge">
+                  <i class="fas fa-file-alt me-1"></i>
+                  Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+              </span>
+              <span class="text-muted">
+                  <i class="fas fa-car me-1"></i>
+                  {{ page_obj.paginator.count }} total vehicle{{ page_obj.paginator.count|pluralize }}
+              </span>
+          </div>
+      </nav>
+  </div>
+  {% endif %}
+
 </div>
 
 <!-- ✅ SCROLLABLE Vehicle Modal -->
@@ -636,6 +777,10 @@
 </div>
 
 <script>
+// ====================================
+// VEHICLE FORM MANAGEMENT
+// ====================================
+
 function resetVehicleForm() {
   const form = document.getElementById('vehicleForm');
   form.reset();
@@ -651,6 +796,7 @@ function editVehicle(button) {
   form.action = `/vehicles/edit/${vehicleId}/`;
   document.getElementById('vehicleModalLabel').innerHTML = '<i class="fas fa-edit me-2"></i>Edit Vehicle';
   
+  // Populate form fields
   document.getElementById('name').value = button.getAttribute('data-name') || '';
   document.getElementById('vehicle_type').value = button.getAttribute('data-vehicle-type') || '';
   document.getElementById('destination').value = button.getAttribute('data-destination') || '';
@@ -660,11 +806,13 @@ function editVehicle(button) {
   document.getElementById('contact_person').value = button.getAttribute('data-contact-person') || '';
   document.getElementById('contact_phone').value = button.getAttribute('data-contact-phone') || '';
   document.getElementById('details').value = button.getAttribute('data-details') || '';
-  
   document.getElementById('status').checked = button.getAttribute('data-status') === 'true';
 }
 
-// Delete Modal
+// ====================================
+// DELETE MODAL HANDLER
+// ====================================
+
 const deleteModal = document.getElementById('deleteModal');
 if (deleteModal) {
   deleteModal.addEventListener('show.bs.modal', function (event) {
@@ -674,16 +822,31 @@ if (deleteModal) {
   });
 }
 
-// Search/Filter
+// ====================================
+// SEARCH & FILTER
+// ====================================
+
 function filterVehicles() {
   const searchValue = document.getElementById('searchInput').value.toLowerCase();
   const table = document.getElementById('vehiclesTable');
   const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
 
+  let visibleCount = 0;
   for (let i = 0; i < rows.length; i++) {
     const row = rows[i];
     const text = row.textContent.toLowerCase();
-    row.style.display = text.includes(searchValue) ? '' : 'none';
+    if (text.includes(searchValue)) {
+      row.style.display = '';
+      visibleCount++;
+    } else {
+      row.style.display = 'none';
+    }
+  }
+  
+  // Hide pagination when searching
+  const paginationContainer = document.getElementById('paginationContainer');
+  if (paginationContainer) {
+    paginationContainer.style.display = searchValue ? 'none' : 'block';
   }
 }
 
@@ -691,6 +854,31 @@ function resetSearch() {
   document.getElementById('searchInput').value = '';
   filterVehicles();
 }
+
+// ====================================
+// INITIALIZE ON PAGE LOAD
+// ====================================
+
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('Vehicle management system initialized');
+  
+  // Add real-time search on keyup
+  const searchInput = document.getElementById('searchInput');
+  if (searchInput) {
+    searchInput.addEventListener('keyup', filterVehicles);
+  }
+  
+  // Auto-dismiss alerts after 5 seconds
+  const alerts = document.querySelectorAll('.alert-dismissible');
+  alerts.forEach(alert => {
+    setTimeout(() => {
+      const closeButton = alert.querySelector('.btn-close');
+      if (closeButton) {
+        closeButton.click();
+      }
+    }, 5000);
+  });
+});
 </script>
 
 {% endblock %}

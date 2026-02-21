@@ -112,6 +112,16 @@
     </a>
     {% endif %}
 
+    <!-- Day Itinerary -->
+    {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.permissions.can_manage_day_itineraries %}
+    <a href="{% url 'day_itinerary_list' %}" class="text-decoration-none text-dark" target="_blank">
+      <div class="grid-card">
+        <i class="fas fa-calendar-day fa-2x mb-2"></i>
+        <div>Day Itinerary</div>
+      </div>
+    </a>
+    {% endif %}
+
     <!-- Lead Source -->
     {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.permissions.can_manage_lead_sources %}
     <a href="{% url 'leadsource_list' %}" class="text-decoration-none text-dark" target="_blank">

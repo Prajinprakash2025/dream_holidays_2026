@@ -5,15 +5,20 @@
 
 {% block extra_css %}
 <style>
-  /* SUB-NAVBAR STYLING */
+  /* SUB-NAVBAR STYLING - Full width alignment */
   .query-compact-nav {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 8px;
+    border-radius: 0;
     padding: 12px 20px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     margin-bottom: 20px;
+    margin-left: -30px;
+    margin-right: -30px;
+    margin-top: -30px;
+    padding-left: 30px;
+    padding-right: 30px;
   }
-  
+
   .nav-content {
     display: flex;
     justify-content: space-between;
@@ -21,7 +26,7 @@
     flex-wrap: wrap;
     gap: 15px;
   }
-  
+
   .info-bar {
     display: flex;
     align-items: center;
@@ -30,7 +35,7 @@
     color: #fff;
     font-size: 0.95rem;
   }
-  
+
   .query-id {
     font-size: 1.1rem;
     padding: 5px 12px;
@@ -38,46 +43,46 @@
     border-radius: 5px;
     font-weight: 600;
   }
-  
+
   .info-bar .badge {
     font-size: 0.9rem;
     padding: 6px 12px;
   }
-  
+
   .separator {
     color: rgba(255,255,255,0.5);
     font-weight: 300;
   }
-  
+
   .date-info {
     display: flex;
     align-items: center;
   }
-  
+
   .action-bar {
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
   }
-  
+
   .action-bar .btn {
     border-color: rgba(255,255,255,0.5);
     color: #fff;
     transition: all 0.3s;
     font-weight: 500;
   }
-  
+
   .action-bar .btn:hover {
     background: rgba(255,255,255,0.2);
     border-color: #fff;
     transform: translateY(-2px);
   }
-  
+
   /* STATUS BUTTONS */
   .status-form .btn {
     transition: all 0.3s;
   }
-  
+
   .status-form .btn:hover {
     transform: translateY(-2px);
   }
@@ -89,7 +94,7 @@
     align-items: center;
     margin-bottom: 20px;
   }
-  
+
   .proposals-header h5 {
     margin: 0;
     font-weight: 600;
@@ -138,53 +143,150 @@
 
   /* CARD STYLING */
   .proposal-card {
-    flex: 0 0 380px;
-    min-width: 380px;
-    max-width: 380px;
+    flex: 0 0 400px;
+    min-width: 400px;
+    max-width: 400px;
     background: #fff;
     border: 1px solid #ddd;
     border-radius: 12px;
-    overflow: hidden;
+    overflow: visible;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     transition: all 0.3s ease;
     display: flex;
     flex-direction: column;
+    min-height: 550px;
   }
-  
+
   .proposal-card:hover {
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
     transform: translateY(-5px);
   }
-  
+
   .card-header-dark {
     background: linear-gradient(135deg, #37474f 0%, #2b3940 100%);
     color: #fff;
     padding: 15px;
+    position: relative;
   }
-  
+
   .card-header-dark h6 {
     margin: 0;
     font-size: 1.1rem;
     font-weight: 600;
   }
-  
+
   .card-header-dark .destination {
     font-size: 0.85rem;
     opacity: 0.9;
     margin-top: 5px;
   }
-  
+
+  /* THREE-DOT DROPDOWN MENU STYLING - HIGH VISIBILITY */
+  .card-header-dark .dropdown {
+    position: relative;
+  }
+
+  .card-header-dark .dropdown .btn-light {
+    background: #fff;
+    border: none;
+    color: #37474f;
+    padding: 5px 10px;
+    font-size: 18px;
+    line-height: 1;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+
+  .card-header-dark .dropdown .btn-light:hover {
+    background: #f8f9fa;
+    transform: scale(1.05);
+  }
+
+  .card-header-dark .dropdown .btn-light:focus {
+    box-shadow: 0 0 0 3px rgba(255,255,255,0.5);
+    background: #f8f9fa;
+  }
+
+  .card-header-dark .dropdown .btn-light i {
+    color: #37474f;
+    font-weight: bold;
+  }
+
+  /* Dropdown menu styling - Simple and Clean */
+  .dropdown-menu {
+    border-radius: 6px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    border: 1px solid #ddd;
+    min-width: 180px;
+    padding: 5px 0;
+    margin-top: 5px;
+    animation: none;
+  }
+
+  .dropdown-item {
+    padding: 8px 15px;
+    font-size: 0.9rem;
+    color: #333;
+    transition: background-color 0.15s;
+  }
+
+  .dropdown-item:hover {
+    background-color: #f8f9fa;
+    color: #333;
+  }
+
+  .dropdown-item:active {
+    background-color: #e9ecef;
+    color: #333;
+  }
+
+  .dropdown-item i {
+    width: 18px;
+    text-align: center;
+    margin-right: 8px;
+    color: #6c757d;
+  }
+
+  .dropdown-divider {
+    margin: 5px 0;
+    border-top: 1px solid #e9ecef;
+  }
+
+  /* Hide default dropdown arrow */
+  .dropdown-toggle::after {
+    display: none;
+  }
+
+  /* Remove dropdown animation */
+  .dropdown-menu.show {
+    animation: none;
+  }
+
+  /* Dropdown item danger styling */
+  .dropdown-item.text-danger {
+    color: #dc3545;
+  }
+
+  .dropdown-item.text-danger:hover {
+    background-color: #fff5f5;
+    color: #dc3545;
+  }
+
+  .dropdown-item.text-danger i {
+    color: #dc3545;
+  }
+
   .card-body-compact {
-    padding: 20px;
+    padding: 18px;
     flex: 1;
     display: flex;
     flex-direction: column;
   }
-  
+
   .info-section {
     flex: 1;
   }
-  
+
   .info-row {
     display: flex;
     justify-content: space-between;
@@ -192,22 +294,22 @@
     border-bottom: 1px solid #f0f0f0;
     font-size: 0.9rem;
   }
-  
+
   .info-row:last-child {
     border-bottom: none;
   }
-  
+
   .info-label {
     color: #6c757d;
     font-weight: 500;
   }
-  
+
   .info-value {
     color: #212529;
     font-weight: 600;
     text-align: right;
   }
-  
+
   .status-badge {
     display: inline-block;
     padding: 6px 12px;
@@ -216,52 +318,122 @@
     font-weight: 600;
     margin: 10px 0;
   }
-  
+
   .pricing-section {
     background: #f8f9fa;
     border-radius: 8px;
     padding: 12px;
     margin: 15px 0;
   }
-  
+
   .price-item {
     display: flex;
     justify-content: space-between;
     padding: 8px 0;
     font-size: 0.95rem;
   }
-  
+
   .price-label {
     color: #495057;
     font-weight: 500;
   }
-  
+
   .price-amount {
     color: #000;
     font-weight: 700;
     font-size: 1.05rem;
   }
-  
+
+  /* IMPROVED ACTION BUTTONS - CENTERED */
   .action-buttons {
-    margin-top: 15px;
+    margin-top: 20px;
+    padding-top: 15px;
     display: flex;
     flex-direction: column;
     gap: 8px;
   }
-  
+
   .action-buttons .btn {
     transition: all 0.3s;
+    font-size: 0.9rem;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
   }
-  
+
+  .action-buttons .btn i {
+    font-size: 0.95rem;
+  }
+
   .action-buttons .btn:hover {
-    transform: translateX(5px);
+    transform: translateX(3px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  }
+
+  /* Button Color Improvements */
+  .btn-outline-primary:hover {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+    color: #fff;
+  }
+
+  .btn-outline-success:hover {
+    background-color: #198754;
+    border-color: #198754;
+    color: #fff;
+  }
+
+  .btn-outline-info:hover {
+    background-color: #0dcaf0;
+    border-color: #0dcaf0;
+    color: #000;
+  }
+
+  .btn-outline-warning:hover {
+    background-color: #ffc107;
+    border-color: #ffc107;
+    color: #000;
+  }
+
+  .btn-outline-danger:hover {
+    background-color: #dc3545;
+    border-color: #dc3545;
+    color: #fff;
+  }
+
+  .btn-primary {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+  }
+
+  .btn-primary:hover {
+    background-color: #0b5ed7;
+    border-color: #0a58ca;
+  }
+
+  /* Status Alert Box */
+  .status-alert-box {
+    background: #fee;
+    border: 1px solid #fcc;
+    border-radius: 6px;
+    padding: 8px 12px;
+    margin-bottom: 10px;
+    text-align: center;
+  }
+
+  .status-alert-box i {
+    margin-right: 6px;
   }
 
   /* EMPTY STATE CARD */
   .empty-state-card {
-    flex: 0 0 380px;
-    min-width: 380px;
-    max-width: 380px;
+    flex: 0 0 400px;
+    min-width: 400px;
+    max-width: 400px;
     background: #f8f9fa;
     border: 2px dashed #dee2e6;
     border-radius: 12px;
@@ -271,20 +443,20 @@
     align-items: center;
     padding: 60px 40px;
     text-align: center;
-    min-height: 450px;
+    min-height: 550px;
   }
-  
+
   .empty-state-icon {
     font-size: 4rem;
     color: #dee2e6;
     margin-bottom: 20px;
   }
-  
+
   .empty-state-card h5 {
     color: #6c757d;
     margin-bottom: 10px;
   }
-  
+
   .empty-state-card p {
     color: #adb5bd;
     margin: 0;
@@ -292,9 +464,9 @@
 
   /* CREATE CARD */
   .create-card {
-    flex: 0 0 380px;
-    min-width: 380px;
-    max-width: 380px;
+    flex: 0 0 400px;
+    min-width: 400px;
+    max-width: 400px;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     border: none;
     border-radius: 12px;
@@ -304,22 +476,22 @@
     align-items: center;
     padding: 40px 30px;
     text-align: center;
-    min-height: 450px;
+    min-height: 550px;
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
   }
-  
+
   .create-card-icon {
     font-size: 3.5rem;
     color: rgba(255,255,255,0.9);
     margin-bottom: 25px;
   }
-  
+
   .create-card h5 {
     color: #fff;
     margin-bottom: 30px;
     font-weight: 600;
   }
-  
+
   .create-card .btn {
     width: 100%;
     max-width: 280px;
@@ -332,62 +504,61 @@
     transition: all 0.3s;
     margin-bottom: 15px;
   }
-  
+
   .create-card .btn:hover {
     background: rgba(255,255,255,0.25);
     border-color: #fff;
     transform: translateY(-3px);
   }
-  
+
   .create-card .btn i {
     font-size: 1.2rem;
   }
 
-  /* ✅ MODAL FIX - Ensure modal appears properly */
+  /* MODAL FIX */
   .modal {
-    z-index: 1055 !important;
+    z-index: 3050 !important;
   }
-  
+
   .modal-backdrop {
-    z-index: 1050 !important;
+    z-index: 3000 !important;
   }
-  
+
   .modal-dialog {
     margin-top: 2rem;
     margin-bottom: 2rem;
   }
-  
-  /* ✅ MODAL STYLING */
+
   .modal-content {
     border-radius: 15px;
     overflow: hidden;
     border: none;
     box-shadow: 0 10px 40px rgba(0,0,0,0.3);
   }
-  
+
   .modal-header {
     border-bottom: none;
   }
-  
+
   .modal-footer {
     border-top: 1px solid #e9ecef;
     padding: 20px 25px;
   }
-  
-  /* ✅ FORM STYLING */
+
+  /* FORM STYLING */
   .text-pink {
     color: #e91e63 !important;
   }
-  
+
   .form-control:focus {
     border-color: #667eea;
     box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
   }
-  
+
   .form-control-lg {
     font-size: 1.1rem;
   }
-  
+
   .card-header {
     font-size: 1rem;
     padding: 12px 20px;
@@ -397,31 +568,35 @@
   @media (max-width: 768px) {
     .query-compact-nav {
       padding: 10px 15px;
+      margin-left: -15px;
+      margin-right: -15px;
+      padding-left: 15px;
+      padding-right: 15px;
     }
-    
+
     .info-bar {
       width: 100%;
       font-size: 0.85rem;
     }
-    
+
     .action-bar {
       width: 100%;
     }
-    
+
     .proposals-header {
       flex-direction: column;
       align-items: flex-start;
       gap: 10px;
     }
-    
+
     .proposal-card,
     .empty-state-card,
     .create-card {
-      flex: 0 0 320px;
-      min-width: 320px;
-      max-width: 320px;
+      flex: 0 0 340px;
+      min-width: 340px;
+      max-width: 340px;
     }
-    
+
     .modal-dialog {
       margin: 0.5rem;
       max-width: 100%;
@@ -429,67 +604,10 @@
   }
 </style>
 
+
 {% endblock %}
 
 {% block proposals_content %}
-
-<!-- Compact Sub-Navbar Header -->
-<div class="query-compact-nav">
-  <div class="nav-content">
-    <div class="info-bar">
-      <span class="query-id">
-        <i class="fas fa-hashtag me-1"></i>
-        <strong>{{ query.id }}</strong>
-      </span>
-      
-      {% if query.total_days %}
-      <span class="badge bg-light text-dark">
-        <i class="fas fa-calendar-day me-1"></i>
-        {{ query.total_days }} Days
-      </span>
-      {% endif %}
-      
-      <span class="separator">|</span>
-      
-      <span class="date-info">
-        <i class="fas fa-calendar-alt me-1"></i>
-        {{ query.from_date|date:"d M Y"|default:"Not set" }} 
-        <i class="fas fa-arrow-right mx-2"></i>
-        {{ query.to_date|date:"d M Y"|default:"Not set" }}
-      </span>
-      
-      <span class="separator d-none d-lg-inline">|</span>
-      
-      <span class="d-none d-lg-inline">
-        <i class="fas fa-clock me-1"></i>
-        <small>{{ query.created_at|date:"d M Y" }}</small>
-      </span>
-    </div>
-    
-    <div class="action-bar">
-      <button class="btn btn-sm btn-outline-light">
-        <i class="fab fa-whatsapp"></i>
-        <span class="d-none d-md-inline ms-1">WhatsApp</span>
-      </button>
-      <button class="btn btn-sm btn-outline-light">
-        <i class="fas fa-envelope"></i>
-        <span class="d-none d-md-inline ms-1">Email</span>
-      </button>
-      <a href="{% url 'itinerary_history' query.id %}" class="btn btn-outline-secondary">
-        <i class="fas fa-history"></i> View History ({{ archived_count }})
-      </a>
-      <a href="{% url 'list_itineraries' %}" class="btn btn-sm btn-outline-light">
-        <i class="fas fa-tasks"></i>
-        <span class="d-none d-lg-inline ms-1">Itineraries</span>
-      </a>
-      <button class="btn btn-sm btn-outline-light">
-        <i class="fas fa-edit"></i>
-        <span class="d-none d-md-inline ms-1">Edit</span>
-      </button>
-    </div>
-  </div>
-</div>
-
 
 <!-- Status Buttons -->
 <form method="post" action="{% url 'update_query_status' query.id %}" class="status-form mb-4">
@@ -504,7 +622,6 @@
   </div>
 </form>
 
-
 <!-- Proposals Section Header -->
 <div class="proposals-header">
   <h5><i class="fas fa-file-alt me-2"></i>Proposals</h5>
@@ -515,14 +632,18 @@
     <button class="btn btn-outline-secondary btn-sm">
       <i class="fas fa-archive me-1"></i>Archived
     </button>
+<!-- ✅ NEW: Version History Button -->
+    <a href="{% url 'itinerary_version_history' query.id %}" 
+       class="btn btn-outline-info btn-sm">
+      <i class="fas fa-history me-1"></i>Version History
+    </a>
   </div>
 </div>
-
 
 <!-- Horizontal Scroll Proposals -->
 <div class="proposals-scroll-wrapper">
   <div class="proposals-scroll-container">
-    
+
     {% if itineraries %}
       {% for itinerary in itineraries %}
       <div class="proposal-card">
@@ -542,7 +663,59 @@
                 {{ itinerary.destination_list|default:"No destinations" }}
               </div>
             </div>
-            <span class="badge bg-light text-dark">ID: {{ itinerary.id }}</span>
+            <div class="d-flex align-items-center gap-2">
+              <span class="badge bg-light text-dark">ID: {{ itinerary.id }}</span>
+
+              <!-- Three Dots Dropdown Menu -->
+              {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.role == 'manager' %}
+              <div class="dropdown">
+                <button
+                  class="btn btn-sm btn-light dropdown-toggle"
+                  type="button"
+                  id="cardMenu{{ itinerary.id }}"
+                  data-bs-toggle="dropdown"
+                  aria-expanded="false"
+                  style="padding: 4px 8px;">
+                  <i class="fas fa-ellipsis-v"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="cardMenu{{ itinerary.id }}">
+                  <!-- Edit Day Plans -->
+                  <li>
+                    <!-- ✅ NEW WAY (Smart versioning): -->
+                      <a class="dropdown-item" href="{% url 'prepare_edit_itinerary' itinerary.id %}">
+                        <i class="fas fa-calendar-day me-2"></i>Edit Day Plans
+                      </a>
+                  </li>
+                  <!-- Edit Details -->
+                  <li>
+                    <a
+                      class="dropdown-item"
+                      href="#"
+                      data-bs-toggle="modal"
+                      data-bs-target="#editItineraryModal"
+                      data-itinerary-id="{{ itinerary.id }}"
+                      data-travel-from="{{ itinerary.travel_from|date:'Y-m-d' }}"
+                      data-travel-to="{{ itinerary.travel_to|date:'Y-m-d' }}"
+                      data-adults="{{ itinerary.adults }}"
+                      data-childrens="{{ itinerary.childrens }}"
+                      data-infants="{{ itinerary.infants }}">
+                      <i class="fas fa-edit me-2"></i>Edit Details
+                    </a>
+                  </li>
+                  <li><hr class="dropdown-divider"></li>
+                  <!-- Delete Proposal -->
+                  <li>
+                    <a
+                      class="dropdown-item text-danger"
+                      href="#"
+                      onclick="deleteItinerary({{ itinerary.id }}, '{{ itinerary.name|escapejs }}'); return false;">
+                      <i class="fas fa-trash-alt me-2"></i>Delete Proposal
+                    </a>
+                  </li>
+                </ul>
+              </div>
+              {% endif %}
+            </div>
           </div>
         </div>
 
@@ -550,7 +723,7 @@
         <div class="card-body-compact">
           <div class="info-section">
 
-            <!-- Passengers from Itinerary -->
+            <!-- Passengers -->
             <div class="info-row">
               <span class="info-label"><i class="fas fa-users me-1"></i>Passengers</span>
               <span class="info-value">
@@ -564,7 +737,7 @@
               </span>
             </div>
 
-            <!-- Travel Dates from Itinerary -->
+            <!-- Travel Dates -->
             <div class="info-row">
               <span class="info-label"><i class="fas fa-calendar me-1"></i>Travel Dates</span>
               <span class="info-value">
@@ -576,7 +749,7 @@
               </span>
             </div>
 
-            <!-- Created By -->
+            {% comment %} <!-- Created By -->
             <div class="info-row">
               <span class="info-label"><i class="fas fa-user me-1"></i>Created By</span>
               <span class="info-value">
@@ -586,7 +759,7 @@
                   Unknown
                 {% endif %}
               </span>
-            </div>
+            </div> {% endcomment %}
 
             <!-- Created Date -->
             <div class="info-row">
@@ -605,22 +778,46 @@
               </span>
             </div>
 
-            <!-- Selected Option -->
             {% if itinerary.selected_option %}
             <div class="text-center mb-2">
-              <small class="text-muted">
-                <i class="fas fa-check-circle text-success me-1"></i>
-                <strong>{{ itinerary.selected_option }}</strong>
+              <small class="text-success">
+                <i class="fas fa-check-circle me-1"></i>
+                {% with key=itinerary.selected_option|stringformat:"s"|lower|cut:" "|cut:"_" %}
+                    {% if key == 'option1' or key == 'standard' %}
+                        <strong class="text-primary">Standard Package</strong>
+                    {% elif key == 'option2' or key == 'deluxe' %}
+                        <strong class="text-info">Deluxe Package</strong>
+                    {% elif key == 'option3' or key == 'premium' %}
+                        <strong class="text-success">Premium Package</strong>
+                    {% elif key == 'option4' or key == 'luxury' %}
+                        <strong class="text-warning">Luxury Package</strong>
+                    {% else %}
+                        <strong>{{ itinerary.selected_option }}</strong>
+                    {% endif %}
+                {% endwith %}
               </small>
             </div>
             {% endif %}
 
-            <!-- Pricing Options -->
             {% if itinerary.pricing_options.count %}
             <div class="pricing-section">
               {% for option in itinerary.pricing_options.all %}
               <div class="price-item">
-                <span class="price-label">{{ option.option_name }}</span>
+                <span class="price-label">
+                    {% with key=option.option_name|stringformat:"s"|lower|cut:" "|cut:"_" %}
+                        {% if key == 'option1' or key == 'standard' %}
+                            <span class="text-primary fw-bold">Standard</span>
+                        {% elif key == 'option2' or key == 'deluxe' %}
+                            <span class="text-info fw-bold">Deluxe</span>
+                        {% elif key == 'option3' or key == 'premium' %}
+                            <span class="text-success fw-bold">Premium</span> 
+                        {% elif key == 'option4' or key == 'luxury' %}
+                            <span class="text-success fw-bold">luxury</span>
+                        {% else %}
+                            {{ option.option_name }}
+                        {% endif %}
+                    {% endwith %}
+                </span>
                 <span class="price-amount">₹{{ option.final_amount|floatformat:0 }}</span>
               </div>
               {% endfor %}
@@ -632,102 +829,136 @@
             {% endif %}
           </div>
 
-          <!-- ✅ UPDATED ACTION BUTTONS WITH CANCEL -->
           <div class="action-buttons">
             {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.role == 'manager' %}
-              
-              <!-- Edit Day Plans -->
-              <a href="{% url 'itinerary_day_plan' itinerary.id %}" class="btn btn-outline-primary btn-sm">
-                <i class="fas fa-edit me-1"></i>Edit Day Plans
-              </a>
 
-              <!-- Edit Itinerary Details -->
-              <button 
-                type="button"
-                class="btn btn-outline-primary btn-sm" 
-                data-bs-toggle="modal" 
-                data-bs-target="#editItineraryModal" 
-                data-itinerary-id="{{ itinerary.id }}"
-                data-travel-from="{{ itinerary.travel_from|date:'Y-m-d' }}"
-                data-travel-to="{{ itinerary.travel_to|date:'Y-m-d' }}"
-                data-adults="{{ itinerary.adults }}"
-                data-childrens="{{ itinerary.childrens }}"
-                data-infants="{{ itinerary.infants }}">
-                <i class="fas fa-edit me-1"></i> Edit Details
-              </button>
-
-              <!-- ✅ STATUS-BASED ACTIONS -->
+              <!-- STATUS-BASED ACTIONS -->
               {% if itinerary.status == 'draft' %}
-                <!-- Confirm Button (Only for Draft) -->
-                <button 
-                  class="btn btn-outline-success btn-sm" 
-                  data-bs-toggle="modal" 
-                  data-bs-target="#confirmItineraryModal" 
+                <!-- Confirm Proposal - First Button -->
+                <button
+                  class="btn btn-outline-success btn-sm"
+                  data-bs-toggle="modal"
+                  data-bs-target="#confirmItineraryModal"
                   data-itinerary-id="{{ itinerary.id }}">
-                  <i class="fas fa-check me-1"></i>Confirm
+                  <i class="fas fa-check-circle"></i>
+                  <span>Confirm Proposal</span>
                 </button>
-              
+
+                <!-- View Quotation - Second Button -->
+                <a
+                  href="{% url 'view_quotation' itinerary.id %}"
+                  class="btn btn-primary btn-sm"
+                  target="_blank">
+                  <i class="fas fa-file-invoice"></i>
+                  <span>View Quotation</span>
+                </a>
+
               {% elif itinerary.status == 'confirmed' %}
-                <!-- Change Option -->
-                <button 
-                  class="btn btn-outline-info btn-sm" 
-                  data-bs-toggle="modal" 
-                  data-bs-target="#confirmItineraryModal" 
-                  data-itinerary-id="{{ itinerary.id }}" 
-                  data-is-reselection="true">
-                  <i class="fas fa-exchange-alt me-1"></i>Change Option
-                </button>
-                
-                <!-- Set to Draft -->
-                <button 
-                  class="btn btn-outline-warning btn-sm" 
-                  onclick="setDraftItinerary({{ itinerary.id }})">
-                  <i class="fas fa-undo me-1"></i>Set to Draft
-                </button>
-                
-                <!-- ✅ CANCEL BUTTON (NEW) -->
-                <button 
-                  class="btn btn-outline-danger btn-sm" 
-                  onclick="cancelItinerary({{ itinerary.id }})">
-                  <i class="fas fa-ban me-1"></i>Cancel
-                </button>
-              
-              {% elif itinerary.status == 'cancelled' %}
-                <!-- Cancelled Badge -->
-                <div class="alert alert-danger py-1 px-2 mb-2 small">
-                  <i class="fas fa-ban me-1"></i>
-                  <strong>Cancelled</strong>
+                <!-- View Quotation - First -->
+                <a
+                  href="{% url 'view_quotation' itinerary.id %}"
+                  class="btn btn-primary btn-sm"
+                  target="_blank">
+                  <i class="fas fa-file-invoice"></i>
+                  <span>View Quotation</span>
+                </a>
+
+                <!-- View Confirmation - Second -->
+                <a
+                  href="{% url 'view_confirmation' itinerary.id %}"
+                  class="btn btn-success btn-sm"
+                  target="_blank">
+                  <i class="fas fa-file-contract"></i>
+                  <span>View Confirmation</span>
+                </a>
+
+                <!-- Download Button with Dropdown -->
+                <div class="dropdown w-100">
+                  <button
+                    class="btn btn-info btn-sm w-100 d-flex align-items-center justify-content-center"
+                    type="button"
+                    id="downloadMenu{{ itinerary.id }}"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false"
+                    style="position: relative;">
+                    <i class="fas fa-download me-2"></i>
+                    <span>Download</span>
+                    <i class="fas fa-caret-down" style="position: absolute; right: 10px;"></i>
+                  </button>
+                  <ul class="dropdown-menu w-100" aria-labelledby="downloadMenu{{ itinerary.id }}">
+                    <li>
+                      <a class="dropdown-item" href="{% url 'view_client_quotation' itinerary.id %}" target="_blank">
+                        <i class="fas fa-user me-2"></i>Client Version
+                      </a>
+                    </li>
+                    <li>
+                      <a class="dropdown-item" href="{% url 'view_driver_itinerary' itinerary.id %}" target="_blank">
+                        <i class="fas fa-id-card me-2"></i>Driver Version
+                      </a>
+                    </li>
+                  </ul>
                 </div>
-                
-                <!-- Reactivate Button -->
-                <button 
-                  class="btn btn-outline-success btn-sm" 
+
+                <!-- Change Option -->
+                <button
+                  class="btn btn-outline-info btn-sm"
+                  data-bs-toggle="modal"
+                  data-bs-target="#confirmItineraryModal"
+                  data-itinerary-id="{{ itinerary.id }}"
+                  data-is-reselection="true">
+                  <i class="fas fa-exchange-alt"></i>
+                  <span>Change Option</span>
+                </button>
+
+                <!-- Set to Draft -->
+                <button
+                  class="btn btn-outline-warning btn-sm"
                   onclick="setDraftItinerary({{ itinerary.id }})">
-                  <i class="fas fa-redo me-1"></i>Reactivate
+                  <i class="fas fa-undo"></i>
+                  <span>Set to Draft</span>
+                </button>
+
+                <!-- Cancel -->
+                <button
+                  class="btn btn-outline-danger btn-sm"
+                  onclick="cancelItinerary({{ itinerary.id }})">
+                  <i class="fas fa-ban"></i>
+                  <span>Cancel Proposal</span>
+                </button>
+
+              {% elif itinerary.status == 'cancelled' %}
+                <!-- View Quotation - First -->
+                <a
+                  href="{% url 'view_client_quotation' itinerary.id %}"
+                  class="btn btn-primary btn-sm"
+                  target="_blank">
+                  <i class="fas fa-file-invoice"></i>
+                  <span>View Quotation</span>
+                </a>
+
+                <!-- Cancelled Alert -->
+                <div class="status-alert-box">
+                  <i class="fas fa-ban"></i>
+                  <strong>This proposal is cancelled</strong>
+                </div>
+
+                <!-- Reactivate -->
+                <button
+                  class="btn btn-outline-success btn-sm"
+                  onclick="setDraftItinerary({{ itinerary.id }})">
+                  <i class="fas fa-redo"></i>
+                  <span>Reactivate Proposal</span>
                 </button>
               {% endif %}
 
-              <!-- View Quotation (Always Available) -->
-              <a 
-                href="{% url 'view_quotation' itinerary.id %}" 
-                class="btn btn-primary btn-sm" 
-                target="_blank">
-                <i class="fas fa-file-invoice me-1"></i>View Quotation
-              </a>
-              
-              <!-- Delete Button -->
-              <button 
-                class="btn btn-outline-danger btn-sm" 
-                onclick="deleteItinerary({{ itinerary.id }}, '{{ itinerary.name|escapejs }}')">
-                <i class="fas fa-trash me-1"></i>Delete
-              </button>
             {% endif %}
           </div>
+
         </div>
       </div>
       {% endfor %}
     {% else %}
-      <!-- EMPTY STATE CARD -->
+      <!-- EMPTY STATE -->
       <div class="empty-state-card">
         <div class="empty-state-icon">
           <i class="fas fa-file-alt"></i>
@@ -743,7 +974,7 @@
         <i class="fas fa-plus-circle"></i>
       </div>
       <h5>Create New Itinerary</h5>
-      
+
       {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.role == 'manager' %}
       <button class="btn" data-bs-toggle="modal" data-bs-target="#createItineraryModal">
         <i class="fas fa-plus me-2"></i>Create Itinerary
@@ -757,8 +988,6 @@
 
   </div>
 </div>
-
-
 
 
 <!-- Confirmation Modal -->
@@ -782,7 +1011,6 @@
       </div>
       <div class="modal-body text-center py-4">
         <h5 class="mb-3 fw-bold">You are about to confirm an itinerary</h5>
-        <p class="text-muted small mb-4">This action cannot be undone.</p>
 
         <div class="bg-light p-3 rounded mb-4">
           <label class="form-label fw-bold mb-2">Select Hotel Option</label>
@@ -898,45 +1126,53 @@
 
           <!-- Passenger Details -->
           <div class="row mb-4">
-            <div class="col-md-4 mb-3">
-              <label for="adult" class="form-label fw-bold">
-                <i class="fas fa-user me-1 text-info"></i>Adults
-              </label>
-              <input
-                type="number"
-                class="form-control"
-                id="adult"
-                name="adult"
-                value="{{ query.adult|default:0 }}"
-                min="0"
-                placeholder="2">
-            </div>
-            <div class="col-md-4 mb-3">
-              <label for="children" class="form-label fw-bold">
-                <i class="fas fa-child me-1 text-warning"></i>Children
-              </label>
-              <input
-                type="number"
-                class="form-control"
-                id="children"
-                name="children"
-                value="{{ query.childrens|default:0 }}"
-                min="0"
-                placeholder="0">
-            </div>
-            <div class="col-md-4 mb-3">
-              <label for="infant" class="form-label fw-bold">
-                <i class="fas fa-baby me-1" style="color: #e91e63;"></i>Infants
-              </label>
-              <input
-                type="number"
-                class="form-control"
-                id="infant"
-                name="infant"
-                value="{{ query.infant|default:0 }}"
-                min="0"
-                placeholder="0">
-            </div>
+              <div class="col-md-4 mb-3">
+                  <label for="adult" class="form-label fw-bold">
+                      <i class="fas fa-user me-1 text-info"></i>Adults
+                      <small class="text-muted">(Above 12 years)</small>
+                  </label>
+                  <input
+                      type="number"
+                      class="form-control"
+                      id="adult"
+                      name="adult"
+                      value="{{ query.adult|default:0 }}"
+                      min="0"
+                      placeholder="2">
+                  <small class="text-muted">Passengers above 12 years</small>
+              </div>
+
+              <div class="col-md-4 mb-3">
+                  <label for="children" class="form-label fw-bold">
+                      <i class="fas fa-child me-1 text-warning"></i>Children
+                      <small class="text-muted">(6-12 years)</small>
+                  </label>
+                  <input
+                      type="number"
+                      class="form-control"
+                      id="children"
+                      name="children"
+                      value="{{ query.childrens|default:0 }}"
+                      min="0"
+                      placeholder="0">
+                  <small class="text-muted">Passengers aged 6 to 12 years</small>
+              </div>
+
+              <div class="col-md-4 mb-3">
+                  <label for="infant" class="form-label fw-bold">
+                      <i class="fas fa-baby me-1" style="color: #e91e63;"></i>Infants
+                      <small class="text-muted">(Below 6 years)</small>
+                  </label>
+                  <input
+                      type="number"
+                      class="form-control"
+                      id="infant"
+                      name="infant"
+                      value="{{ query.infant|default:0 }}"
+                      min="0"
+                      placeholder="0">
+                  <small class="text-muted">Passengers below 6 years old</small>
+              </div>
           </div>
 
           <!-- Destinations -->
@@ -994,7 +1230,7 @@
       </div>
 
       <div class="modal-body">
-        
+
         <!-- COPIED ITEMS SECTION -->
         <div id="copiedItemsSection" style="display: none;">
           <div class="alert alert-success">
@@ -1012,7 +1248,7 @@
               <i class="fas fa-exclamation-triangle me-2"></i>Items Requiring Manual Setup
             </h6>
             <p class="mb-3">The following bookings could not be automatically migrated:</p>
-            
+
             <!-- HOTELS -->
             <div id="skippedHotels" style="display: none;" class="mb-3">
               <h6 class="text-danger">
@@ -1186,12 +1422,12 @@
     editItineraryModal.addEventListener('show.bs.modal', function (event) {
       var button = event.relatedTarget;
       var itineraryId = button.getAttribute('data-itinerary-id');
-      
+
       console.log('📝 Opening edit modal for itinerary:', itineraryId);
-      
+
       // Set the itinerary id in hidden input
       document.getElementById('editItineraryId').value = itineraryId;
-      
+
       // ✅ FETCH ITINERARY DATA VIA AJAX
       fetch(`/api/itinerary/${itineraryId}/details/`, {
         method: 'GET',
@@ -1204,14 +1440,14 @@
       .then(data => {
         if (data.success) {
           console.log('✅ Itinerary data loaded:', data);
-          
+
           // ✅ AUTO-FILL FORM FIELDS WITH ITINERARY DATA
           document.getElementById('travel_from').value = data.itinerary.travel_from || '';
           document.getElementById('travel_to').value = data.itinerary.travel_to || '';
           document.getElementById('adults').value = data.itinerary.adults || 1;
           document.getElementById('childrens').value = data.itinerary.childrens || 0;
           document.getElementById('infants').value = data.itinerary.infants || 0;
-          
+
           console.log('✅ Form fields populated');
         } else {
           console.error('❌ Error loading itinerary:', data.message);
@@ -1254,7 +1490,7 @@
   // Handle fetch responses
   function handleResponse(response) {
     const contentType = response.headers.get('content-type');
-    
+
     if (contentType && contentType.includes('application/json')) {
       return response.json().then(data => {
         if (!response.ok) {
@@ -1274,7 +1510,7 @@
   // INITIALIZATION
   // ===================================
   document.addEventListener("DOMContentLoaded", function () {
-    
+
     // ===================================
     // CONFIRM ITINERARY MODAL
     // ===================================
@@ -1284,11 +1520,11 @@
         const button = event.relatedTarget;
         currentItineraryId = button.dataset.itineraryId;
         isReselection = button.dataset.isReselection === 'true';
-        
+
         const modalTitle = document.getElementById("confirmModalLabel");
         const modalDescription = confirmModal.querySelector('.modal-body h5');
         const confirmButton = confirmModal.querySelector('.btn-success');
-        
+
         if (isReselection) {
           modalTitle.textContent = "Change Selected Option";
           modalDescription.textContent = "Select a new option for this itinerary";
@@ -1298,7 +1534,7 @@
           modalDescription.textContent = "You are about to confirm an itinerary";
           confirmButton.textContent = "Confirm Itinerary";
         }
-        
+
         loadHotelOptions(currentItineraryId);
       });
     }
@@ -1309,33 +1545,33 @@
     const fromDateInput = document.getElementById('from_date');
     const toDateInput = document.getElementById('to_date');
     const totalDaysInput = document.getElementById('total_days');
-    
+
     if (fromDateInput && toDateInput && totalDaysInput) {
-      
+
       // ✅ When Days or From Date changes → Calculate To Date
       function calculateToDate() {
         const fromDate = fromDateInput.value;
         const days = parseInt(totalDaysInput.value);
-        
+
         if (fromDate && days && days > 0) {
           const from = new Date(fromDate);
           const to = new Date(from);
           to.setDate(to.getDate() + days - 1);
-          
+
           const toDateStr = to.toISOString().split('T')[0];
           toDateInput.value = toDateStr;
         }
       }
-      
+
       // ✅ When To Date changes → Calculate Days
       function calculateDaysFromDates() {
         const fromDate = fromDateInput.value;
         const toDate = toDateInput.value;
-        
+
         if (fromDate && toDate) {
           const from = new Date(fromDate);
           const to = new Date(toDate);
-          
+
           if (to >= from) {
             const diffTime = Math.abs(to - from);
             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
@@ -1346,12 +1582,12 @@
           }
         }
       }
-      
+
       // ✅ Event Listeners
       totalDaysInput.addEventListener('input', calculateToDate);
       fromDateInput.addEventListener('change', calculateToDate);
       toDateInput.addEventListener('change', calculateDaysFromDates);
-      
+
       // ✅ Initial calculation on page load
       if (fromDateInput.value && totalDaysInput.value) {
         calculateToDate();
@@ -1364,15 +1600,15 @@
     // EDIT ITINERARY FORM SUBMISSION ✅
     // ===================================
     const editForm = document.getElementById('editItineraryForm');
-    
+
     if (editForm) {
       editForm.addEventListener('submit', function(e) {
         e.preventDefault();
-        
+
         const submitBtn = editForm.querySelector('button[type="submit"]');
         const formErrors = document.getElementById('editFormErrors');
         const itineraryId = document.getElementById('editItineraryId').value;
-        
+
         // Clear previous errors
         if (formErrors) {
           formErrors.classList.add('d-none');
@@ -1380,18 +1616,18 @@
         document.querySelectorAll('.is-invalid').forEach(el => {
           el.classList.remove('is-invalid');
         });
-        
+
         const originalText = submitBtn.innerHTML;
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Saving...';
-        
+
         // Get form values
         const travelFrom = document.getElementById('travel_from').value;
         const travelTo = document.getElementById('travel_to').value;
         const adults = document.getElementById('adults').value;
         const childrens = document.getElementById('childrens').value;
         const infants = document.getElementById('infants').value;
-        
+
         // Validation
         if (!travelFrom || !travelTo) {
           alert('⚠️ Please fill in all required fields');
@@ -1399,17 +1635,17 @@
           submitBtn.innerHTML = originalText;
           return;
         }
-        
+
         const fromDate = new Date(travelFrom);
         const toDate = new Date(travelTo);
-        
+
         if (toDate < fromDate) {
           alert('⚠️ Travel end date must be after travel start date');
           submitBtn.disabled = false;
           submitBtn.innerHTML = originalText;
           return;
         }
-        
+
         console.log('📝 Submitting edit:', {
           itinerary_id: itineraryId,
           travel_from: travelFrom,
@@ -1418,9 +1654,9 @@
           childrens: childrens,
           infants: infants
         });
-        
+
         const formData = new FormData(editForm);
-        
+
         fetch(editForm.action, {
           method: 'POST',
           headers: {
@@ -1433,24 +1669,24 @@
         .then(data => {
           if (data.success) {
             console.log('✅ Itinerary updated successfully');
-            
+
             const modal = bootstrap.Modal.getInstance(editItineraryModal);
             modal.hide();
-            
+
             alert('✅ ' + data.message);
-            
+
             // ✅ SHOW BOOKING REPORT MODAL IF BOOKINGS WERE COPIED
             if (data.booking_report) {
               setTimeout(() => {
                 showBookingReport(data.booking_report);
               }, 1000);
             }
-            
+
             // Reload page after 2 seconds
             setTimeout(() => {
               location.reload();
             }, 2000);
-            
+
           } else {
             // Handle field errors
             if (data.errors) {
@@ -1473,7 +1709,7 @@
             } else {
               throw new Error(data.message || "Update failed");
             }
-            
+
             submitBtn.disabled = false;
             submitBtn.innerHTML = originalText;
           }
@@ -1485,7 +1721,7 @@
           submitBtn.innerHTML = originalText;
         });
       });
-      
+
       // ✅ Reset form when modal is closed
       if (editItineraryModal) {
         editItineraryModal.addEventListener('hidden.bs.modal', function() {
@@ -1505,27 +1741,27 @@
     // CREATE ITINERARY FORM SUBMISSION
     // ===================================
     const createForm = document.getElementById('createItineraryForm');
-    
+
     if (createForm) {
       createForm.addEventListener('submit', function(e) {
         e.preventDefault();
-        
+
         const submitBtn = document.getElementById('submitItineraryBtn');
         const formErrors = document.getElementById('formErrors');
         const errorMessage = document.getElementById('errorMessage');
-        
+
         // Clear previous errors
         formErrors.classList.add('d-none');
         document.querySelectorAll('.is-invalid').forEach(el => {
           el.classList.remove('is-invalid');
         });
-        
+
         const originalText = submitBtn.innerHTML;
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Creating...';
-        
+
         const formData = new FormData(createForm);
-        
+
         fetch(createForm.action, {
           method: 'POST',
           headers: {
@@ -1539,15 +1775,15 @@
           if (data.success) {
             const modal = bootstrap.Modal.getInstance(document.getElementById('createItineraryModal'));
             modal.hide();
-            
+
             alert('✅ ' + data.message);
-            
+
             if (data.redirect_url) {
               window.location.href = data.redirect_url;
             } else {
               location.reload();
             }
-            
+
           } else {
             // Handle field errors
             if (data.errors) {
@@ -1570,7 +1806,7 @@
             } else {
               throw new Error(data.message || "Form submission failed");
             }
-            
+
             submitBtn.disabled = false;
             submitBtn.innerHTML = originalText;
           }
@@ -1585,7 +1821,7 @@
           submitBtn.innerHTML = originalText;
         });
       });
-      
+
       // ✅ Reset form when modal is closed
       const createModal = document.getElementById('createItineraryModal');
       if (createModal) {
@@ -1611,22 +1847,48 @@
   // ===================================
   // LOAD HOTEL OPTIONS
   // ===================================
+  // ===================================
+  // LOAD HOTEL OPTIONS
+  // ===================================
   function loadHotelOptions(itineraryId) {
     const select = document.getElementById("hotelOptionSelect");
     if (!select) return;
-    
+
     select.innerHTML = '<option value="">Loading...</option>';
 
     fetch(`/api/itinerary/${itineraryId}/options/`)
       .then(handleResponse)
       .then((data) => {
-        select.innerHTML = '<option value="">Select an option</option>';
+        select.innerHTML = '<option value="">Select a Package</option>';
 
         if (data.success && data.options && data.options.length > 0) {
           data.options.forEach((option) => {
             const opt = document.createElement("option");
             opt.value = option.id;
-            opt.textContent = `${option.name} - ₹${parseFloat(option.price).toLocaleString("en-IN")}`;
+
+            // ✅ START: Map Option Names
+            let displayName = option.name;
+            // Normalize string (remove spaces/underscores, make lowercase) for safe comparison
+            const key = String(option.name).toLowerCase().replace(/ /g, '').replace(/_/g, '');
+
+            if (key === 'option1' || key === 'standard') {
+                displayName = 'Standard Package';
+            } else if (key === 'option2' || key === 'deluxe') {
+                displayName = 'Deluxe Package';
+            } else if (key === 'option3' || key === 'premium') {
+                displayName = 'Premium Package';
+            }
+             else if (key === 'option4' || key === 'luxury') {
+                displayName = 'Luxury Package';
+            }
+            // ✅ END: Map Option Names
+
+            // Format Price
+            const price = parseFloat(option.price).toLocaleString("en-IN", {
+                maximumFractionDigits: 0
+            });
+
+            opt.textContent = `${displayName} - ₹${price}`;
             select.appendChild(opt);
           });
         } else {
@@ -1647,7 +1909,7 @@
     const selectedOption = document.getElementById("hotelOptionSelect").value;
 
     if (!selectedOption) {
-      alert("⚠️ Please select a hotel option");
+      alert("⚠️ Please select a package option");
       return;
     }
 
@@ -1674,12 +1936,12 @@
             document.getElementById("confirmItineraryModal")
           );
           modal.hide();
-          
-          const message = isReselection 
-            ? "✅ Option changed successfully!" 
+
+          const message = isReselection
+            ? "✅ Option changed successfully!"
             : "✅ Itinerary confirmed successfully!";
           alert(message);
-          
+
           location.reload();
         } else {
           throw new Error(data.message || "Confirmation failed");
@@ -1756,44 +2018,46 @@
   }
 
   // ===================================
-  // DELETE ITINERARY
+  // DELETE ITINERARY - FIXED VERSION ✅
   // ===================================
   function deleteItinerary(itineraryId, itineraryName) {
-    if (!confirm(`⚠️ Are you sure you want to delete "${itineraryName}"?\n\n⚠️ This action cannot be undone!\n⚠️ All day plans, bookings, and pricing will be permanently deleted.`)) {
-      return;
+    // Confirmation dialog
+    const confirmMsg = `⚠️ DELETE PROPOSAL?\n\nItinerary: ${itineraryName}\n\nThis will permanently delete:\n✗ All day plans\n✗ All bookings\n✗ All pricing options\n\n⚠️ THIS ACTION CANNOT BE UNDONE!\n\nAre you sure?`;
+    
+    if (!confirm(confirmMsg)) {
+      return false;
     }
     
-    const deleteBtn = event.target.closest('button');
-    const originalText = deleteBtn.innerHTML;
-    deleteBtn.disabled = true;
-    deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Deleting...';
+    // Second confirmation
+    if (!confirm('⚠️ FINAL WARNING: Delete permanently?')) {
+      return false;
+    }
     
-    fetch(`/api/itinerary/${itineraryId}/delete/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': getCookie('csrftoken'),
-        'X-Requested-With': 'XMLHttpRequest'
-      },
-    })
-    .then(handleResponse)
-    .then(data => {
-      if (data.success) {
-        alert('✅ ' + data.message);
-        location.reload();
-      } else {
-        throw new Error(data.message || "Delete failed");
-      }
-    })
-    .catch(error => {
-      console.error('Delete error:', error);
-      alert(`❌ ${error.message}`);
-      deleteBtn.disabled = false;
-      deleteBtn.innerHTML = originalText;
-    });
+    // Show loading console log
+    console.log(`🗑️ Deleting itinerary ${itineraryId}...`);
+    
+    // ✅ CREATE FORM AND SUBMIT (Works with both <a> and <button>)
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = `/itinerary/${itineraryId}/delete/`;
+    
+    // Add CSRF token
+    const csrfToken = getCookie('csrftoken');
+    const csrfInput = document.createElement('input');
+    csrfInput.type = 'hidden';
+    csrfInput.name = 'csrfmiddlewaretoken';
+    csrfInput.value = csrfToken;
+    form.appendChild(csrfInput);
+    
+    // Submit form
+    document.body.appendChild(form);
+    form.submit();
+    
+    return false; // Prevent default link behavior
   }
 
 </script>
+
 
 
 {% endblock %}

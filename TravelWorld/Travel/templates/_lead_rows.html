@@ -1,0 +1,91 @@
+{% for lead in object_list %}
+<tr class="{% if lead.dup_count > 1 %}duplicate-row{% endif %}">
+
+  <td class="text-center">{{ forloop.counter }}</td>
+
+  <td class="fw-semibold">
+    {{ lead.name|default:"—" }}
+    {% if lead.dup_count > 1 %}
+      <span class="badge dup-badge ms-1"
+            title="Submitted {{ lead.dup_count }} times">
+        {{ lead.dup_count }}
+      </span>
+    {% endif %}
+  </td>
+
+  <td>
+    {% if lead.email %}
+      <a href="mailto:{{ lead.email }}" class="text-decoration-none">
+        <i class="bi bi-envelope-open me-1"></i>{{ lead.email }}
+      </a>
+    {% else %}
+      <span class="text-muted">—</span>
+    {% endif %}
+  </td>
+
+  <td>
+    {% if lead.phone %}
+      <a href="tel:{{ lead.phone }}" class="text-decoration-none">
+        <i class="bi bi-telephone me-1"></i>{{ lead.phone }}
+      </a>
+    {% else %}
+      <span class="text-muted">—</span>
+    {% endif %}
+  </td>
+
+  <td class="text-truncate" style="max-width: 320px;" title="{{ lead.from_url }}">
+    {% if lead.from_url %}
+      <a href="{{ lead.from_url }}" class="text-decoration-none" target="_blank" rel="noopener">
+        {{ lead.from_url }} <i class="bi bi-box-arrow-up-right ms-1"></i>
+      </a>
+    {% else %}
+      <span class="text-muted">—</span>
+    {% endif %}
+  </td>
+
+  <!-- CHANNEL (use chan_is_ads and chan_source like main table) -->
+  <td>
+    {% if lead.chan_is_ads %}
+      <span class="badge badge-ads">Google Ads</span>
+    {% else %}
+      <span class="badge badge-seo">SEO</span>
+    {% endif %}
+  </td>
+
+  <td class="text-muted small" data-ts="{{ lead.created_at|date:'c' }}">
+    {{ lead.created_at|date:"Y-m-d H:i" }}
+  </td>
+
+  <td class="text-end">
+    <div class="btn-group">
+
+      {% if lead.email %}
+      <button class="btn btn-sm btn-outline-secondary copy-btn"
+              data-copy="{{ lead.email }}" data-label="Email">
+        <i class="bi bi-clipboard"></i>
+      </button>
+      {% endif %}
+
+      {% if lead.phone %}
+      <button class="btn btn-sm btn-outline-secondary copy-btn"
+              data-copy="{{ lead.phone }}" data-label="Phone">
+        <i class="bi bi-clipboard2"></i>
+      </button>
+      {% endif %}
+
+    </div>
+  </td>
+
+</tr>
+
+{% empty %}
+<tr>
+  <td colspan="8" class="py-5">
+    <div class="text-center text-muted">
+      <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+      <div class="fw-semibold">No leads yet</div>
+      <div>Leads submitted from your PHP site will appear here.</div>
+    </div>
+  </td>
+</tr>
+{% endfor %}

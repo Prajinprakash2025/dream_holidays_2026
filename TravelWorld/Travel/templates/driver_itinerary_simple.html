@@ -1,0 +1,466 @@
+
+
+
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Quotation - {{ itinerary.id }}</title>
+
+<link rel="icon" href="{% static 'assets/img/dreamholiday_logo.png' %}">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+
+<style>
+body{
+    background:#e9ecef;
+    font-family: 'Times New Roman', Times, serif;
+    margin:0;
+    padding:0;
+}
+
+/* MAIN WRAPPER */
+#pdf-content{
+    width:100%;
+    max-width:900px;
+    margin:0 auto;
+    background:#fff;
+    padding:20px 40px;
+}
+
+/* SECTION */
+.section{
+    padding:20px 0;
+}
+
+/* NO PAGE BREAK */
+.avoid-break{
+    page-break-inside:avoid!important;
+    break-inside:avoid!important;
+}
+
+img{
+    max-width:100%;
+    height:auto;
+    page-break-inside:avoid!important;
+    break-inside:avoid!important;
+}
+
+
+/* LARGE PAYMENT IMAGE (NEW CLASS) */
+.payment-image-large {
+    width: 520px;          /* 👈 increase size */
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 15px auto;     /* center */
+    border: 2px solid #000;
+    padding: 10px;
+    background: #fff;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+/* HEADER */
+.header-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+.logo-img{width:260px;}
+.header-text{
+    text-align:right;
+    font-size:14px;
+    font-weight:bold;
+    line-height:1.4;
+}
+.brand-name{
+    font-size:18px;
+    font-weight:bold;
+    color:#000;
+}
+
+/* MAIN TOP LINE (BLACK) */
+.brown-line{
+    border:0;
+    height:3px;
+    background:#000;   /* ✅ changed to black */
+    margin:12px 0 25px;
+}
+
+/* CREATED BY underline */
+.created-underline{
+    width:85px;
+    height:2px;
+    background:#000;
+    margin:4px 0 8px 0;
+}
+
+/* DETAILS TABLE */
+table.details-table td,
+table.details-table th{
+    border:1px solid #777;
+    background:#f7faf0;
+    padding:6px 8px;
+    font-size:14px;
+}
+
+/* SOCIAL */
+/* SOCIAL */
+.social-row{
+    display:flex;
+    justify-content:space-between;
+    margin-top:25px;
+}
+
+.social-box{
+    width:32%;
+    text-align:center;
+    font-size:14px;
+}
+
+/* 🔥 IMPORTANT FIX */
+.social-box img{
+    width:130px;
+    display:block;          /* forces image to its own line */
+    margin:0 auto 8px auto; /* center + space below image */
+}
+
+
+/* BULLETS */
+.bullet-section p{
+    margin:0 0 6px;
+    padding-left:15px;
+    text-indent:-10px;
+    font-size:14px;
+}
+.bullet-section p::before{
+    content:"• ";
+    font-weight:bold;
+}
+
+/* 5px gap below headings before bullet list */
+.list-gap{
+    margin-top:5px;
+}
+
+/* Compact paragraph spacing for the requested block */
+.compact-text p{
+    margin:2px 0;          /* ✅ reduced gap */
+    font-size:14px;
+}
+
+/* Footer */
+.footer-quote{
+    text-align:center;
+    font-size:16px;
+    font-style:italic;
+    color:#0066a1;
+
+
+}
+
+.footer-logo{
+    width: 330px;
+    display:block;
+    margin: 10px auto;
+}
+
+/* Headings like Inclusions / Exclusions / Terms */
+/* Heading style (no left margin) */
+/* Section heading */
+.red-heading {
+    color: #c00000;
+    font-weight: bold;
+    
+    margin: 0;
+    padding: 0;
+}
+
+/* Bullet list shifted to align under the 's' of Inclusions */
+.bullet-section {
+    padding-left: 5ch;   /* 👈 aligns under “Inclusions” */
+}
+
+/* Bullet paragraphs */
+.bullet-section p {
+    margin: 0 0 6px 0;
+    padding: 0;
+    font-size: 14px;
+}
+
+/* Small vertical gap before first bullet */
+.bullet-section p:first-of-type {
+    margin-top: 6px;
+}
+
+/* Bullet symbol */
+.bullet-section p::before {
+    content: "• ";
+    font-weight: bold;
+}
+/* QR PAYMENT SECTION */
+.qr-payment {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    margin-top: 12px;
+}
+
+.qr-payment img {
+    width: 120px;
+    height: auto;
+    border: 1px solid #000;
+    padding: 6px;
+    background: #fff;
+}
+
+.qr-payment-text {
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.qr-payment-text .label {
+    font-weight: bold;
+}
+
+/* ACTION BAR */
+.action-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: #ffffff;
+    padding: 12px;
+    text-align: center;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+    z-index: 9999;
+}
+
+/* Hide action bar while printing / PDF */
+@media print {
+    .action-bar {
+        display: none !important;
+    }
+}
+
+/* Push PDF content below the fixed bar */
+
+
+/* ============================= */
+/* NEW PAYMENT DISPLAY CSS ONLY */
+/* ============================= */
+
+/* Wrapper for payment section */
+.payment-wrapper {
+    text-align: center;
+    margin-top: 25px;
+}
+
+/* Force large visible payment image */
+.payment-wrapper img.payment-display {
+    width: 520px;          /* BIG & CLEAR */
+    max-width: 100%;
+    height: auto;
+    display: inline-block;
+    border: 2px solid #000;
+    padding: 12px;
+    background: #fff;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.2);
+}
+
+/* Caption text */
+.payment-wrapper .payment-caption {
+    margin-top: 10px;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+/* Optional: slightly larger in PDF */
+@media print {
+    .payment-wrapper img.payment-display {
+        width: 580px;
+    }
+}
+
+
+
+
+
+</style>
+</head>
+
+<body>
+
+   
+<div class="action-bar d-flex justify-content-center gap-2">
+    <button class="btn btn-dark" onclick="downloadPDF()">
+        ⬇ Download Quotation PDF
+    </button>
+
+   
+</div>
+
+
+
+   
+
+</div>
+
+<div id="pdf-content">
+
+   
+
+
+
+<!-- SECTION 1 – HEADER -->
+<div class="section avoid-break">
+
+    <div class="header-row avoid-break">
+        <img src="{% static 'assets/img/dreamholiday_logo.png' %}" class="logo-img"/>
+        <div class="header-text">
+            Thank you for making enquiry with <br>
+            <span class="brand-name">Dream Holidays Kerala</span><br>
+            A Premium Travel Planner
+        </div>
+    </div>
+
+    <hr class="brown-line"/>
+
+    <div class="d-flex justify-content-between avoid-break">
+        <div>
+            <div style="color:#1e4a7a; font-size:20px; font-weight:bold; text-decoration:underline;">
+                Ms/Mr. {{ query.client_name }} trip to
+            </div>
+            <div>{{ itinerary.destination_list }}</div>
+        </div>
+
+        
+    </div>
+
+    <br>
+
+   
+
+
+
+    
+</div>
+
+
+<!-- SECTION 2 – ACCOMMODATION -->
+<div class="section avoid-break">
+
+    <h4 style="color:#003366; font-weight:bold; text-decoration:underline;">ACCOMMODATION</h4>
+    <p style="font-weight:bold; margin-bottom:5px;">Option 1</p>
+
+    <table class="details-table avoid-break" width="100%">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Destination</th>
+                <th>Hotels</th>
+                <th>Hotel Contact Number</th>
+                
+            </tr>
+        </thead>
+        <tbody>
+        {% for acc in accommodations %}
+            <tr>
+                <td>{{ acc.date|date:"d M Y" }}</td>
+                <td>{{ acc.destination|upper }}</td>
+                <td>{{ acc.hotel }}</td>
+                <td>{{ acc.contact|default:"-" }}</td>
+                
+            </tr>
+            
+        {% endfor %}
+        </tbody>
+    </table>
+
+   
+
+    
+
+</div>
+
+
+
+<!-- SECTION 3 – DAY PLANS -->
+<div class="section">
+
+    <h4 style="color:#c00000; font-size:20px; font-weight:bold; text-decoration:underline;">
+        Day To Day Travel Planning
+    </h4>
+
+    {% for day in day_plans %}
+    <div class="avoid-break">
+
+        <h6 style="color:#c00000; margin-top:20px;">
+            Day {{ day.day_number }}{% if day.title %} - {{ day.title }}{% endif %}
+        </h6>
+
+        
+
+        <div style="font-size:14px; line-height:1.6;">
+            {{ day.get_description|linebreaks }}
+        </div>
+
+    </div>
+    {% endfor %}
+
+</div>
+
+
+
+
+
+
+
+
+
+
+</div><!-- END CONTENT WRAPPER -->
+
+</body>
+</html>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<script>
+function downloadPDF() {
+    const actionBar = document.querySelector('.action-bar');
+    actionBar.style.display = 'none';
+
+    const element = document.getElementById('pdf-content');
+
+    const opt = {
+        margin: 0,
+        filename: 'Quotation_{{ itinerary.id }}.pdf',
+        image: { type: 'jpeg', quality: 1 },
+        html2canvas: {
+            scale: 2,
+            useCORS: true,
+            allowTaint: true,
+            scrollY: 0
+        },
+        jsPDF: {
+            unit: 'mm',
+            format: 'a4',
+            orientation: 'portrait'
+        }
+    };
+
+    html2pdf()
+        .set(opt)
+        .from(element)
+        .save()
+        .then(() => {
+            actionBar.style.display = 'block';
+        });
+}
+
+
+</script>
+
+

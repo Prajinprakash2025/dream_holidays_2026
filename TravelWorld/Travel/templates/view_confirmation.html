@@ -1,0 +1,326 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Confirmation - {{ confirmation_no }}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .header h2 {
+            color: #333;
+            margin-bottom: 5px;
+            font-size: 18px;
+        }
+
+        .header p {
+            font-size: 11px;
+            color: #666;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        table th, table td {
+            border: 1px solid #000;
+            padding: 8px;
+            text-align: left;
+            font-size: 12px;
+        }
+
+        table th {
+            background-color: #e8e8e8;
+            font-weight: bold;
+        }
+
+        .section-header {
+            background-color: #d0d0d0;
+            font-weight: bold;
+            text-align: center;
+            padding: 8px;
+            border: 1px solid #000;
+            margin-bottom: 0;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+        }
+
+        .action-buttons button,
+        .action-buttons a {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .action-buttons button:hover,
+        .action-buttons a:hover {
+            background: #5568d3;
+        }
+
+        .action-buttons .btn-back {
+            background: #6c757d;
+        }
+
+        .action-buttons .btn-back:hover {
+            background: #5a6268;
+        }
+
+        .action-buttons .btn-download {
+            background: #28a745;
+        }
+
+        .action-buttons .btn-download:hover {
+            background: #218838;
+        }
+
+        @media print {
+            .action-buttons {
+                display: none;
+            }
+            body {
+                padding: 0;
+                background: white;
+            }
+            .container {
+                box-shadow: none;
+            }
+        }
+
+        .highlight-amount {
+            font-weight: bold;
+            color: #000;
+        }
+    </style>
+</head>
+<body>
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+        <a href="#" class="btn-back">
+            <i class="fas fa-arrow-left"></i> Back to Query
+        </a>
+        <button onclick="window.print()">
+            <i class="fas fa-print"></i> Print
+        </button>
+        <a href="{% url 'download_confirmation_pdf' itinerary.id %}" class="btn-download">
+            <i class="fas fa-download"></i> Download PDF
+        </a>
+    </div>
+
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h2>travel hope</h2>
+            <p>Your Premium Travel Partner</p>
+        </div>
+
+        <!-- Top Information Table -->
+        <table>
+            <tr>
+                <th>Date Of Arrival</th>
+                <td>{{ arrival_date|date:"d-m-Y" }}</td>
+                <th>No Of Days</th>
+                <td>{{ total_days }}</td>
+            </tr>
+            <tr>
+                <th>Date Of Departure</th>
+                <td>{{ departure_date|date:"d-m-Y" }}</td>
+                <th>Confirmation No</th>
+                <td>{{ confirmation_no }}</td>
+            </tr>
+        </table>
+
+        <!-- Guest Details -->
+        <div class="section-header">Guest Details</div>
+        <table>
+            <tr>
+                <th>Guest Name</th>
+                <td>{{ guest_name }}</td>
+                <th>Guest Phone</th>
+                <td>{{ guest_phone }}</td>
+            </tr>
+        </table>
+
+        <!-- Package Details -->
+        <div class="section-header">Package Details</div>
+        <table>
+            <tr>
+                <th>Package Category</th>
+                <td>{{ package_category }}</td>
+                <th>Package Type</th>
+                <td>{{ package_type }}</td>
+            </tr>
+            <tr>
+                <th>No Of Adults</th>
+                <td>{{ adults }}</td>
+                <th>No Of Child</th>
+                <td>{{ children }}{% if children > 0 %} (06 Yrs){% endif %}</td>
+            </tr>
+            <tr>
+                <th>No Of Rooms</th>
+                <td>{{ rooms }}</td>
+                <th>Extra Beds</th>
+                <td>{{ extra_beds }}</td>
+            </tr>
+        </table>
+
+        <table>
+            <tr>
+                <th colspan="2">Type Of Car</th>
+                <th colspan="2">{{ vehicle_type }}</th>
+            </tr>
+            <tr>
+                <th colspan="2">Vehicle Cost</th>
+                <td colspan="2">₹{{ vehicle_cost|floatformat:0 }}</td>
+            </tr>
+        </table>
+
+        <!-- Itinerary Table -->
+        <div class="section-header">Package Details</div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Place To Visit</th>
+                    <th>Hotel</th>
+                    <th>Room Type</th>
+                    <th>Plan</th>
+                    <th>Rate</th>
+                    <th>Advance</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for day in itinerary_data %}
+                <tr>
+                    <td>{{ day.date|date:"d-m-Y" }}</td>
+                    <td>{{ day.place }}</td>
+                    <td>{{ day.hotel }}</td>
+                    <td>{{ day.room_type }}</td>
+                    <td>{{ day.meal_plan }}</td>
+                    <td>₹{{ day.rate|floatformat:0 }}</td>
+                    <td>₹{{ day.advance|floatformat:0 }}</td>
+                </tr>
+                {% endfor %}
+                <tr>
+                    <td>{{ departure_date|date:"d-m-Y" }}</td>
+                    <td colspan="6">Drop at Airport after Sightseeing</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Additional Details -->
+        <div class="section-header">Additional Details</div>
+        <table>
+            <tr>
+                <th style="width: 25%;">Confirmed By</th>
+                <td style="width: 25%;">{{ confirmed_by }}</td>
+                <th style="width: 25%;">Email</th>
+                <td style="width: 25%;">{{ email }}</td>
+            </tr>
+            <tr>
+                <th>Arrival Details</th>
+                <td colspan="3">{{ query.arrival_details|default:"To be confirmed" }}</td>
+            </tr>
+            <tr>
+                <th>Departure Details</th>
+                <td colspan="3">{{ query.departure_details|default:"To be confirmed" }}</td>
+            </tr>
+            <tr>
+                <th>Special Inclusion</th>
+                <td colspan="3">{{ special_inclusions|linebreaksbr }}</td>
+            </tr>
+            <tr>
+                <td></td>
+                <td colspan="2"></td>
+                <th>Special Exclusion</th>
+            </tr>
+            <tr>
+                <th>Notes (Executive)</th>
+                <td colspan="3">{{ itinerary.executive_notes|default:"" }}</td>
+            </tr>
+            <tr>
+                <th>Notes (Reservation)</th>
+                <td colspan="3">{{ notes }}</td>
+            </tr>
+            <tr>
+                <th>Notes (Accounts)</th>
+                <td colspan="3">{{ itinerary.account_notes|default:"" }}</td>
+            </tr>
+            <tr>
+                <th rowspan="2">Written On<br><br>{{ written_on }}</th>
+                <td colspan="2" class="text-center">
+                    <strong>Booking Finished On</strong><br><br>{{ booking_finished_on }}
+                </td>
+                <th rowspan="2">Booking Done By<br><br>{{ booking_done_by }}</th>
+            </tr>
+            <tr>
+                <th>GST<br><br>₹{{ gst|floatformat:0 }} (Included in Pkg)</th>
+                <th class="text-center">
+                    Advance<br><br>₹{{ total_advance|floatformat:0 }}
+                </th>
+            </tr>
+            <tr>
+                <th>Package Cost<br><br><span class="highlight-amount">₹{{ package_cost|floatformat:0 }}</span></th>
+                <td colspan="2" class="text-center">
+                    <strong>Selected Option:</strong> {{ selected_option }}
+                </td>
+                <th>Balance<br><br><span class="highlight-amount">₹{{ balance|floatformat:0 }}</span></th>
+            </tr>
+        </table>
+
+        <!-- Footer -->
+        <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 2px solid #333;">
+            <p style="font-size: 12px;"><strong>Travel Hope - Your Premium Travel Partner</strong></p>
+            <p style="font-size: 11px;">Contact: {{ email }}</p>
+        </div>
+    </div>
+</body>
+</html>

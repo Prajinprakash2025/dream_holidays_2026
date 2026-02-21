@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        @page {
+            size: A4 portrait;
+            margin: 0.7cm 0.9cm;
+        }
+        
+        body { 
+            font-family: Arial, sans-serif; 
+            font-size: 8.5px;
+            line-height: 1.1;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .header { 
+            text-align: center; 
+            margin-bottom: 6px;
+            border-bottom: 1.5px solid #000;
+            padding-bottom: 4px;
+        }
+        
+        .header h2 { 
+            font-size: 13px; 
+            margin: 0 0 2px 0;
+            color: #000;
+            font-weight: bold;
+        }
+        
+        .header p { 
+            font-size: 7.5px; 
+            color: #666;
+            margin: 0;
+        }
+        
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-bottom: 5px;
+        }
+        
+        table th, table td { 
+            border: 1px solid #000; 
+            padding: 2.5px 3px;
+            text-align: left; 
+            font-size: 7.5px;
+            vertical-align: middle;
+            line-height: 1.1;
+        }
+        
+        table th { 
+            background-color: #e8e8e8; 
+            font-weight: bold;
+            font-size: 7.5px;
+        }
+        
+        .section-header { 
+            background-color: #d0d0d0; 
+            font-weight: bold; 
+            text-align: center; 
+            padding: 3px; 
+            border: 1px solid #000;
+            margin: 0;
+            font-size: 8.5px;
+        }
+        
+        .text-center {
+            text-align: center;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 6px;
+            padding-top: 4px;
+            border-top: 1.5px solid #000;
+        }
+        
+        .footer p {
+            margin: 1px 0;
+            font-size: 7.5px;
+        }
+        
+        .highlight-amount {
+            font-weight: bold;
+            font-size: 8.5px;
+        }
+        
+        .no-bottom-margin {
+            margin-bottom: 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <h2>travel hope</h2>
+        <p>Your Premium Travel Partner</p>
+    </div>
+
+    <!-- Top Information Table -->
+    <table>
+        <tr>
+            <th style="width: 18%;">Date Of Arrival</th>
+            <td style="width: 32%;">{{ arrival_date|date:"d-m-Y" }}</td>
+            <th style="width: 18%;">No Of Days</th>
+            <td style="width: 32%;">{{ total_days }}</td>
+        </tr>
+        <tr>
+            <th>Date Of Departure</th>
+            <td>{{ departure_date|date:"d-m-Y" }}</td>
+            <th>Confirmation No</th>
+            <td><strong>{{ confirmation_no }}</strong></td>
+        </tr>
+    </table>
+
+    <!-- Guest Details -->
+    <div class="section-header">Guest Details</div>
+    <table>
+        <tr>
+            <th style="width: 18%;">Guest Name</th>
+            <td style="width: 32%;">{{ guest_name }}</td>
+            <th style="width: 18%;">Guest Phone</th>
+            <td style="width: 32%;">{{ guest_phone }}</td>
+        </tr>
+    </table>
+
+    <!-- Package Details -->
+    <div class="section-header">Package Details</div>
+    <table>
+        <tr>
+            <th style="width: 18%;">Package Category</th>
+            <td style="width: 32%;">{{ package_category }}</td>
+            <th style="width: 18%;">Package Type</th>
+            <td style="width: 32%;">{{ package_type }}</td>
+        </tr>
+        <tr>
+            <th>No Of Adults</th>
+            <td>{{ adults }}</td>
+            <th>No Of Child</th>
+            <td>{{ children }}{% if children > 0 %} (06 Yrs){% endif %}</td>
+        </tr>
+        <tr>
+            <th>No Of Rooms</th>
+            <td>{{ rooms }}</td>
+            <th>Extra Beds</th>
+            <td>{{ extra_beds }}</td>
+        </tr>
+        <tr>
+            <th colspan="2" style="width: 50%;">Type Of Car</th>
+            <td colspan="2" style="width: 50%;">{{ vehicle_type }}</td>
+        </tr>
+        <tr>
+            <th colspan="2">Vehicle Cost</th>
+            <td colspan="2">Rs {{ vehicle_cost|floatformat:0 }}</td>
+        </tr>
+    </table>
+
+    <!-- Itinerary Table -->
+    <div class="section-header">Package Details</div>
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 9%;">Date</th>
+                <th style="width: 12%;">Place</th>
+                <th style="width: 22%;">Hotel</th>
+                <th style="width: 18%;">Room Type</th>
+                <th style="width: 13%;">Plan</th>
+                <th style="width: 13%;">Rate</th>
+                <th style="width: 13%;">Advance</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for day in itinerary_data %}
+            <tr>
+                <td>{{ day.date|date:"d-m-y" }}</td>
+                <td>{{ day.place }}</td>
+                <td>{{ day.hotel }}</td>
+                <td>{{ day.room_type }}</td>
+                <td>{{ day.meal_plan }}</td>
+                <td>Rs {{ day.rate|floatformat:0 }}</td>
+                <td>Rs {{ day.advance|floatformat:0 }}</td>
+            </tr>
+            {% endfor %}
+            <tr>
+                <td>{{ departure_date|date:"d-m-y" }}</td>
+                <td colspan="6">Drop at Airport after Sightseeing</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- Additional Details -->
+    <div class="section-header">Additional Details</div>
+    <table>
+        <tr>
+            <th style="width: 18%;">Confirmed By</th>
+            <td style="width: 32%;">{{ confirmed_by }}</td>
+            <th style="width: 18%;">Email</th>
+            <td style="width: 32%;">{{ email }}</td>
+        </tr>
+        <tr>
+            <th>Arrival Details</th>
+            <td colspan="3">{{ query.arrival_details|default:"To be confirmed" }}</td>
+        </tr>
+        <tr>
+            <th>Departure Details</th>
+            <td colspan="3">{{ query.departure_details|default:"To be confirmed" }}</td>
+        </tr>
+        <tr>
+            <th>Special Inclusion</th>
+            <td colspan="3">{{ special_inclusions|safe }}</td>
+        </tr>
+        <tr>
+            <td></td>
+            <td colspan="2"></td>
+            <th style="text-align: right;">Special Exclusion</th>
+        </tr>
+        <tr>
+            <th>Notes (Executive)</th>
+            <td colspan="3">{{ itinerary.executive_notes|default:"" }}</td>
+        </tr>
+        <tr>
+            <th>Notes (Reservation)</th>
+            <td colspan="3">{{ notes }}</td>
+        </tr>
+        <tr>
+            <th>Notes (Accounts)</th>
+            <td colspan="3">{{ itinerary.account_notes|default:"" }}</td>
+        </tr>
+        <tr>
+            <th style="width: 18%;">Written On</th>
+            <td colspan="2" class="text-center" style="width: 32%;"><strong>Booking Finished On</strong></td>
+            <th style="width: 18%;">Booking Done By</th>
+        </tr>
+        <tr>
+            <td>{{ written_on }}</td>
+            <td colspan="2" class="text-center">{{ booking_finished_on }}</td>
+            <td>{{ booking_done_by }}</td>
+        </tr>
+        <tr>
+            <th>GST</th>
+            <th class="text-center" colspan="2">Advance</th>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Rs {{ gst|floatformat:0 }} (Included in Pkg)</td>
+            <td class="text-center" colspan="2">Rs {{ total_advance|floatformat:0 }}</td>
+            <td></td>
+        </tr>
+        <tr>
+            <th>Package Cost</th>
+            <td colspan="2" class="text-center"><strong>Selected Option</strong></td>
+            <th>Balance</th>
+        </tr>
+        <tr>
+            <td><span class="highlight-amount">Rs {{ package_cost|floatformat:0 }}</span></td>
+            <td colspan="2" class="text-center">{{ selected_option }}</td>
+            <td><span class="highlight-amount">Rs {{ balance|floatformat:0 }}</span></td>
+        </tr>
+    </table>
+
+    <!-- Footer -->
+    <div class="footer">
+        <p><strong>Travel Hope - Your Premium Travel Partner</strong></p>
+        <p>Contact: {{ email }}</p>
+    </div>
+</body>
+</html>

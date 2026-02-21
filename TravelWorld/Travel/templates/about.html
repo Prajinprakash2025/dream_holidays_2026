@@ -1,0 +1,178 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<style>
+  :root{
+    --brand:#0B4F8A;
+    --accent:#22C55E;
+    --muted:#64748b;
+    --card-border:#e6ecf5;
+  }
+
+  /* ======= HERO with animated gradient ======= */
+  .home-hero{
+    position: relative;
+    border: 1px solid var(--card-border);
+    border-radius: 18px;
+    overflow: hidden;
+    background: radial-gradient(900px 420px at -10% -20%, rgba(34,197,94,.15), transparent 55%),
+                radial-gradient(900px 420px at 110% 0%, rgba(11,79,138,.14), transparent 55%),
+                linear-gradient(180deg, #ffffff, #f8fbff 70%);
+    box-shadow: 0 14px 36px rgba(11,79,138,.08);
+  }
+  .hero-anim{
+    position:absolute; inset:-40%;
+    background: conic-gradient(from 0deg, rgba(99,102,241,.08), rgba(34,197,94,.08), rgba(99,102,241,.08));
+    filter: blur(60px);
+    animation: spin 18s linear infinite;
+    pointer-events:none;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ======= Reveal on scroll ======= */
+  .reveal { opacity: 0; transform: translateY(14px); transition: all .6s ease; }
+  .reveal.in { opacity: 1; transform: translateY(0); }
+  .stagger > * { opacity: 0; transform: translateY(10px); }
+  .stagger.in > * { animation: fadeUp .6s ease forwards; }
+  .stagger.in > *:nth-child(1){animation-delay:.05s}
+  .stagger.in > *:nth-child(2){animation-delay:.12s}
+  .stagger.in > *:nth-child(3){animation-delay:.18s}
+  .stagger.in > *:nth-child(4){animation-delay:.24s}
+  @keyframes fadeUp { to { opacity:1; transform: translateY(0); } }
+
+  /* ======= Card polish ======= */
+  .card{
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    box-shadow: 0 10px 28px rgba(2,6,23,.06);
+    transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+  }
+  .card:hover{
+    transform: translateY(-2px);
+    box-shadow: 0 16px 36px rgba(2,6,23,.10);
+    border-color: #dbe4f0;
+  }
+
+  /* ======= Buttons with micro-interactions ======= */
+  .btn{ position:relative; overflow:hidden; }
+  .btn:active{ transform: translateY(1px); }
+  .btn-shine::after{
+    content:""; position:absolute; top:0; left:-150%;
+    width:150%; height:100%;
+    background: linear-gradient(120deg, transparent 0%, rgba(255,255,255,.5) 50%, transparent 100%);
+    transform: skewX(-20deg);
+    transition: left .7s ease;
+  }
+  .btn-shine:hover::after{ left:120%; }
+
+  .btn-primary{ background: var(--brand); border-color: var(--brand); }
+  .btn-primary:hover{ filter: brightness(1.07); }
+  .btn-secondary{ background: #0ea5e9; border-color:#0ea5e9; }
+  .btn-outline-secondary:hover{ background:#eef2ff; }
+
+  /* ======= Tiny accent pill ======= */
+  .app-pill{
+    display:inline-flex; gap:.5rem; align-items:center;
+    padding:.35rem .7rem; border-radius:999px;
+    background:linear-gradient(90deg, rgba(99,102,241,.14), rgba(34,197,94,.14));
+    border:1px solid rgba(99,102,241,.25);
+    font-weight:600; color:#1f2937;
+  }
+</style>
+
+<div class="container py-5">
+
+  <!-- HERO -->
+  <header class="home-hero p-4 p-md-5 mb-4 reveal" id="hero">
+    <div class="hero-anim"></div>
+    <div class="position-relative">
+      <div class="app-pill mb-2">🚀 {{ app_name|default:"CRM" }}</div>
+      <h1 class="h3 mb-1" style="color:var(--brand)">{{ app_name }}</h1>
+      <p class="text-muted mb-0">{{ tagline|default:"Track leads, assign to CREs, and stay on top of follow-ups." }}</p>
+    </div>
+  </header>
+
+  <!-- ACTION CARDS -->
+  <div class="row g-3 stagger" id="cards">
+    <div class="col-12 col-md-4">
+      <a class="text-decoration-none" href="{% url 'lead-list' %}">
+        <div class="card h-100">
+          <div class="card-body">
+            <div class="d-flex align-items-center gap-3 mb-2">
+              <div class="rounded-3 p-3" style="background:#e6f0ff">📋</div>
+              <h2 class="h5 mb-0">View Leads</h2>
+            </div>
+            <p class="text-muted mb-3">See all incoming leads, filter fast, and open details.</p>
+            <button class="btn btn-primary btn-sm btn-shine">Open Leads →</button>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <div class="col-12 col-md-4">
+      <a class="text-decoration-none" href="{% url 'cre_list' %}">
+        <div class="card h-100">
+          <div class="card-body">
+            <div class="d-flex align-items-center gap-3 mb-2">
+              <div class="rounded-3 p-3" style="background:#e6fff0">🤝</div>
+              <h2 class="h5 mb-0">Manage CREs</h2>
+            </div>
+            <p class="text-muted mb-3">Add, edit, or deactivate CREs. Keep assignments clean.</p>
+            <button class="btn btn-secondary btn-sm btn-shine">Manage Team →</button>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <div class="col-12 col-md-4">
+      <a class="text-decoration-none" href="{% url 'about' %}">
+        <div class="card h-100">
+          <div class="card-body">
+            <div class="d-flex align-items-center gap-3 mb-2">
+              <div class="rounded-3 p-3" style="background:#fff3e6">ℹ️</div>
+              <h2 class="h5 mb-0">About & Status</h2>
+            </div>
+            <p class="text-muted mb-3">Version info, health checks, and endpoints overview.</p>
+            <button class="btn btn-outline-secondary btn-sm btn-shine">View Info →</button>
+          </div>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="mt-4 text-muted small reveal" id="footer">
+    &copy; {{ app_name }} — {{ now|date:"Y" }}
+  </footer>
+</div>
+
+<script>
+  // Reveal-on-scroll for hero, cards, footer
+  (function(){
+    const toReveal = [
+      document.getElementById('hero'),
+      document.getElementById('cards'),
+      document.getElementById('footer')
+    ].filter(Boolean);
+
+    const io = new IntersectionObserver((entries)=>{
+      entries.forEach(e=>{
+        if(e.isIntersecting){
+          const el = e.target;
+          if (el.id === 'cards'){ el.classList.add('in'); }  // stagger group
+          el.classList.add('in');                            // simple reveal
+          io.unobserve(el);
+        }
+      });
+    }, { threshold: .2 });
+
+    toReveal.forEach(el=>{
+      // ensure initial class for stagger group
+      if (el.id === 'cards') el.classList.add('stagger');
+      else el.classList.add('reveal');
+      io.observe(el);
+    });
+  })();
+</script>
+
+{% endblock %}

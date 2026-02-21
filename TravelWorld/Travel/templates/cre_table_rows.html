@@ -1,0 +1,25 @@
+{% for cre in cres %}
+<tr>
+  <td>{{ cre.name }}</td>
+  <td>{{ cre.email }}</td>
+  <td>{{ cre.phone|default:"-" }}</td>
+  <td>
+    {% if cre.is_active %}
+      <span class="badge text-bg-success">Active</span>
+    {% else %}
+      <span class="badge text-bg-secondary">Inactive</span>
+    {% endif %}
+  </td>
+  <td>
+    <button class="btn btn-sm btn-outline-primary"
+            onclick="openEditForm('{{ cre.id }}','{{ cre.name|escapejs }}','{{ cre.email|escapejs }}','{{ cre.phone|default_if_none:''|escapejs }}','{{ cre.is_active }}')">
+      Edit
+    </button>
+    <button class="btn btn-sm btn-outline-danger" onclick="deleteCre('{{ cre.id }}')">
+      Delete
+    </button>
+  </td>
+</tr>
+{% empty %}
+<tr><td colspan="5" class="text-muted">No CREs found.</td></tr>
+{% endfor %}

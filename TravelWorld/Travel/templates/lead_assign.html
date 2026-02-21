@@ -1,0 +1,260 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+  :root{
+    --brand:#0B4F8A;        /* deep blue */
+    --accent:#22C55E;       /* green */
+    --indigo:#6366F1;       /* indigo */
+    --amber:#F59E0B;        /* amber */
+    --rose:#F43F5E;         /* rose */
+    --muted:#64748b;
+    --card-border:#e6ecf5;
+    --bg-hero:#F8FAFF;
+
+    --tbl-head-grad: linear-gradient(90deg,#e9f2ff, #f0fff4 60%, #fff7ed);
+    --thead-border:#d7e3f4;
+  }
+
+  /* HERO */
+  .assign-hero{
+    background:
+      radial-gradient(900px 420px at -10% -20%, rgba(34,197,94,.16), transparent 60%),
+      radial-gradient(900px 420px at 110% 0%, rgba(99,102,241,.14), transparent 55%),
+      linear-gradient(180deg, #fff, var(--bg-hero));
+    border:1px solid var(--card-border);
+    border-radius:16px;
+    box-shadow:0 12px 28px rgba(11,79,138,.08);
+  }
+  .hero-pill{
+    display:inline-flex;align-items:center;gap:.5rem;
+    padding:.35rem .7rem;border-radius:999px;
+    background:linear-gradient(90deg, rgba(99,102,241,.14), rgba(34,197,94,.14));
+    border:1px solid rgba(99,102,241,.25);
+    font-weight:600;color:#1f2937;
+  }
+
+  /* CARDS */
+  .card{ border:1px solid var(--card-border); border-radius:14px; box-shadow:0 6px 24px rgba(2,6,23,.06); }
+  .btn-primary{ background:var(--brand); border-color:var(--brand); }
+  .btn-primary:hover{ filter:brightness(1.07); }
+  .btn-outline-primary{ color:var(--brand); border-color:var(--brand); }
+  .btn-outline-primary:hover{ background:rgba(11,79,138,.08); }
+
+  /* TABLE */
+  .table thead th{ position:sticky; top:0; z-index:5; background:#fff; }
+  .table thead th{
+    background: var(--tbl-head-grad) !important;
+    border-bottom: 1px solid var(--thead-border) !important;
+    color:#0f172a;
+  }
+  .table-hover tbody tr:hover{ background:#f1f7ff; }
+  .table-striped tbody tr:nth-of-type(odd){ background-color:#fbfdff; }
+
+  /* selected row highlight */
+  tr.is-selected{ background:#e8f3ff !important; box-shadow: inset 4px 0 0 #60a5fa; }
+  .count-chip{
+    background:#eef2ff; color:#273e89; border:1px solid #dbe4ff;
+    padding:.25rem .6rem; border-radius:999px; font-weight:600;
+  }
+
+  /* badges for CRE assignment */
+  .badge-unassigned{ background:#fef3c7; color:#92400e; border:1px solid #fde68a; }
+  .badge-assigned{ background:#dcfce7; color:#065f46; border:1px solid #bbf7d0; }
+
+  /* checkbox column size on mobile */
+  @media (max-width: 768px){
+    .text-nowrap{ white-space:nowrap; }
+  }
+</style>
+
+<div class="container-fluid py-3 py-md-4">
+
+  <!-- HERO -->
+  <section class="assign-hero p-3 p-md-4 mb-3">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+      <div>
+        <div class="hero-pill mb-2">🤝 Assign Leads to CRE</div>
+        <h1 class="h4 mb-1" style="color:var(--brand)">Bulk assign & auto-email</h1>
+        <div class="text-muted">
+          Pick one CRE, select leads, then <strong>Assign & Send Email</strong>. The CRE receives a summary instantly.
+        </div>
+      </div>
+      <div class="d-flex flex-wrap gap-2">
+        <a href="{% url 'lead-list' %}" class="btn btn-outline-secondary">
+          <i class="bi bi-arrow-left me-1"></i> Back to Leads
+        </a>
+        <a href="{% url 'cre_list' %}" class="btn btn-outline-primary">
+          <i class="bi bi-people me-1"></i> Manage CREs
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- MESSAGES -->
+  {% if messages %}
+    <div class="mb-3">
+      {% for m in messages %}
+        <div class="alert {% if m.tags %}alert-{{ m.tags }}{% else %}alert-info{% endif %} mb-2" role="alert">
+          {{ m }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <!-- ASSIGN FORM -->
+  <div class="card mb-4">
+    <div class="card-body">
+      <form method="post" id="assign-form" class="row g-3 align-items-end">
+        {% csrf_token %}
+        <div class="col-12 col-md-6">
+          <label for="cre" class="form-label">Choose CRE</label>
+          <select name="cre" id="cre" class="form-select" required>
+            <option value="">-- Select CRE --</option>
+            {% for c in cres %}
+              <option value="{{ c.id }}">{{ c.name }} ({{ c.email }})</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-6 col-md-3">
+          <span class="form-label d-block">Selected</span>
+          <span id="selectedCount" class="count-chip">0</span>
+        </div>
+        <div class="col-6 col-md-3 d-grid">
+          <input type="hidden" name="lead_ids" id="lead_ids">
+          <button id="assignBtn" type="submit" class="btn btn-primary" disabled>
+            <span class="assign-text"><i class="bi bi-send-check me-1"></i> Assign & Send Email</span>
+            <span class="assign-loading d-none">
+              <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Assigning…
+            </span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- LEADS TABLE -->
+  <div class="card">
+    <div class="table-responsive">
+      <table class="table table-hover table-striped align-middle mb-0">
+        <thead class="table-light">
+          <tr class="text-nowrap">
+            <th style="width:44px;" class="text-center">
+              <input type="checkbox" id="check-all" class="form-check-input">
+            </th>
+            <th style="min-width: 80px;">ID</th>
+            <th style="min-width: 200px;">Name</th>
+            <th style="min-width: 220px;">Email</th>
+            <th style="min-width: 160px;">Phone</th>
+            <th style="min-width: 160px;">CRE</th>
+            <th style="min-width: 200px;">Created</th>
+          </tr>
+        </thead>
+        <tbody id="leadTbody">
+        {% for lead in leads %}
+          <tr data-id="{{ lead.id }}" class="{% if lead.cre %}{% else %}{% endif %}">
+            <td class="text-center">
+              <input type="checkbox" class="form-check-input lead-chk" value="{{ lead.id }}">
+            </td>
+            <td class="fw-semibold">{{ lead.id }}</td>
+            <td class="fw-semibold">{{ lead.name|default:"—" }}</td>
+            <td>
+              {% if lead.email %}
+                <a href="mailto:{{ lead.email }}" class="text-decoration-none">
+                  <i class="bi bi-envelope-open me-1"></i>{{ lead.email }}
+                </a>
+              {% else %}
+                <span class="text-muted">—</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if lead.phone %}
+                <a href="tel:{{ lead.phone }}" class="text-decoration-none">
+                  <i class="bi bi-telephone me-1"></i>{{ lead.phone }}
+                </a>
+              {% else %}
+                <span class="text-muted">—</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if lead.cre %}
+                <span class="badge badge-assigned">{{ lead.cre }}</span>
+              {% else %}
+                <span class="badge badge-unassigned">Unassigned</span>
+              {% endif %}
+            </td>
+            <td class="text-muted small">{{ lead.created_at|date:"Y-m-d H:i" }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="7" class="py-5 text-center text-muted">
+            <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+            <div class="fw-semibold">No leads.</div>
+            <div>Once leads arrive, select them and assign to a CRE here.</div>
+          </td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  (function(){
+    const checkAll   = document.getElementById('check-all');
+    const tbody      = document.getElementById('leadTbody');
+    const hidden     = document.getElementById('lead_ids');
+    const form       = document.getElementById('assign-form');
+    const assignBtn  = document.getElementById('assignBtn');
+    const countChip  = document.getElementById('selectedCount');
+    const textSpan   = document.querySelector('.assign-text');
+    const loadSpan   = document.querySelector('.assign-loading');
+
+    function getBoxes(){ return Array.from(document.querySelectorAll('.lead-chk')); }
+    function selectedIds(){
+      return getBoxes().filter(b => b.checked).map(b => b.value);
+    }
+    function updateUI(){
+      const ids = selectedIds();
+      hidden.value = ids.join(',');
+      countChip.textContent = ids.length;
+      assignBtn.disabled = !(ids.length && document.getElementById('cre').value);
+      // row highlight
+      getBoxes().forEach(b => {
+        const tr = b.closest('tr');
+        if (!tr) return;
+        tr.classList.toggle('is-selected', b.checked);
+      });
+    }
+
+    // Toggle all
+    checkAll?.addEventListener('change', e => {
+      getBoxes().forEach(b => b.checked = e.target.checked);
+      updateUI();
+    });
+
+    // Individual checkboxes
+    tbody?.addEventListener('change', e => {
+      if (e.target && e.target.classList.contains('lead-chk')) {
+        if (!e.target.checked) checkAll.checked = false;
+        updateUI();
+      }
+    });
+
+    // Enable button when CRE changes
+    document.getElementById('cre')?.addEventListener('change', updateUI);
+
+    // Submit: freeze UI and show spinner
+    form?.addEventListener('submit', () => {
+      updateUI();
+      assignBtn.disabled = true;
+      textSpan.classList.add('d-none');
+      loadSpan.classList.remove('d-none');
+    });
+
+    // Initial
+    updateUI();
+  })();
+</script>
+
+{% endblock %}

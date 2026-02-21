@@ -1,0 +1,1005 @@
+{% extends "admin_board.html" %}
+{% load static %}
+
+{% block content %}
+
+<style>
+    .back-button-container {
+        padding: 1.5rem 2rem 0 2rem;
+        margin-bottom: -1rem;
+    }
+
+    .back-btn-modern {
+        padding: 0.6rem 1.2rem;
+        font-size: 14px;
+        font-weight: 500;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+        border: 2px solid #667eea;
+        color: #667eea;
+        background: white;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .back-btn-modern:hover {
+        background: #667eea;
+        color: white;
+        transform: translateX(-5px);
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+    
+    /* ✅ Custom Checkbox Style */
+    .form-check-input {
+        cursor: pointer;
+        width: 1.2em;
+        height: 1.2em;
+    }
+</style>
+
+<div class="back-button-container">
+    <a href="{% url 'admin_settings' %}" class="back-btn-modern">
+        <i class="fas fa-arrow-left"></i>
+        <span>Back to Admin Settings</span>
+    </a>
+</div>
+
+<div style="margin-top: 70px; padding: 2rem;">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>
+            <i class="fas fa-calendar-day me-2"></i>Day Itineraries
+        </h2>
+        <div>
+            <button id="bulkDeleteBtn" class="btn btn-danger me-2 d-none" onclick="deleteSelectedItems()">
+                <i class="fas fa-trash-alt me-2"></i>Delete Selected (<span id="selectedCount">0</span>)
+            </button>
+
+            <button class="btn btn-success me-2" data-bs-toggle="modal" data-bs-target="#galleryModal">
+                <i class="fas fa-images me-2"></i>Manage Gallery
+            </button>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addItineraryModal">
+                <i class="fas fa-plus me-2"></i>Add New Itinerary
+            </button>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="GET" class="row g-3">
+                <div class="col-md-10">
+                    <input type="text" name="q" class="form-control"
+                           placeholder="Search by name, details, or destination..."
+                           value="{{ search_query }}">
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-search me-2"></i>Search
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body" id="itineraryListContainer">
+            {% if itineraries %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 40px;">
+                                <input type="checkbox" class="form-check-input" id="selectAll">
+                            </th>
+                            <th>#</th>
+                            <th>Images</th>
+                            <th>Itinerary Name</th>
+                            <th>Destination</th>
+                            <th>Details</th>
+                            <th>Created By</th>
+                            <th>Created At</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for itinerary in itineraries %}
+                        <tr class="{% if itinerary.is_pinned %}table-warning{% endif %}">
+                            <td>
+                                <input type="checkbox" class="form-check-input itinerary-checkbox" value="{{ itinerary.id }}">
+                            </td>
+                            <td>{{ forloop.counter }}</td>
+                            <td>
+                                {% if itinerary.get_image %}
+                                <img src="{{ itinerary.get_image }}" alt="{{ itinerary.name }}"
+                                     class="img-thumbnail" style="width: 60px; height: 60px; object-fit: cover;">
+                                {% else %}
+                                <div class="bg-light d-flex align-items-center justify-content-center"
+                                     style="width: 60px; height: 60px; border-radius: 4px;">
+                                    <i class="fas fa-image text-muted"></i>
+                                </div>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if itinerary.is_pinned %}
+                                <i class="fas fa-thumbtack text-warning me-2" title="Pinned to top"></i>
+                                {% endif %}
+                                <i class="fas fa-route text-primary me-2"></i>
+                                <strong>{{ itinerary.name }}</strong>
+                            </td>
+                            <td>
+                                <i class="fas fa-map-marker-alt text-danger me-2"></i>
+                                {{ itinerary.destination }}
+                            </td>
+                            <td>
+                                <div style="max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
+                                     title="{{ itinerary.details }}">
+                                    {{ itinerary.details|truncatewords:12 }}
+                                </div>
+                            </td>
+                            <td>
+                                {% if itinerary.created_by %}
+                                    <i class="fas fa-user text-success me-1"></i>
+                                    {{ itinerary.created_by.user.get_full_name|default:itinerary.created_by.user.username }}
+                                {% else %}
+                                    <span class="text-muted">N/A</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <i class="far fa-calendar text-info me-1"></i>
+                                {{ itinerary.created_at|date:"d M Y" }}
+                            </td>
+                            <td class="text-center">
+                                <button class="btn btn-sm {% if itinerary.is_pinned %}btn-warning{% else %}btn-outline-secondary{% endif %}"
+                                        onclick="togglePin({{ itinerary.id }}, {{ itinerary.is_pinned|yesno:'true,false' }})"
+                                        title="{% if itinerary.is_pinned %}Unpin{% else %}Pin to top{% endif %}">
+                                    <i class="fas fa-thumbtack"></i>
+                                </button>
+                                <button class="btn btn-sm btn-info"
+                                        onclick="viewItinerary({{ itinerary.id }})"
+                                        title="View Details">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="btn btn-sm btn-warning"
+                                        onclick="editItinerary({{ itinerary.id }})"
+                                        title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-danger"
+                                        onclick="confirmDelete({{ itinerary.id }}, '{{ itinerary.name }}')"
+                                        title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-calendar-day fa-4x text-muted mb-3"></i>
+                <h5 class="text-muted">No Day Itineraries Found</h5>
+                <p class="text-muted">Click "Add New Itinerary" to create your first itinerary.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="addItineraryModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-plus-circle me-2"></i>Add New Day Itinerary
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="addItineraryForm" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Destination Name <span class="text-danger">*</span></label>
+                        {{ form.destination }}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Itinerary Name <span class="text-danger">*</span></label>
+                        {{ form.name }}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Details <span class="text-danger">*</span></label>
+                        {{ form.details }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Image Source <span class="text-danger">*</span></label>
+                        <div class="btn-group w-100" role="group">
+                            <input type="radio" class="btn-check" name="image_source" id="addImageSourceGallery" value="gallery" autocomplete="off">
+                            <label class="btn btn-outline-primary" for="addImageSourceGallery">
+                                <i class="fas fa-images me-2"></i>From Gallery
+                            </label>
+
+                            <input type="radio" class="btn-check" name="image_source" id="addImageSourceUpload" value="upload" autocomplete="off" checked>
+                            <label class="btn btn-outline-primary" for="addImageSourceUpload">
+                                <i class="fas fa-upload me-2"></i>Upload New
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="mb-3" id="addGallerySection" style="display: none;">
+                        <label class="form-label">Select from Gallery</label>
+                        <div class="row" id="addGalleryGrid" style="max-height: 300px; overflow-y: auto;">
+                            {% for img in gallery_images %}
+                            <div class="col-md-3 col-sm-4 col-6 mb-3">
+                                <div class="card gallery-card" data-image-id="{{ img.id }}" onclick="selectAddGalleryImage({{ img.id }}, '{{ img.image.url }}', '{{ img.name }}')">
+                                    <img src="{{ img.image.url }}" class="card-img-top" alt="{{ img.name }}" style="height: 100px; object-fit: cover; cursor: pointer;">
+                                    <div class="card-body p-2">
+                                        <small class="text-truncate d-block" title="{{ img.name }}">{{ img.name }}</small>
+                                    </div>
+                                </div>
+                            </div>
+                            {% empty %}
+                            <div class="col-12">
+                                <p class="text-muted text-center">No gallery images available. <a href="#" data-bs-toggle="modal" data-bs-target="#galleryModal">Add some first</a></p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <input type="hidden" name="gallery_image" id="addGalleryImageInput">
+                        <div id="addSelectedGalleryPreview" class="mt-2"></div>
+                    </div>
+
+                    <div class="mb-3" id="addUploadSection">
+                        <label class="form-label">Upload Itinerary Image</label>
+                        <input type="file" class="form-control" name="uploaded_image" id="addUploadedImageInput" accept="image/*">
+                        <div id="addImagePreview" class="mt-2"></div>
+                        <small class="text-muted">Recommended size: 800x600px (Max: 2MB)</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.is_pinned }}
+                            <label class="form-check-label" for="id_is_pinned">
+                                <i class="fas fa-thumbtack text-warning me-1"></i>
+                                Pin to Top (Show this itinerary first)
+                            </label>
+                        </div>
+                    </div>
+                    <div id="addFormErrors" class="alert alert-danger d-none"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>Cancel
+                    </button>
+                    
+                    <button type="submit" class="btn btn-info text-white" value="save_add_another">
+                        <i class="fas fa-plus-square me-2"></i>Save & Add Another
+                    </button>
+
+                    <button type="submit" class="btn btn-primary" value="save">
+                        <i class="fas fa-save me-2"></i>Save Itinerary
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editItineraryModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title">
+                    <i class="fas fa-edit me-2"></i>Edit Day Itinerary
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="editItineraryForm" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="hidden" id="editItineraryId">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Destination Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="editDestination" name="destination"
+                               placeholder="e.g., 'Munnar', 'Cochin', 'Thekkady'" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Itinerary Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="editName" name="name"
+                               placeholder="Enter itinerary name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Details <span class="text-danger">*</span></label>
+                        <textarea class="form-control" id="editDetails" name="details" rows="5"
+                                  placeholder="Enter detailed itinerary description..." required></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Image Source</label>
+                        <div class="btn-group w-100" role="group">
+                            <input type="radio" class="btn-check" name="image_source" id="editImageSourceGallery" value="gallery" autocomplete="off">
+                            <label class="btn btn-outline-primary" for="editImageSourceGallery">
+                                <i class="fas fa-images me-2"></i>From Gallery
+                            </label>
+
+                            <input type="radio" class="btn-check" name="image_source" id="editImageSourceUpload" value="upload" autocomplete="off" checked>
+                            <label class="btn btn-outline-primary" for="editImageSourceUpload">
+                                <i class="fas fa-upload me-2"></i>Upload New
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="mb-3" id="editGallerySection" style="display: none;">
+                        <label class="form-label">Select from Gallery</label>
+                        <div class="row" id="editGalleryGrid" style="max-height: 300px; overflow-y: auto;">
+                            {% for img in gallery_images %}
+                            <div class="col-md-3 col-sm-4 col-6 mb-3">
+                                <div class="card gallery-card" data-image-id="{{ img.id }}" onclick="selectEditGalleryImage({{ img.id }}, '{{ img.image.url }}', '{{ img.name }}')">
+                                    <img src="{{ img.image.url }}" class="card-img-top" alt="{{ img.name }}" style="height: 100px; object-fit: cover; cursor: pointer;">
+                                    <div class="card-body p-2">
+                                        <small class="text-truncate d-block" title="{{ img.name }}">{{ img.name }}</small>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <input type="hidden" name="gallery_image" id="editGalleryImageInput">
+                        <div id="editSelectedGalleryPreview" class="mt-2"></div>
+                    </div>
+
+                    <div class="mb-3" id="editUploadSection">
+                        <label class="form-label">Itinerary Image</label>
+                        <input type="file" class="form-control" id="editImage" name="uploaded_image" accept="image/*">
+                        <div id="editImagePreview" class="mt-2"></div>
+                        <small class="text-muted">Leave empty to keep current image</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" id="editIsPinned" name="is_pinned">
+                            <label class="form-check-label" for="editIsPinned">
+                                <i class="fas fa-thumbtack text-warning me-1"></i>
+                                Pin to Top (Show this itinerary first)
+                            </label>
+                        </div>
+                    </div>
+                    <div id="editFormErrors" class="alert alert-danger d-none"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>Cancel
+                    </button>
+                    <button type="submit" class="btn btn-warning">
+                        <i class="fas fa-save me-2"></i>Update Itinerary
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="viewItineraryModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-eye me-2"></i>Itinerary Details
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="viewPinStatus" class="mb-3"></div>
+                <div id="viewImageContainer" class="mb-3 text-center"></div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong><i class="fas fa-map-marker-alt text-danger me-2"></i>Destination:</strong>
+                        <p id="viewDestination" class="ms-4"></p>
+                    </div>
+                    <div class="col-md-6">
+                        <strong><i class="fas fa-route text-primary me-2"></i>Itinerary Name:</strong>
+                        <p id="viewName" class="ms-4"></p>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <strong><i class="fas fa-info-circle text-success me-2"></i>Details:</strong>
+                    <p id="viewDetails" class="ms-4 mt-2" style="white-space: pre-wrap;"></p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Confirm Delete
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the itinerary:</p>
+                <p class="fw-bold text-primary" id="deleteItineraryName"></p>
+                <p class="text-danger"><i class="fas fa-warning me-2"></i>This action cannot be undone!</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>Cancel
+                </button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+                    <i class="fas fa-trash me-2"></i>Delete
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="galleryModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-images me-2"></i>Manage Gallery Images
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="card mb-3">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0"><i class="fas fa-plus-circle me-2"></i>Add New Gallery Image</h6>
+                    </div>
+                    <div class="card-body">
+                        <form id="addGalleryImageForm" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <input type="text" class="form-control" name="name" placeholder="Image Name" required>
+                                </div>
+                                <div class="col-md-5">
+                                    <input type="file" class="form-control" name="image" accept="image/*" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <button type="submit" class="btn btn-success w-100">
+                                        <i class="fas fa-upload me-2"></i>Upload
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="row" id="galleryImagesList">
+                    {% for img in gallery_images %}
+                    <div class="col-md-2 col-sm-3 col-4 mb-3" id="gallery-img-{{ img.id }}">
+                        <div class="card">
+                            <img src="{{ img.image.url }}" class="card-img-top" alt="{{ img.name }}" style="height: 120px; object-fit: cover;">
+                            <div class="card-body p-2">
+                                <small class="text-truncate d-block" title="{{ img.name }}">{{ img.name }}</small>
+                                <button class="btn btn-sm btn-danger w-100 mt-1" onclick="deleteGalleryImage({{ img.id }}, '{{ img.name }}')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="col-12">
+                        <p class="text-muted text-center">No gallery images yet. Upload some above!</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// ✅ MULTI-SELECT & BULK DELETE LOGIC
+
+// 1. Toggle All Checkboxes
+document.getElementById('selectAll').addEventListener('change', function() {
+    const isChecked = this.checked;
+    document.querySelectorAll('.itinerary-checkbox').forEach(checkbox => {
+        checkbox.checked = isChecked;
+    });
+    updateBulkActionState();
+});
+
+// 2. Individual Checkbox Change
+document.addEventListener('change', function(e) {
+    if (e.target.classList.contains('itinerary-checkbox')) {
+        updateBulkActionState();
+        
+        // Uncheck "Select All" if one is unchecked
+        const allCheckboxes = document.querySelectorAll('.itinerary-checkbox');
+        const checkedCheckboxes = document.querySelectorAll('.itinerary-checkbox:checked');
+        document.getElementById('selectAll').checked = (allCheckboxes.length === checkedCheckboxes.length && allCheckboxes.length > 0);
+    }
+});
+
+// 3. Update Button State (Show/Hide/Count)
+function updateBulkActionState() {
+    const checkedCount = document.querySelectorAll('.itinerary-checkbox:checked').length;
+    const bulkBtn = document.getElementById('bulkDeleteBtn');
+    const countSpan = document.getElementById('selectedCount');
+    
+    countSpan.textContent = checkedCount;
+    
+    if (checkedCount > 0) {
+        bulkBtn.classList.remove('d-none');
+    } else {
+        bulkBtn.classList.add('d-none');
+    }
+}
+
+// 4. Bulk Delete Function
+// In your template <script> section:
+
+function deleteSelectedItems() {
+    // ... (collection logic remains the same) ...
+    let selectedIds = [];
+    document.querySelectorAll('.itinerary-checkbox:checked').forEach((checkbox) => {
+        selectedIds.push(checkbox.value);
+    });
+
+    if (selectedIds.length === 0) {
+        alert("Please select at least one item to delete.");
+        return;
+    }
+
+    if (!confirm(`Are you sure you want to delete ${selectedIds.length} items? This cannot be undone.`)) {
+        return;
+    }
+
+    // ✅ UPDATE THE URL HERE
+    fetch("{% url 'delete_selected_day_itineraries' %}", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({ ids: selectedIds })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            window.location.reload(); 
+        } else {
+            alert("Error: " + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert("An error occurred while processing the request.");
+    });
+}
+// --- End Multi-Select Logic ---
+
+// ✅ Add Form - Image Source Toggle
+document.querySelectorAll('input[name="image_source"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+        const isGallery = this.value === 'gallery';
+        const gallerySection = this.id.includes('add') ? document.getElementById('addGallerySection') : document.getElementById('editGallerySection');
+        const uploadSection = this.id.includes('add') ? document.getElementById('addUploadSection') : document.getElementById('editUploadSection');
+
+        if (isGallery) {
+            gallerySection.style.display = 'block';
+            uploadSection.style.display = 'none';
+        } else {
+            gallerySection.style.display = 'none';
+            uploadSection.style.display = 'block';
+        }
+    });
+});
+
+// ✅ Select Gallery Image (Add Form)
+function selectAddGalleryImage(imageId, imageUrl, imageName) {
+    document.querySelectorAll('#addGalleryGrid .gallery-card').forEach(card => {
+        card.classList.remove('border-primary', 'border-3');
+    });
+
+    document.querySelector(`#addGalleryGrid .gallery-card[data-image-id="${imageId}"]`).classList.add('border-primary', 'border-3');
+    document.getElementById('addGalleryImageInput').value = imageId;
+    document.getElementById('addSelectedGalleryPreview').innerHTML = `
+        <div class="alert alert-success">
+            <i class="fas fa-check-circle me-2"></i>Selected: ${imageName}
+            <img src="${imageUrl}" class="img-thumbnail ms-2" style="height: 50px;">
+        </div>
+    `;
+}
+
+// ✅ Select Gallery Image (Edit Form)
+function selectEditGalleryImage(imageId, imageUrl, imageName) {
+    document.querySelectorAll('#editGalleryGrid .gallery-card').forEach(card => {
+        card.classList.remove('border-primary', 'border-3');
+    });
+
+    document.querySelector(`#editGalleryGrid .gallery-card[data-image-id="${imageId}"]`).classList.add('border-primary', 'border-3');
+    document.getElementById('editGalleryImageInput').value = imageId;
+    document.getElementById('editSelectedGalleryPreview').innerHTML = `
+        <div class="alert alert-success">
+            <i class="fas fa-check-circle me-2"></i>Selected: ${imageName}
+            <img src="${imageUrl}" class="img-thumbnail ms-2" style="height: 50px;">
+        </div>
+    `;
+}
+
+// ✅ Upload Image Preview (Add Form)
+document.getElementById('addUploadedImageInput').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    const preview = document.getElementById('addImagePreview');
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.innerHTML = `<img src="${e.target.result}" class="img-thumbnail" style="max-width: 300px; max-height: 200px;">`;
+        };
+        reader.readAsDataURL(file);
+    } else {
+        preview.innerHTML = '';
+    }
+});
+
+// ✅ Upload Image Preview (Edit Form)
+document.getElementById('editImage').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    const preview = document.getElementById('editImagePreview');
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.innerHTML = `<img src="${e.target.result}" class="img-thumbnail" style="max-width: 300px; max-height: 200px;">`;
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
+// ✅ Helper function to refresh ONLY the list in the background
+function refreshItineraryList() {
+    fetch(window.location.href) // Request the current page again
+    .then(response => response.text())
+    .then(html => {
+        // Parse the fetched HTML
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        
+        // Find the new list content
+        const newContent = doc.getElementById('itineraryListContainer').innerHTML;
+        
+        // Update the current page's list
+        document.getElementById('itineraryListContainer').innerHTML = newContent;
+        
+        // ✅ RE-ATTACH EVENTS for new elements in table
+        document.getElementById('selectAll').addEventListener('change', function() {
+            const isChecked = this.checked;
+            document.querySelectorAll('.itinerary-checkbox').forEach(checkbox => {
+                checkbox.checked = isChecked;
+            });
+            updateBulkActionState();
+        });
+    })
+    .catch(err => console.error('Error refreshing list:', err));
+}
+
+// ✅ Add Itinerary Logic (Updated)
+document.getElementById('addItineraryForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    // Check which button was clicked
+    const action = e.submitter ? e.submitter.value : 'save';
+    const formData = new FormData(this);
+    const form = this;
+    const errorDiv = document.getElementById('addFormErrors');
+
+    fetch("{% url 'add_day_itinerary' %}", {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            if (action === 'save_add_another') {
+                // 1. Show Success Message
+                errorDiv.className = 'alert alert-success';
+                errorDiv.innerHTML = '<i class="fas fa-check-circle me-2"></i>Saved! Added to list.';
+                errorDiv.classList.remove('d-none');
+
+                // 2. Refresh the background table dynamically
+                refreshItineraryList();
+
+                // 3. Reset the form for the next entry
+                form.reset();
+                document.getElementById('addImagePreview').innerHTML = '';
+                document.getElementById('addSelectedGalleryPreview').innerHTML = '';
+                document.getElementById('addGalleryImageInput').value = '';
+                
+                // Reset gallery borders
+                document.querySelectorAll('#addGalleryGrid .gallery-card').forEach(card => {
+                    card.classList.remove('border-primary', 'border-3');
+                });
+
+                // Auto-hide success message after 3 seconds
+                setTimeout(() => {
+                    errorDiv.classList.add('d-none');
+                    errorDiv.className = 'alert alert-danger d-none'; 
+                }, 3000);
+
+            } else {
+                // Standard Save: Reload the full page
+                window.location.reload();
+            }
+        } else {
+            // Handle Errors
+            errorDiv.className = 'alert alert-danger';
+            errorDiv.classList.remove('d-none');
+            errorDiv.innerHTML = data.message || '<ul>' + Object.entries(data.errors).map(([key, value]) =>
+                `<li><strong>${key}:</strong> ${value}</li>`
+            ).join('') + '</ul>';
+        }
+    })
+    .catch(error => console.error('Error:', error));
+});
+// Toggle Pin
+function togglePin(id, isPinned) {
+    fetch(`/day-itineraries/toggle-pin/${id}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            window.location.reload();
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+// View Itinerary
+function viewItinerary(id) {
+    fetch(`/day-itineraries/edit/${id}/`)
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('viewName').textContent = data.name;
+        document.getElementById('viewDestination').textContent = data.destination;
+        document.getElementById('viewDetails').textContent = data.details || 'No details available';
+
+        const pinStatus = document.getElementById('viewPinStatus');
+        if (data.is_pinned) {
+            pinStatus.innerHTML = '<div class="alert alert-warning"><i class="fas fa-thumbtack me-2"></i>This itinerary is pinned to the top</div>';
+        } else {
+            pinStatus.innerHTML = '';
+        }
+
+        const imageContainer = document.getElementById('viewImageContainer');
+        if (data.image_url) {
+            imageContainer.innerHTML = `<img src="${data.image_url}" class="img-fluid rounded" style="max-height: 300px;">`;
+        } else {
+            imageContainer.innerHTML = '<p class="text-muted">No image available</p>';
+        }
+
+        const modal = new bootstrap.Modal(document.getElementById('viewItineraryModal'));
+        modal.show();
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+// Edit Itinerary - Load Data
+function editItinerary(id) {
+    fetch(`/day-itineraries/edit/${id}/`)
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('editItineraryId').value = data.id;
+        document.getElementById('editName').value = data.name;
+        document.getElementById('editDestination').value = data.destination;
+        document.getElementById('editDetails').value = data.details;
+        document.getElementById('editIsPinned').checked = data.is_pinned;
+
+        // Set image source
+        if (data.image_source === 'gallery') {
+            document.getElementById('editImageSourceGallery').checked = true;
+            document.getElementById('editGallerySection').style.display = 'block';
+            document.getElementById('editUploadSection').style.display = 'none';
+
+            if (data.gallery_image_id) {
+                document.getElementById('editGalleryImageInput').value = data.gallery_image_id;
+                const card = document.querySelector(`#editGalleryGrid .gallery-card[data-image-id="${data.gallery_image_id}"]`);
+                if (card) {
+                    card.classList.add('border-primary', 'border-3');
+                }
+            }
+        } else {
+            document.getElementById('editImageSourceUpload').checked = true;
+            document.getElementById('editGallerySection').style.display = 'none';
+            document.getElementById('editUploadSection').style.display = 'block';
+        }
+
+        const preview = document.getElementById('editImagePreview');
+        if (data.image_url) {
+            preview.innerHTML = `
+                <div class="position-relative d-inline-block">
+                    <img src="${data.image_url}" class="img-thumbnail" style="max-width: 300px; max-height: 200px;">
+                    <small class="d-block text-muted mt-1">Current image</small>
+                </div>
+            `;
+        } else {
+            preview.innerHTML = '<small class="text-muted">No image uploaded</small>';
+        }
+
+        const modal = new bootstrap.Modal(document.getElementById('editItineraryModal'));
+        modal.show();
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+// Edit Itinerary - Submit
+document.getElementById('editItineraryForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const id = document.getElementById('editItineraryId').value;
+    const formData = new FormData(this);
+
+    fetch(`/day-itineraries/edit/${id}/`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            window.location.reload();
+        } else {
+            const errorDiv = document.getElementById('editFormErrors');
+            errorDiv.classList.remove('d-none');
+            errorDiv.innerHTML = data.message || '<ul>' + Object.entries(data.errors).map(([key, value]) =>
+                `<li><strong>${key}:</strong> ${value}</li>`
+            ).join('') + '</ul>';
+        }
+    })
+    .catch(error => console.error('Error:', error));
+});
+
+// Delete Itinerary
+let deleteItineraryId = null;
+
+function confirmDelete(id, name) {
+    deleteItineraryId = id;
+    document.getElementById('deleteItineraryName').textContent = name;
+    const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    modal.show();
+}
+
+document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
+    if (deleteItineraryId) {
+        fetch(`/day-itineraries/delete/${deleteItineraryId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.reload();
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+});
+
+// ✅ Add Gallery Image
+document.getElementById('addGalleryImageForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+
+    fetch("{% url 'add_gallery_image' %}", {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            window.location.reload();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => console.error('Error:', error));
+});
+
+// ✅ Delete Gallery Image
+function deleteGalleryImage(id, name) {
+    if (confirm(`Delete "${name}"? This cannot be undone!`)) {
+        fetch(`/gallery/images/delete/${id}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById(`gallery-img-${id}`).remove();
+                alert(data.message);
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+}
+</script>
+
+<style>
+.table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+}
+
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+.alert-container {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    z-index: 9999;
+    max-width: 400px;
+}
+
+.table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+.img-thumbnail {
+    border: 1px solid #dee2e6;
+    border-radius: 0.25rem;
+    padding: 0.25rem;
+}
+
+.table-warning {
+    background-color: #fff3cd !important;
+}
+
+.table-warning:hover {
+    background-color: #ffe69c !important;
+}
+
+.btn-outline-secondary:hover {
+    background-color: #ffc107;
+    border-color: #ffc107;
+    color: #000;
+}
+
+/* ✅ Gallery Card Styling */
+.gallery-card {
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.gallery-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.gallery-card.border-primary {
+    border-color: #0d6efd !important;
+    box-shadow: 0 0 10px rgba(13, 110, 253, 0.5);
+}
+</style>
+
+{% endblock %}

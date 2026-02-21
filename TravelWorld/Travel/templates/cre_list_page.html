@@ -1,0 +1,250 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<style>
+  :root{
+    --brand:#0B4F8A;       /* deep blue */
+    --accent:#22C55E;      /* green */
+    --indigo:#6366F1;      /* indigo */
+    --amber:#F59E0B;       /* amber */
+    --muted:#64748b;
+    --card-border:#e6ecf5;
+    --bg-hero:#F8FAFF;
+
+    --tbl-head-grad: linear-gradient(90deg,#e9f2ff, #f0fff4 60%, #fff7ed);
+    --thead-border:#d7e3f4;
+  }
+
+  /* HERO */
+  .cre-hero{
+    background:
+      radial-gradient(900px 420px at -10% -20%, rgba(34,197,94,.16), transparent 60%),
+      radial-gradient(900px 420px at 110% 0%, rgba(99,102,241,.14), transparent 55%),
+      linear-gradient(180deg, #fff, var(--bg-hero));
+    border:1px solid var(--card-border);
+    border-radius:16px;
+    box-shadow:0 12px 28px rgba(11,79,138,.08);
+  }
+  .hero-pill{
+    display:inline-flex;align-items:center;gap:.5rem;
+    padding:.35rem .7rem;border-radius:999px;
+    background:linear-gradient(90deg, rgba(99,102,241,.14), rgba(34,197,94,.14));
+    border:1px solid rgba(99,102,241,.25);
+    font-weight:600;color:#1f2937;
+  }
+
+  /* CARDS & BUTTONS */
+  .card{ border:1px solid var(--card-border); border-radius:14px; box-shadow:0 6px 24px rgba(2,6,23,.06); }
+  .btn-primary{ background:var(--brand); border-color:var(--brand); }
+  .btn-primary:hover{ filter:brightness(1.07); }
+  .btn-outline-primary{ color:var(--brand); border-color:var(--brand); }
+  .btn-outline-primary:hover{ background:rgba(11,79,138,.08); }
+
+  /* TABLE */
+  .table thead th{ position:sticky; top:0; z-index:5; background:#fff; }
+  .table thead th{
+    background: var(--tbl-head-grad) !important;
+    border-bottom: 1px solid var(--thead-border) !important;
+    color:#0f172a;
+  }
+  .table-hover tbody tr:hover{ background:#f1f7ff; }
+  .table-striped tbody tr:nth-of-type(odd){ background-color:#fbfdff; }
+
+  .badge-active   { background:#dcfce7; color:#065f46; border:1px solid #bbf7d0; }
+  .badge-inactive { background:#fee2e2; color:#991b1b; border:1px solid #fecaca; }
+
+  /* modal header ribbon */
+  .modal-content{ border-radius:14px; }
+  .modal-header{ border-bottom:0; position:relative; }
+  .modal-header::before{
+    content:""; position:absolute; inset:0 0 auto 0; height:4px;
+    background:linear-gradient(90deg, var(--brand), var(--accent), var(--indigo), var(--amber));
+    border-top-left-radius:14px; border-top-right-radius:14px;
+  }
+</style>
+
+<div class="container py-3 py-md-4">
+
+  <!-- HERO -->
+  <section class="cre-hero p-3 p-md-4 mb-3">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+      <div>
+        <div class="hero-pill mb-2">🤝 Team • Customer Relationship Executives</div>
+        <h1 class="h4 mb-1" style="color:var(--brand)">Manage CREs</h1>
+        <p class="text-muted mb-0">Add, edit, or deactivate CREs. Changes reflect immediately in assignments.</p>
+      </div>
+      <div class="d-flex gap-2">
+        <a href="{% url 'lead-list' %}" class="btn btn-outline-secondary">
+          <i class="bi bi-arrow-left me-1"></i> Back to Leads
+        </a>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#creModal"
+                onclick="openCreateForm()">
+          <i class="bi bi-plus-lg me-1"></i> Add CRE
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- TABLE -->
+  <div class="card">
+    <div class="table-responsive">
+      <table class="table table-hover table-striped align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Active</th>
+            <th style="width:140px;">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="cre-table-body">
+          {# keep your include path as you currently use it #}
+          {% include 'cre_table_rows.html' %}
+          {# or if your partial lives under leads/partials: {% include 'leads/partials/cre_table_rows.html' %} #}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="creModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog"><div class="modal-content">
+    <div class="modal-header">
+      <h5 class="modal-title" id="creModalTitle">CRE</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    </div>
+    <div class="modal-body">
+      <!-- Form posts to DRF via fetch() -->
+      <form id="creForm" onsubmit="return submitCreForm(event)">
+        {% csrf_token %}
+        <input type="hidden" id="creId">
+        <div class="mb-3">
+          <label class="form-label">Name</label>
+          <input id="creName" class="form-control" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Email</label>
+          <input id="creEmail" type="email" class="form-control" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Phone</label>
+          <input id="crePhone" class="form-control">
+        </div>
+        <div class="form-check mb-3">
+          <input id="creActive" type="checkbox" class="form-check-input" checked>
+          <label class="form-check-label">Active</label>
+        </div>
+        <div id="formErrors" class="text-danger small mb-2"></div>
+        <div class="d-flex justify-content-end gap-2">
+          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+          <button id="submitBtn" type="submit" class="btn btn-primary">Save</button>
+        </div>
+      </form>
+    </div>
+  </div></div>
+</div>
+
+<script>
+  const API_BASE = "/api/cres/";
+  let mode = "create"; // or "edit"
+
+  function openCreateForm(){
+    mode = "create";
+    document.getElementById('creModalTitle').innerText = "Add CRE";
+    document.getElementById('creId').value = "";
+    document.getElementById('creName').value = "";
+    document.getElementById('creEmail').value = "";
+    document.getElementById('crePhone').value = "";
+    document.getElementById('creActive').checked = true;
+    document.getElementById('formErrors').innerText = "";
+  }
+
+  function openEditForm(id, name, email, phone, is_active){
+    mode = "edit";
+    const modal = new bootstrap.Modal(document.getElementById('creModal'));
+    document.getElementById('creModalTitle').innerText = "Edit CRE";
+    document.getElementById('creId').value = id;
+    document.getElementById('creName').value = name;
+    document.getElementById('creEmail').value = email;
+    document.getElementById('crePhone').value = phone || "";
+    document.getElementById('creActive').checked = (is_active === "True" || is_active === true);
+    document.getElementById('formErrors').innerText = "";
+    modal.show();
+  }
+
+  async function submitCreForm(e){
+    e.preventDefault();
+    const id = document.getElementById('creId').value;
+    const payload = {
+      name: document.getElementById('creName').value.trim(),
+      email: document.getElementById('creEmail').value.trim(),
+      phone: document.getElementById('crePhone').value.trim(),
+      is_active: document.getElementById('creActive').checked,
+    };
+    const headers = { "Content-Type": "application/json", "X-Requested-With": "XMLHttpRequest" };
+
+    // If using SessionAuthentication/CSRF:
+    const csrftoken = getCookie('csrftoken');
+    if (csrftoken) headers["X-CSRFToken"] = csrftoken;
+
+    const url = mode === "create" ? API_BASE : API_BASE + id + "/";
+    const method = mode === "create" ? "POST" : "PATCH";
+
+    const resp = await fetch(url, { method, headers, body: JSON.stringify(payload) });
+    if (resp.ok){
+      await refreshTable();
+      bootstrap.Modal.getInstance(document.getElementById('creModal'))?.hide();
+    }else{
+      const data = await resp.json().catch(()=>({}));
+      document.getElementById('formErrors').innerText = formatErrors(data);
+    }
+    return false;
+  }
+
+  async function deleteCre(id){
+    const headers = { "X-Requested-With": "XMLHttpRequest" };
+    const csrftoken = getCookie('csrftoken'); if (csrftoken) headers["X-CSRFToken"] = csrftoken;
+    if (!confirm("Delete this CRE?")) return;
+    const resp = await fetch(API_BASE + id + "/", { method: "DELETE", headers });
+    if (resp.status === 204){ await refreshTable(); }
+  }
+
+  async function refreshTable(){
+    // HTML partial endpoint (not the API). Adjust to your URL name/namespace as needed.
+    const resp = await fetch("{% url 'cre_table_partial' %}", { headers: {"X-Requested-With":"XMLHttpRequest"} });
+    const html = await resp.text();
+    document.getElementById('cre-table-body').innerHTML = html;
+  }
+
+  function formatErrors(obj){
+    if (!obj) return "Error saving.";
+    const parts = [];
+    for (const k in obj){
+      const val = Array.isArray(obj[k]) ? obj[k].join(", ") : String(obj[k]);
+      parts.push(`${k}: ${val}`);
+    }
+    return parts.join(" | ");
+  }
+
+  // CSRF helper (if using session)
+  function getCookie(name){
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== ''){
+      const cookies = document.cookie.split(';');
+      for (let i=0; i<cookies.length; i++){
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+</script>
+
+{% endblock %}
+

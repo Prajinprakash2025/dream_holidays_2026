@@ -1,0 +1,583 @@
+{% extends "proposals_base.html" %}
+{% load static %}
+
+{% block title %}Version History - Query #{{ query.id }}{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* Version History Specific Styles */
+  .version-section {
+    margin-bottom: 40px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 25px;
+    padding-bottom: 12px;
+    border-bottom: 3px solid #e5e7eb;
+  }
+
+  .section-header i {
+    font-size: 1.5rem;
+  }
+
+  .section-header h5 {
+    margin: 0;
+    font-weight: 600;
+    color: #1f2937;
+  }
+
+  .section-count {
+    background: #f59e0b;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  /* Version Cards */
+  .version-card {
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  }
+
+  .version-card:hover {
+    border-color: #f59e0b;
+    box-shadow: 0 8px 24px rgba(245, 158, 11, 0.15);
+    transform: translateY(-3px);
+  }
+
+  .version-card.archived {
+    background: #f9fafb;
+    border-color: #d1d5db;
+  }
+
+  .version-card.archived:hover {
+    border-color: #9ca3af;
+  }
+
+  /* Card Header */
+  .version-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #f3f4f6;
+  }
+
+  .version-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .version-number {
+    background: #6b7280;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 1rem;
+    letter-spacing: 0.5px;
+  }
+
+  .version-id {
+    background: #f3f4f6;
+    color: #6b7280;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  /* Info Grid */
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+
+  .info-box {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 15px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .info-box i {
+    font-size: 1.3rem;
+    color: #9ca3af;
+    margin-top: 2px;
+  }
+
+  .info-content {
+    flex: 1;
+  }
+
+  .info-label {
+    font-size: 0.75rem;
+    color: #6b7280;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+  }
+
+  .info-value {
+    font-size: 0.95rem;
+    color: #111827;
+    font-weight: 600;
+  }
+
+  /* Booking Stats */
+  .booking-stats {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin: 20px 0;
+  }
+
+  .stat-badge {
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .stat-badge i {
+    font-size: 1rem;
+  }
+
+  .stat-badge.hotels { background: #dbeafe; color: #1e40af; }
+  .stat-badge.vehicles { background: #e5e7eb; color: #374151; }
+  .stat-badge.activities { background: #d1fae5; color: #065f46; }
+  .stat-badge.houseboats { background: #e0e7ff; color: #3730a3; }
+  .stat-badge.standalone { background: #fef3c7; color: #92400e; }
+
+  /* Pricing Section */
+  .pricing-box {
+    background: #f9fafb;
+    border: 2px solid #d1d5db;
+    border-radius: 12px;
+    padding: 20px;
+    margin-top: 20px;
+  }
+
+  .pricing-header {
+    font-weight: 700;
+    color: #6b7280;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .pricing-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .pricing-row:last-child {
+    border-bottom: none;
+  }
+
+  .pricing-label {
+    font-weight: 500;
+    color: #6b7280;
+  }
+
+  .pricing-amount {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #6b7280;
+  }
+
+  /* Action Buttons */
+  .action-buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 2px solid #f3f4f6;
+  }
+
+  .action-buttons .btn {
+    flex: 1;
+    min-width: 140px;
+    padding: 10px 16px;
+    font-weight: 600;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.3s;
+  }
+
+  .action-buttons .btn i {
+    font-size: 1rem;
+  }
+
+  /* Restore Button Styling */
+  .btn-outline-success {
+    border: 2px solid #28a745;
+    color: #28a745;
+    background: white;
+  }
+
+  .btn-outline-success:hover {
+    background: #28a745;
+    color: white;
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+  }
+
+  /* Delete Button Styling */
+  .btn-outline-danger {
+    border: 2px solid #dc3545;
+    color: #dc3545;
+    background: white;
+  }
+
+  .btn-outline-danger:hover {
+    background: #dc3545;
+    color: white;
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+  }
+
+  .btn-outline-danger:disabled,
+  .btn-outline-success:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  /* Info Banner */
+  .info-banner {
+    background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+    border: 2px solid #e0e7ff;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 30px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+
+  .info-banner i {
+    font-size: 2rem;
+    color: #667eea;
+  }
+
+  .info-banner-content h6 {
+    margin: 0 0 8px 0;
+    font-weight: 700;
+    color: #374151;
+  }
+
+  .info-banner-content p {
+    margin: 0;
+    color: #6b7280;
+    font-size: 0.9rem;
+  }
+
+  /* Empty State */
+  .empty-state {
+    text-align: center;
+    padding: 80px 20px;
+    color: #9ca3af;
+  }
+
+  .empty-state i {
+    font-size: 4rem;
+    margin-bottom: 20px;
+  }
+
+  .empty-state h5 {
+    color: #6b7280;
+    font-weight: 600;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .info-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .action-buttons {
+      flex-direction: column;
+    }
+
+    .action-buttons .btn {
+      width: 100%;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block proposals_content %}
+
+<!-- Info Banner -->
+<div class="info-banner">
+  <i class="fas fa-info-circle"></i>
+  <div class="info-banner-content">
+    <h6>Version History</h6>
+    <p>
+      This page shows archived versions. When you edit a finalized itinerary, the old version is archived here.
+      <a href="{% url 'query_proposals' query.id %}" class="text-primary fw-bold">← Back to Active Proposals</a>
+    </p>
+  </div>
+</div>
+
+<!-- Archived Versions Section -->
+{% if archived_versions %}
+<div class="version-section">
+  <div class="section-header">
+    <i class="fas fa-archive text-warning"></i>
+    <h5>Archived Versions</h5>
+    <span class="section-count">{{ archived_versions|length }}</span>
+  </div>
+
+  {% for version in archived_versions %}
+  <div class="version-card archived">
+    
+    <!-- Card Header -->
+    <div class="version-card-header">
+      <div class="version-title">
+        <span class="version-number">
+          <i class="fas fa-archive me-1"></i>
+          Version {{ version.itinerary.version_number }}
+        </span>
+        <span class="badge bg-warning text-dark">Archived</span>
+      </div>
+      <span class="version-id">ID: {{ version.itinerary.id }}</span>
+    </div>
+
+    <!-- Info Grid -->
+    <div class="info-grid">
+      <div class="info-box">
+        <i class="fas fa-calendar-alt"></i>
+        <div class="info-content">
+          <div class="info-label">Travel Dates</div>
+          <div class="info-value">
+            {{ version.itinerary.travel_from|date:"d M Y" }} - 
+            {{ version.itinerary.travel_to|date:"d M Y" }}
+          </div>
+        </div>
+      </div>
+
+      <div class="info-box">
+        <i class="fas fa-archive"></i>
+        <div class="info-content">
+          <div class="info-label">Archived On</div>
+          <div class="info-value">{{ version.itinerary.archived_at|date:"d M Y, h:i A" }}</div>
+        </div>
+      </div>
+
+      {% if version.itinerary.archived_reason %}
+      <div class="info-box">
+        <i class="fas fa-info-circle"></i>
+        <div class="info-content">
+          <div class="info-label">Reason</div>
+          <div class="info-value">{{ version.itinerary.archived_reason }}</div>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Booking Stats -->
+    <div class="booking-stats">
+      <span class="stat-badge hotels">
+        <i class="fas fa-hotel"></i>
+        {{ version.hotel_count }} Hotels
+      </span>
+      <span class="stat-badge vehicles">
+        <i class="fas fa-car"></i>
+        {{ version.vehicle_count }} Vehicles
+      </span>
+      <span class="stat-badge activities">
+        <i class="fas fa-hiking"></i>
+        {{ version.activity_count }} Activities
+      </span>
+      <span class="stat-badge houseboats">
+        <i class="fas fa-ship"></i>
+        {{ version.houseboat_count }} Houseboats
+      </span>
+      {% if version.standalone_count > 0 %}
+      <span class="stat-badge standalone">
+        <i class="fas fa-star"></i>
+        {{ version.standalone_count }} Standalone
+      </span>
+      {% endif %}
+    </div>
+
+    <!-- Pricing -->
+    {% if version.pricing_summary %}
+    <div class="pricing-box">
+      <div class="pricing-header">
+        <i class="fas fa-history"></i>
+        Archived Pricing
+      </div>
+      {% for price in version.pricing_summary %}
+      <div class="pricing-row">
+        <span class="pricing-label">{{ price.name }}</span>
+        <span class="pricing-amount">₹{{ price.price|floatformat:0 }}</span>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Actions for Archived Versions -->
+    <div class="action-buttons">
+      <a href="{% url 'itinerary_day_plan' version.itinerary.id %}" 
+         class="btn btn-outline-secondary">
+        <i class="fas fa-eye"></i>
+        View Details
+      </a>
+      
+      <!-- ✅ RESTORE BUTTON -->
+      {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.role == 'manager' %}
+      <button class="btn btn-outline-success" 
+              onclick="confirmRestore({{ version.itinerary.id }}, {{ version.itinerary.version_number }}, '{{ version.itinerary.name|default:'Itinerary'|escapejs }}')">
+        <i class="fas fa-undo"></i>
+        Restore
+      </button>
+      
+      <!-- ✅ DELETE BUTTON -->
+      <button class="btn btn-outline-danger" 
+              onclick="confirmDelete({{ version.itinerary.id }}, {{ version.itinerary.version_number }}, '{{ version.itinerary.name|default:'Itinerary'|escapejs }}')">
+        <i class="fas fa-trash-alt"></i>
+        Delete
+      </button>
+      {% endif %}
+    </div>
+
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<!-- Empty State -->
+<div class="empty-state">
+  <i class="fas fa-archive"></i>
+  <h5>No Archived Versions</h5>
+  <p class="text-muted">When you edit a finalized itinerary, the old version will be archived and appear here.</p>
+  <a href="{% url 'query_proposals' query.id %}" class="btn btn-primary mt-3">
+    <i class="fas fa-arrow-left me-2"></i>Back to Proposals
+  </a>
+</div>
+{% endif %}
+
+<script>
+// CSRF Token Helper
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+
+// ✅ RESTORE CONFIRMATION
+function confirmRestore(itineraryId, versionNumber, itineraryName) {
+  const confirmMsg = `♻️ RESTORE VERSION ${versionNumber}?\n\nItinerary: ${itineraryName}\n\nThis will:\n✓ Create a new active copy in Proposals\n✓ Keep this archived version in history\n✓ Preserve all data (bookings, pricing, etc.)\n\nProceed with restore?`;
+  
+  if (confirm(confirmMsg)) {
+    restoreVersion(itineraryId);
+  }
+}
+
+// ✅ RESTORE FUNCTION
+function restoreVersion(itineraryId) {
+  const restoreBtn = event.target.closest('button');
+  const originalHTML = restoreBtn.innerHTML;
+  
+  // Show loading state
+  restoreBtn.disabled = true;
+  restoreBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Restoring...';
+  
+  // Create form and submit
+  const form = document.createElement('form');
+  form.method = 'POST';
+  form.action = `/itinerary/${itineraryId}/restore/`;
+  
+  // Add CSRF token
+  const csrfToken = getCookie('csrftoken');
+  const csrfInput = document.createElement('input');
+  csrfInput.type = 'hidden';
+  csrfInput.name = 'csrfmiddlewaretoken';
+  csrfInput.value = csrfToken;
+  form.appendChild(csrfInput);
+  
+  // Submit form
+  document.body.appendChild(form);
+  form.submit();
+}
+
+// ✅ DELETE CONFIRMATION
+function confirmDelete(itineraryId, versionNumber, itineraryName) {
+  const confirmMsg = `⚠️ DELETE VERSION ${versionNumber}?\n\nItinerary: ${itineraryName}\n\nThis will PERMANENTLY delete:\n✗ All day plans\n✗ All hotel bookings\n✗ All vehicle bookings\n✗ All activity bookings\n✗ All houseboat bookings\n✗ All pricing options\n\n⚠️ THIS ACTION CANNOT BE UNDONE!\n\nAre you absolutely sure?`;
+  
+  if (confirm(confirmMsg)) {
+    // Second confirmation
+    if (confirm('⚠️ FINAL WARNING: This is irreversible. Delete permanently?')) {
+      deleteVersion(itineraryId);
+    }
+  }
+}
+
+// ✅ DELETE FUNCTION
+function deleteVersion(itineraryId) {
+  const deleteBtn = event.target.closest('button');
+  const originalHTML = deleteBtn.innerHTML;
+  
+  // Show loading state
+  deleteBtn.disabled = true;
+  deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
+  
+  // Create form and submit
+  const form = document.createElement('form');
+  form.method = 'POST';
+  form.action = `/itinerary/${itineraryId}/delete-version/`;
+  
+  // Add CSRF token
+  const csrfToken = getCookie('csrftoken');
+  const csrfInput = document.createElement('input');
+  csrfInput.type = 'hidden';
+  csrfInput.name = 'csrfmiddlewaretoken';
+  csrfInput.value = csrfToken;
+  form.appendChild(csrfInput);
+  
+  // Submit form
+  document.body.appendChild(form);
+  form.submit();
+}
+</script>
+
+{% endblock %}

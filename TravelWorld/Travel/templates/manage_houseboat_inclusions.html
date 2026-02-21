@@ -34,15 +34,7 @@
         </div>
     </div>
 
-    <!-- Messages -->
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        {% endfor %}
-    {% endif %}
+
 
     <!-- Existing Inclusions List -->
     <div class="card shadow-sm">
@@ -109,8 +101,8 @@
                                 </td>
                                 <td class="text-center">
                                     <!-- Edit Button -->
-                                    <button type="button" class="btn btn-sm btn-warning" 
-                                            data-bs-toggle="modal" 
+                                    <button type="button" class="btn btn-sm btn-warning"
+                                            data-bs-toggle="modal"
                                             data-bs-target="#editInclusionModal"
                                             data-inclusion-id="{{ inclusion.id }}"
                                             data-name="{{ inclusion.name }}"
@@ -124,11 +116,11 @@
                                             data-is-available="{{ inclusion.is_available|yesno:'true,false' }}">
                                         <i class="bi bi-pencil-square"></i>
                                     </button>
-                                    
+
                                     <!-- Delete Button -->
                                     <form action="{% url 'delete_houseboat_inclusion' inclusion.id %}" method="post" class="d-inline">
                                         {% csrf_token %}
-                                        <button type="submit" class="btn btn-sm btn-outline-danger" 
+                                        <button type="submit" class="btn btn-sm btn-outline-danger"
                                                 onclick="return confirm('Are you sure you want to delete {{ inclusion.name }}?');">
                                             <i class="bi bi-trash"></i>
                                         </button>
@@ -398,23 +390,23 @@ function updatePriceField() {
     const pricingType = document.getElementById('pricingTypeSelect').value;
     const priceInput = document.getElementById('adultPriceInput');
     const priceHint = document.getElementById('adultPriceHint');
-    
+
     const hints = {
         'free': '(No charge)',
         'per_person': '(₹ per person)',
         'per_boat': '(₹ per boat)',
         'per_booking': '(₹ one-time)'
     };
-    
+
     priceHint.textContent = hints[pricingType] || '(₹)';
-    
+
     if (pricingType === 'free') {
         priceInput.value = '0';
         priceInput.disabled = true;
     } else {
         priceInput.disabled = false;
     }
-    
+
     updateChildPriceExample();
 }
 
@@ -423,7 +415,7 @@ function updateChildPriceField() {
     const childPriceInput = document.getElementById('childPriceInput');
     const childPriceLabel = document.getElementById('childPriceLabel');
     const childPriceHint = document.getElementById('childPriceHint');
-    
+
     if (childPricingType === 'same') {
         childPriceInput.value = '0';
         childPriceInput.disabled = true;
@@ -445,7 +437,7 @@ function updateChildPriceField() {
         childPriceLabel.textContent = 'Value';
         childPriceHint.textContent = '(Free)';
     }
-    
+
     updateChildPriceExample();
 }
 
@@ -454,7 +446,7 @@ function updateChildPriceExample() {
     const childPricingType = document.getElementById('childPricingTypeSelect').value;
     const childPriceValue = parseFloat(document.getElementById('childPriceInput').value) || 0;
     const exampleElement = document.getElementById('childPriceExample');
-    
+
     if (childPricingType === 'same') {
         exampleElement.textContent = `✓ Child pays: ₹${adultPrice.toFixed(2)}`;
     } else if (childPricingType === 'percentage') {
@@ -473,17 +465,17 @@ function updateChildPriceExample() {
 document.addEventListener('DOMContentLoaded', function() {
     updatePriceField();
     updateChildPriceField();
-    
+
     document.getElementById('adultPriceInput').addEventListener('input', updateChildPriceExample);
     document.getElementById('childPriceInput').addEventListener('input', updateChildPriceExample);
-    
+
     const editModal = document.getElementById('editInclusionModal');
     const editForm = document.getElementById('editInclusionForm');
-    
+
     if (editModal && editForm) {
         editModal.addEventListener('show.bs.modal', function(event) {
             const button = event.relatedTarget;
-            
+
             const inclusionId = button.getAttribute('data-inclusion-id');
             const name = button.getAttribute('data-name');
             const pricingType = button.getAttribute('data-pricing-type');
@@ -494,10 +486,10 @@ document.addEventListener('DOMContentLoaded', function() {
             const maxAge = button.getAttribute('data-max-age');
             const details = button.getAttribute('data-details');
             const isAvailable = button.getAttribute('data-is-available') === 'true';
-            
+
             // ✅ FIXED: Use houseboat inclusion URL
             editForm.action = `/houseboat-inclusions/${inclusionId}/edit/`;
-            
+
             document.getElementById('edit_name').value = name;
             document.getElementById('edit_pricingTypeSelect').value = pricingType;
             document.getElementById('edit_adultPriceInput').value = adultPrice;
@@ -507,15 +499,15 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('edit_max_age').value = maxAge;
             document.getElementById('edit_details').value = details;
             document.getElementById('edit_isAvailable').checked = isAvailable;
-            
+
             editUpdatePriceField();
             editUpdateChildPriceField();
         });
     }
-    
+
     const editAdultInput = document.getElementById('edit_adultPriceInput');
     const editChildInput = document.getElementById('edit_childPriceInput');
-    
+
     if (editAdultInput) editAdultInput.addEventListener('input', editUpdateChildPriceExample);
     if (editChildInput) editChildInput.addEventListener('input', editUpdateChildPriceExample);
 });
@@ -524,17 +516,17 @@ function editUpdatePriceField() {
     const pricingType = document.getElementById('edit_pricingTypeSelect').value;
     const priceInput = document.getElementById('edit_adultPriceInput');
     const priceHint = document.getElementById('edit_adultPriceHint');
-    
+
     const hints = {
         'free': '(No charge)',
         'per_person': '(₹ per person)',
         'per_boat': '(₹ per boat)',
         'per_booking': '(₹ one-time)'
     };
-    
+
     priceHint.textContent = hints[pricingType] || '(₹)';
     priceInput.disabled = (pricingType === 'free');
-    
+
     editUpdateChildPriceExample();
 }
 
@@ -543,7 +535,7 @@ function editUpdateChildPriceField() {
     const childPriceInput = document.getElementById('edit_childPriceInput');
     const childPriceLabel = document.getElementById('edit_childPriceLabel');
     const childPriceHint = document.getElementById('edit_childPriceHint');
-    
+
     if (childPricingType === 'same') {
         childPriceInput.disabled = true;
         childPriceLabel.textContent = 'Value';
@@ -561,7 +553,7 @@ function editUpdateChildPriceField() {
         childPriceLabel.textContent = 'Value';
         childPriceHint.textContent = '(Free)';
     }
-    
+
     editUpdateChildPriceExample();
 }
 
@@ -570,7 +562,7 @@ function editUpdateChildPriceExample() {
     const childPricingType = document.getElementById('edit_childPricingTypeSelect').value;
     const childPriceValue = parseFloat(document.getElementById('edit_childPriceInput').value) || 0;
     const exampleElement = document.getElementById('edit_childPriceExample');
-    
+
     if (childPricingType === 'same') {
         exampleElement.textContent = `✓ Child pays: ₹${adultPrice.toFixed(2)}`;
     } else if (childPricingType === 'percentage') {

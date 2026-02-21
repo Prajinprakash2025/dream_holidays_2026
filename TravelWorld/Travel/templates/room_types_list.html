@@ -4,6 +4,7 @@
 {% block content %}
 
 <style>
+  /* ... your existing styles ... */
   .roomtypes-header {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     padding: 2rem;
@@ -12,19 +13,16 @@
     color: white;
     box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
   }
-
   .modern-table-container {
     background: white;
     border-radius: 12px;
     overflow: hidden;
     box-shadow: 0 4px 15px rgba(0,0,0,0.08);
   }
-
   .modern-table thead {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
   }
-
   .modern-table thead th {
     border: none;
     padding: 1rem;
@@ -33,29 +31,24 @@
     font-size: 13px;
     letter-spacing: 0.5px;
   }
-
   .modern-table tbody tr {
     transition: all 0.3s ease;
     border-bottom: 1px solid #f0f0f0;
   }
-
   .modern-table tbody tr:hover {
     background: #f8f9ff;
     transform: scale(1.01);
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
   }
-
   .modern-table tbody td {
     padding: 1rem;
     vertical-align: middle;
   }
-
   .room-info {
     display: flex;
     align-items: center;
     gap: 1rem;
   }
-
   .room-icon {
     width: 50px;
     height: 50px;
@@ -67,13 +60,11 @@
     color: white;
     font-size: 20px;
   }
-
   .action-buttons {
     display: flex;
     gap: 0.5rem;
     justify-content: center;
   }
-
   .btn-action {
     padding: 0.5rem 1rem;
     border-radius: 8px;
@@ -82,17 +73,14 @@
     font-size: 13px;
     font-weight: 500;
   }
-
   .btn-action:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0,0,0,0.2);
   }
-
   .modal-header-gradient {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
   }
-
   .search-box {
     background: white;
     padding: 1rem 1.5rem;
@@ -100,27 +88,15 @@
     box-shadow: 0 4px 15px rgba(0,0,0,0.08);
     margin-bottom: 1.5rem;
   }
-
   .form-switch .form-check-input {
     width: 48px;
     height: 24px;
     cursor: pointer;
   }
-  .suppliers-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    padding: 2rem;
-    border-radius: 15px;
-    margin-bottom: 2rem;
-    color: white;
-    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
-  }
-
-  /* Add this new style for back button */
   .back-button-container {
     padding: 1.5rem 2rem 0 2rem;
     margin-bottom: -1rem;
   }
-
   .back-btn-modern {
     padding: 0.6rem 1.2rem;
     font-size: 14px;
@@ -135,138 +111,138 @@
     align-items: center;
     gap: 0.5rem;
   }
-
   .back-btn-modern:hover {
     background: #667eea;
     color: white;
     transform: translateX(-5px);
     box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
   }
-
-  .back-btn-modern i {
-    font-size: 16px;
-  }
-
-  .search-filter-bar {
-    background: white;
-    padding: 1.5rem;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-    margin-bottom: 1.5rem;
-  }
-
-  .modern-table {
-    background: white;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-  }
-
-  .modern-table thead {
+  .serial-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 35px;
+    height: 35px;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
-  }
-
-  .modern-table thead th {
-    border: none;
-    padding: 1rem;
+    border-radius: 8px;
     font-weight: 600;
-    text-transform: uppercase;
-    font-size: 13px;
-    letter-spacing: 0.5px;
-  }
-
-  .modern-table tbody tr {
+    font-size: 14px;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
     transition: all 0.3s ease;
-    border-bottom: 1px solid #f0f0f0;
   }
-
-  .modern-table tbody tr:hover {
-    background: #f8f9ff;
-    transform: scale(1.01);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+  .modern-table tbody tr:hover .serial-number {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
   }
-
-  .modern-table tbody td {
-    padding: 1rem;
-    vertical-align: middle;
-  }
-
-  .action-btn-group {
-    display: flex;
-    gap: 0.5rem;
-  }
-
-  .action-btn {
-    padding: 0.4rem 0.8rem;
-    border-radius: 8px;
-    border: none;
-    transition: all 0.3s ease;
-    font-size: 13px;
-    font-weight: 500;
-  }
-
-  .action-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-  }
-
-  .badge-modern {
-    padding: 0.4rem 0.8rem;
-    border-radius: 8px;
-    font-weight: 500;
-    font-size: 12px;
-  }
-
-  .stats-card {
+  .pagination-container {
     background: white;
     padding: 1.5rem;
     border-radius: 12px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    margin-top: 1.5rem;
     text-align: center;
+  }
+  .pagination-modern {
+    display: inline-flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    padding: 0;
+    list-style: none;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .page-item-modern {
+    display: inline-block;
+  }
+  .page-link-modern {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    background: white;
+    border: 2px solid #e0e0e0;
+    color: #333;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 14px;
     transition: all 0.3s ease;
+    cursor: pointer;
   }
-
-  .stats-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+  .page-link-modern:hover {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-color: #667eea;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
   }
-
-  .stats-card .icon {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
+  .page-item-modern.active .page-link-modern {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-color: #667eea;
+    color: white;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    font-weight: 600;
+  }
+  .page-item-modern.disabled .page-link-modern {
+    background: #f5f5f5;
+    border-color: #e0e0e0;
+    color: #999;
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+  .page-item-modern.disabled .page-link-modern:hover {
+    transform: none;
+    box-shadow: none;
+    background: #f5f5f5;
+    color: #999;
+  }
+  .page-info {
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 0 auto 1rem;
-    font-size: 24px;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
   }
-
-  .modal-header-gradient {
+  .page-info .badge {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-weight: 500;
     color: white;
   }
-
-  .form-section-title {
-    color: #667eea;
+  .pagination-ellipsis {
+    padding: 0.6rem 1rem;
+    color: #999;
     font-weight: 600;
-    border-bottom: 2px solid #667eea;
-    padding-bottom: 0.5rem;
-    margin-bottom: 1rem;
+  }
+  @media (max-width: 768px) {
+    .pagination-modern {
+      font-size: 12px;
+    }
+    .page-link-modern {
+      padding: 0.5rem 0.75rem;
+      font-size: 12px;
+    }
+    .page-link-modern span {
+      display: none;
+    }
+    .page-info {
+      font-size: 13px;
+    }
   }
 </style>
 
-<!-- Back Button with Modern Styling -->
 <div class="back-button-container">
     <a href="{% url 'admin_settings' %}" class="back-btn-modern">
         <i class="fas fa-arrow-left"></i>
         <span>Back to Admin Settings</span>
     </a>
 </div>
+
 <div class="container-fluid" style="margin-top: 90px; padding: 0 2rem;">
   
-  <!-- Header -->
   <div class="roomtypes-header">
     <div class="d-flex justify-content-between align-items-center">
       <div>
@@ -276,7 +252,6 @@
         <p class="mb-0" style="opacity: 0.9;">Manage hotel room types and categories</p>
       </div>
       
-      <!-- ✅ PERMISSION CHECK: Add Room Type Button -->
       {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.permissions.can_add_room_type %}
       <button type="button" class="btn btn-light btn-lg shadow" data-bs-toggle="modal" data-bs-target="#roomTypeModal" onclick="resetForm()">
         <i class="fas fa-plus-circle me-2"></i>Add Room Type
@@ -285,7 +260,6 @@
     </div>
   </div>
 
-  <!-- Search Box -->
   <div class="search-box">
     <div class="input-group">
       <span class="input-group-text bg-transparent border-0">
@@ -298,12 +272,12 @@
     </div>
   </div>
 
-  <!-- Table -->
-  <div class="modern-table-container">
+  <div class="modern-table-container" id="roomTypeListContainer" >
     <div class="table-responsive">
-      <table class="table modern-table mb-0" id="roomTypesTable">
+      <table class="table modern-table mb-0" id="roomTypesTable"> 
         <thead>
           <tr>
+            <th style="width: 60px;"><i class="fas fa-hashtag me-2"></i>#</th>
             <th><i class="fas fa-bed me-2"></i>Room Type</th>
             <th class="text-center"><i class="fas fa-toggle-on me-2"></i>Status</th>
             <th class="text-center"><i class="fas fa-cogs me-2"></i>Actions</th>
@@ -312,6 +286,10 @@
         <tbody>
           {% for room_type in room_types %}
           <tr>
+            <td>
+              <span class="serial-number">{{ forloop.counter|add:page_obj.start_index|add:"-1" }}</span>
+            </td>
+            
             <td>
               <div class="room-info">
                 <div class="room-icon">
@@ -323,6 +301,7 @@
                 </div>
               </div>
             </td>
+            
             <td class="text-center">
               {% if room_type.is_active %}
                 <span class="badge bg-success" style="padding: 0.5rem 1rem;">
@@ -334,10 +313,10 @@
                 </span>
               {% endif %}
             </td>
+            
             <td>
               <div class="action-buttons">
                 
-                <!-- ✅ PERMISSION CHECK: Edit Button -->
                 {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.permissions.can_edit_room_type %}
                 <button type="button" class="btn btn-warning btn-action" onclick="editRoomType(this)"
                         data-bs-toggle="modal"
@@ -349,7 +328,6 @@
                 </button>
                 {% endif %}
                 
-                <!-- ✅ PERMISSION CHECK: Delete Button -->
                 {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.permissions.can_delete_room_type %}
                 <button type="button" class="btn btn-danger btn-action" 
                         data-bs-toggle="modal" 
@@ -365,7 +343,7 @@
           </tr>
           {% empty %}
           <tr>
-            <td colspan="3" class="text-center py-5">
+            <td colspan="4" class="text-center py-5">
               <i class="fas fa-bed fa-3x text-muted mb-3"></i>
               <h5 class="text-muted">No room types found</h5>
               <p class="text-muted">Start by adding your first room type</p>
@@ -376,9 +354,98 @@
       </table>
     </div>
   </div>
+
+  {% if page_obj.has_other_pages %}
+  <div class="pagination-container" id="paginationContainer">
+    <nav aria-label="Page navigation">
+      <ul class="pagination-modern">
+        
+        {% if page_obj.has_previous %}
+        <li class="page-item-modern">
+          <a href="?page=1" class="page-link-modern" title="First Page">
+            <i class="fas fa-angle-double-left"></i>
+          </a>
+        </li>
+        {% endif %}
+        
+        {% if page_obj.has_previous %}
+        <li class="page-item-modern">
+          <a href="?page={{ page_obj.previous_page_number }}" class="page-link-modern" title="Previous">
+            <i class="fas fa-angle-left"></i>
+            <span>Previous</span>
+          </a>
+        </li>
+        {% else %}
+        <li class="page-item-modern disabled">
+          <span class="page-link-modern">
+            <i class="fas fa-angle-left"></i>
+            <span>Previous</span>
+          </span>
+        </li>
+        {% endif %}
+        
+        {% for num in page_obj.paginator.page_range %}
+          {% if page_obj.number == num %}
+            <li class="page-item-modern active">
+              <span class="page-link-modern">{{ num }}</span>
+            </li>
+          {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+            <li class="page-item-modern">
+              <a href="?page={{ num }}" class="page-link-modern">{{ num }}</a>
+            </li>
+          {% elif num == 1 or num == page_obj.paginator.num_pages %}
+            <li class="page-item-modern">
+              <a href="?page={{ num }}" class="page-link-modern">{{ num }}</a>
+            </li>
+          {% elif num == page_obj.number|add:'-3' or num == page_obj.number|add:'3' %}
+            <li class="page-item-modern disabled">
+              <span class="pagination-ellipsis">...</span>
+            </li>
+          {% endif %}
+        {% endfor %}
+        
+        {% if page_obj.has_next %}
+        <li class="page-item-modern">
+          <a href="?page={{ page_obj.next_page_number }}" class="page-link-modern" title="Next">
+            <span>Next</span>
+            <i class="fas fa-angle-right"></i>
+          </a>
+        </li>
+        {% else %}
+        <li class="page-item-modern disabled">
+          <span class="page-link-modern">
+            <span>Next</span>
+            <i class="fas fa-angle-right"></i>
+          </span>
+        </li>
+        {% endif %}
+        
+        {% if page_obj.has_next %}
+        <li class="page-item-modern">
+          <a href="?page={{ page_obj.paginator.num_pages }}" class="page-link-modern" title="Last Page">
+            <i class="fas fa-angle-double-right"></i>
+          </a>
+        </li>
+        {% endif %}
+        
+      </ul>
+      
+      <div class="page-info">
+        <span class="badge">
+          <i class="fas fa-file-alt me-1"></i>
+          Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+        </span>
+        <span class="text-muted">
+          <i class="fas fa-bed me-1"></i>
+          {{ page_obj.paginator.count }} total room type{{ page_obj.paginator.count|pluralize }}
+        </span>
+      </div>
+    </nav>
+  </div>
+  {% endif %}
+
 </div>
 
-<!-- Add/Edit Modal -->
 <div class="modal fade" id="roomTypeModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
@@ -412,12 +479,19 @@
             </div>
           </div>
 
+          <div id="formErrors" class="alert d-none mt-3"></div>
+
           <div class="modal-footer border-0 pt-3">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-              <i class="fas fa-times me-1"></i>Close
+                <i class="fas fa-times me-1"></i>Close
             </button>
-            <button type="submit" class="btn btn-primary">
-              <i class="fas fa-save me-1"></i>Save Room Type
+
+            <button type="submit" class="btn btn-info text-white" value="save_add_another">
+                <i class="fas fa-plus-square me-1"></i>Save & Add Another
+            </button>
+
+            <button type="submit" class="btn btn-primary" value="save">
+                <i class="fas fa-save me-1"></i>Save Room Type
             </button>
           </div>
         </form>
@@ -426,7 +500,6 @@
   </div>
 </div>
 
-<!-- Delete Modal -->
 <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
@@ -458,60 +531,164 @@
 </div>
 
 <script>
-// Reset Form
+// ✅ Helper: Refresh the list in background (Added cache buster)
+function refreshRoomTypeList() {
+    // Add a timestamp to the URL to prevent browser caching
+    const url = window.location.href + (window.location.href.includes('?') ? '&' : '?') + 't=' + new Date().getTime();
+
+    fetch(url)
+    .then(response => response.text())
+    .then(html => {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        // Update the table container
+        const newContent = doc.getElementById('roomTypeListContainer').innerHTML;
+        document.getElementById('roomTypeListContainer').innerHTML = newContent;
+    })
+    .catch(err => console.error('Error refreshing list:', err));
+}
+
+// ✅ Form Submission Logic (Updated Error Handling)
+document.getElementById('roomTypeForm').addEventListener('submit', function(e) {
+    e.preventDefault(); // Stop standard reload
+
+    const form = this;
+    const formData = new FormData(form);
+    const actionBtn = e.submitter ? e.submitter.value : 'save'; 
+    const errorDiv = document.getElementById('formErrors');
+    
+    const url = form.action; 
+
+    fetch(url, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // ... (Success logic remains exactly the same) ...
+            if (actionBtn === 'save_add_another') {
+                if (errorDiv) {
+                    errorDiv.className = 'alert alert-success mt-3';
+                    errorDiv.innerHTML = '<i class="fas fa-check-circle me-2"></i>Saved successfully! Add the next one.';
+                    errorDiv.classList.remove('d-none');
+                }
+                refreshRoomTypeList();
+                form.reset();
+                document.getElementById('is_active').checked = true;
+                form.action = "{% url 'add_room_type' %}";
+                document.getElementById('roomTypeModalLabel').innerHTML = '<i class="fas fa-bed me-2"></i>Add New Room Type';
+                setTimeout(() => { if (errorDiv) errorDiv.classList.add('d-none'); }, 3000);
+            } else {
+                window.location.reload();
+            }
+        } else {
+            // 🚨 THIS IS THE FIX 🚨
+            if (errorDiv) {
+                errorDiv.className = 'alert alert-danger mt-3';
+                
+                // 1. Start with the main message
+                let errorHtml = `<i class="fas fa-exclamation-circle me-2"></i>${data.message || 'Error processing request'}`;
+
+                // 2. Loop through specific errors (like "Name already exists")
+                if (data.errors) {
+                    errorHtml += '<ul class="mb-0 mt-2 small text-start">'; // Create a list
+                    for (const [field, messages] of Object.entries(data.errors)) {
+                        messages.forEach(msg => {
+                            // Display the error message
+                            errorHtml += `<li>${msg}</li>`;
+                        });
+                    }
+                    errorHtml += '</ul>';
+                }
+
+                errorDiv.innerHTML = errorHtml;
+                errorDiv.classList.remove('d-none');
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        if (errorDiv) {
+            errorDiv.className = 'alert alert-danger mt-3';
+            errorDiv.innerHTML = '<i class="fas fa-times-circle me-2"></i>An unexpected error occurred.';
+            errorDiv.classList.remove('d-none');
+        }
+    });
+});
+
+// ✅ Reset Form
 function resetForm() {
-  const form = document.getElementById('roomTypeForm');
-  form.reset();
-  form.action = "{% url 'add_room_type' %}";
-  document.getElementById('roomTypeModalLabel').innerHTML = '<i class="fas fa-bed me-2"></i>Add New Room Type';
-  document.getElementById('is_active').checked = true;
+    const form = document.getElementById('roomTypeForm');
+    form.reset();
+    form.action = "{% url 'add_room_type' %}";
+    document.getElementById('roomTypeModalLabel').innerHTML = '<i class="fas fa-bed me-2"></i>Add New Room Type';
+    document.getElementById('is_active').checked = true;
+    
+    // Hide errors
+    const errorDiv = document.getElementById('formErrors');
+    if(errorDiv) errorDiv.classList.add('d-none');
 }
 
-// Edit Room Type
+// ✅ Edit Room Type
 function editRoomType(button) {
-  const form = document.getElementById('roomTypeForm');
-  const roomId = button.getAttribute('data-id');
-  
-  // Set form action
-  form.action = "{% url 'edit_room_type' 0 %}".replace('/0/', `/${roomId}/`);
-  
-  // Update modal title
-  document.getElementById('roomTypeModalLabel').innerHTML = '<i class="fas fa-edit me-2"></i>Edit Room Type';
-  
-  // Populate fields
-  document.getElementById('name').value = button.getAttribute('data-name');
-  document.getElementById('is_active').checked = button.getAttribute('data-status') === 'true';
+    const form = document.getElementById('roomTypeForm');
+    const roomId = button.getAttribute('data-id');
+    
+    // Hide errors
+    const errorDiv = document.getElementById('formErrors');
+    if(errorDiv) errorDiv.classList.add('d-none');
+    
+    form.action = "{% url 'edit_room_type' 0 %}".replace('/0/', `/${roomId}/`);
+    document.getElementById('roomTypeModalLabel').innerHTML = '<i class="fas fa-edit me-2"></i>Edit Room Type';
+    
+    document.getElementById('name').value = button.getAttribute('data-name');
+    document.getElementById('is_active').checked = button.getAttribute('data-status') === 'true';
 }
 
-// Delete Modal
+// Delete Modal (Existing)
 const deleteModal = document.getElementById('deleteModal');
 if (deleteModal) {
-  deleteModal.addEventListener('show.bs.modal', function (event) {
-    const button = event.relatedTarget;
-    const deleteUrl = button.getAttribute('data-delete-url');
-    const itemName = button.getAttribute('data-delete-name');
-    
-    document.getElementById('deleteModalForm').action = deleteUrl;
-    document.getElementById('deleteModalItemName').textContent = itemName;
-  });
+    deleteModal.addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget;
+        const deleteUrl = button.getAttribute('data-delete-url');
+        const itemName = button.getAttribute('data-delete-name');
+        
+        document.getElementById('deleteModalForm').action = deleteUrl;
+        document.getElementById('deleteModalItemName').textContent = itemName;
+    });
 }
 
-// Search/Filter
+// Search Filter (Existing)
 function filterRoomTypes() {
-  const searchValue = document.getElementById('searchInput').value.toLowerCase();
-  const table = document.getElementById('roomTypesTable');
-  const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
-
-  for (let i = 0; i < rows.length; i++) {
-    const row = rows[i];
-    const text = row.textContent.toLowerCase();
-    row.style.display = text.includes(searchValue) ? '' : 'none';
-  }
+    const searchValue = document.getElementById('searchInput').value.toLowerCase();
+    const table = document.getElementById('roomTypesTable');
+    const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+    let visibleCount = 0;
+    
+    for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
+        const text = row.textContent.toLowerCase();
+        if (text.includes(searchValue)) {
+            row.style.display = '';
+            visibleCount++;
+        } else {
+            row.style.display = 'none';
+        }
+    }
+    
+    const paginationContainer = document.getElementById('paginationContainer');
+    if (paginationContainer) {
+        paginationContainer.style.display = searchValue ? 'none' : 'block';
+    }
 }
 
 function resetSearch() {
-  document.getElementById('searchInput').value = '';
-  filterRoomTypes();
+    document.getElementById('searchInput').value = '';
+    filterRoomTypes();
 }
 </script>
 

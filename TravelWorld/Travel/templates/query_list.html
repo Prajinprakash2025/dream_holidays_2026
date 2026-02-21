@@ -1,203 +1,421 @@
   {% extends "base.html" %} {% load static %} {% block content %}
 
-  <style>
+<style>
+  /* Remove default container padding */
+  .container-fluid {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+  }
 
-    /* Make modal body scrollable with fixed height */
-    #queryModal .modal-body {
-      max-height: 65vh;
-      overflow-y: auto;
-    }
-    
-    /* Compact card styling */
-    #queryModal .card {
-      margin-bottom: 1rem !important;
-    }
-    
-    #queryModal .card-body {
-      padding: 0.75rem !important;
-    }
-    
-    #queryModal .card-header {
-      padding: 0.5rem 0.75rem !important;
-    }
-    
-    /* Smaller form fields */
-    #queryModal .form-control,
-    #queryModal .form-select {
-      padding: 0.375rem 0.75rem;
-      font-size: 0.9rem;
-    }
-    
-    #queryModal .form-label {
-      margin-bottom: 0.25rem;
-      font-size: 0.85rem;
-    }
-    
-    /* Ensure footer is always visible */
-    #queryModal .modal-footer {
-      position: sticky;
-      bottom: 0;
-      background: white;
-      z-index: 10;
-      border-top: 2px solid #dee2e6;
-    }
-    /* Fix dropdown option colors */
-    .form-select option {
-      background-color: white;
-      color: #333;
-      padding: 8px;
-    }
+  /* Stats Cards - COMPACT RECTANGULAR Design */
+  .stats-wrapper {
+    background: #f8f9fa;
+    padding: 10px 30px;
+    margin-bottom: 0;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  }
 
-    .form-select option:hover {
-      background-color: #f0f0f0;
-    }
+  .stats-container {
+    display: flex;
+    gap: 10px;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    max-width: 100%;
+  }
 
-    /* Fix for selected option */
-    .form-select option:checked {
-      background-color: #0d6efd;
-      color: white;
-    }
+  .stat-card {
+    flex: 1;
+    min-width: 100px;
+    padding: 12px 15px;
+    border-radius: 6px;
+    color: white;
+    text-align: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+  }
 
-    /* Better dropdown styling */
-    .form-select {
-      cursor: pointer;
-    }
+  .stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+  }
 
-    .form-select:focus {
-      border-color: #86b7fe;
-      box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
-    }
+  .stat-card .stat-number {
+    font-size: 28px;
+    font-weight: 700;
+    display: block;
+    margin-bottom: 2px;
+    line-height: 1;
+  }
 
-    .record-card {
-      background: #fff;
-      border-radius: 6px;
-      padding: 12px 14px;
-      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
-      margin-bottom: 12px;
-      transition: 0.3s;
-      font-size: 11px;
-      line-height: 1.2;
-      position: relative;
-    }
+  .stat-card .stat-label {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: block;
+    line-height: 1.2;
+  }
 
-    .record-card:hover {
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-    }
+  /* Card Colors */
+  .stat-card.total { background: #3c5469; }
+  .stat-card.new { background: #8e44ad; }
+  .stat-card.active { background: #16a085; }
+  .stat-card.no-connect { background: #3c5469; }
+  .stat-card.hot-lead { background: #e74c3c; }
+  .stat-card.followup { background: #f39c12; }
+  .stat-card.proposal { background: #c0392b; }
+  .stat-card.confirmed { background: #27ae60; }
+  .stat-card.cancelled { background: #95a5a6; }
+  .stat-card.invalid { background: #e74c3c; }
 
-    .record-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 13px;
-      font-weight: 600;
-      color: #2b4c7e;
-      margin-bottom: 6px;
-    }
+  /* Main Content Wrapper */
+  .queries-content-wrapper {
+    padding: 20px 30px;
+    background: #ecf0f1;
+    min-height: calc(100vh - 180px);
+  }
 
-    .record-actions {
-      display: flex;
-      gap: 8px;
-    }
+  /* Page Header */
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    background: white;
+    padding: 12px 20px;
+    border-radius: 6px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  }
 
-    .record-actions a {
-      font-size: 12px;
-      color: #444;
-      cursor: pointer;
-    }
+  .page-header h5 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #2c3e50;
+  }
 
-    .record-actions a:hover {
-      color: #0d6efd;
-    }
+  .page-header .badge {
+    font-size: 13px;
+    padding: 4px 10px;
+    margin-left: 8px;
+  }
 
-    .record-actions i {
-      font-size: 13px;
-    }
+  /* COMPACT Query Cards */
+  .record-card {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 12px 18px;
+    margin-bottom: 12px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+  }
 
-    .record-info-row {
-      display: flex;
+  .record-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    border-color: #b0b0b0;
+    transform: translateY(-1px);
+  }
+
+  .my-query {
+    border-left: 4px solid #28a745;
+    background: #f8fff9;
+  }
+
+  /* Header Section */
+  .record-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e9ecef;
+    margin-bottom: 8px;
+  }
+
+  .record-header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+  }
+
+  .query-id {
+    font-size: 14px;
+    font-weight: 700;
+    color: #0066cc;
+    text-decoration: none;
+    padding: 3px 8px;
+    background: #e3f2fd;
+    border-radius: 4px;
+  }
+
+  .query-id:hover {
+    background: #bbdefb;
+    text-decoration: none;
+  }
+
+  .client-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #2c3e50;
+  }
+
+  .status-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    border-radius: 15px;
+    background: #8e44ad;
+    color: white;
+  }
+
+  .creator-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    background: #e3f2fd;
+    color: #1976d2;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 600;
+  }
+
+  /* Action Buttons */
+  .record-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .record-actions a {
+    font-size: 15px;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .record-actions a:hover {
+    color: #0d6efd;
+    transform: scale(1.1);
+  }
+
+  /* BETTER ALIGNED Info Grid - Spread across full width */
+  .record-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px 15px;
+    margin-bottom: 8px;
+  }
+
+  .record-info-item {
+    display: flex;
+    flex-direction: column;
+    font-size: 11px;
+    line-height: 1.3;
+  }
+
+  .record-label {
+    font-weight: 600;
+    color: #666;
+    margin-bottom: 2px;
+    font-size: 16px;
+  }
+
+  .record-value {
+    color: #333;
+    font-weight: 600;
+    font-size: 16px;
+  }
+
+  /* Sector Badge */
+  .record-value.sector-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    background: #495057;
+    color: white;
+    border-radius: 3px;
+    font-size: 16px;
+    font-weight: 600;
+    align-self: flex-start;
+  }
+
+  /* Remarks Section */
+  .record-remark {
+    background: #f8f9fa;
+    padding: 6px 10px;
+    border-radius: 4px;
+    margin-top: 6px;
+    font-size: 11px;
+    color: #495057;
+    border-left: 3px solid #007bff;
+    display: inline-block;
+  }
+
+  .record-remark .record-label {
+    color: #6c757d;
+    font-weight: 700;
+  }
+
+  /* Footer */
+  .record-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 8px;
+    padding-top: 6px;
+    border-top: 1px solid #f0f0f0;
+    font-size: 10px;
+    color: #999;
+  }
+
+  /* View Proposal Button */
+  .view-proposal-btn {
+    display: inline-block;
+    padding: 5px 12px;
+    background: #0d6efd;
+    color: white;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s;
+  }
+
+  .view-proposal-btn:hover {
+    background: #0b5ed7;
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(13, 110, 253, 0.3);
+  }
+
+  /* Modal Styles */
+  #queryModal .modal-body {
+    max-height: 65vh;
+    overflow-y: auto;
+  }
+
+  #queryModal .card {
+    margin-bottom: 1rem !important;
+  }
+
+  #queryModal .card-body {
+    padding: 0.75rem !important;
+  }
+
+  #queryModal .card-header {
+    padding: 0.5rem 0.75rem !important;
+    background: #f8f9fa !important;
+    font-weight: 600;
+  }
+
+  #queryModal .form-control,
+  #queryModal .form-select {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.9rem;
+  }
+
+  #queryModal .form-label {
+    margin-bottom: 0.25rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+  }
+
+  #queryModal .modal-footer {
+    position: sticky;
+    bottom: 0;
+    background: white;
+    z-index: 10;
+    border-top: 2px solid #dee2e6;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 1200px) {
+    .stats-container {
       flex-wrap: wrap;
-      gap: 6px 14px;
-      margin-bottom: 2px;
     }
 
-    .record-info {
-      flex: 1 1 170px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+    .stat-card {
+      min-width: 120px;
     }
-
-    .record-label {
-      font-weight: 500;
-      color: #444;
-      margin-right: 3px;
-    }
-
-    .record-remark {
-      margin-top: 4px;
-    }
-
-    .record-meta small {
-      color: #999;
-      font-size: 10px;
-    }
-
-      .creator-badge {
-      display: inline-block;
-      padding: 2px 8px;
-      background: #e3f2fd;
-      color: #1976d2;
-      border-radius: 4px;
-      font-size: 10px;
-      font-weight: 500;
-    }
-    
-    .my-query {
-      border-left: 3px solid #28a745;
-    }
-  </style>
+  }
+</style>
 
 
 
 
-  <div class="container mt-9">
+<!-- STATS CARDS SECTION -->
+<div class="stats-wrapper">
+  <div class="stats-container">
+    <div class="stat-card total">
+      <span class="stat-number">{{ total_queries }}</span>
+      <span class="stat-label">TOTAL</span>
+    </div>
+    <div class="stat-card new">
+      <span class="stat-number">{{ status_counts.new|default:0 }}</span>
+      <span class="stat-label">NEW</span>
+    </div>
+    <div class="stat-card active">
+      <span class="stat-number">{{ status_counts.active|default:0 }}</span>
+      <span class="stat-label">ACTIVE</span>
+    </div>
+    <div class="stat-card no-connect">
+      <span class="stat-number">{{ status_counts.no_connect|default:0 }}</span>
+      <span class="stat-label">NO CONNECT</span>
+    </div>
+    <div class="stat-card hot-lead">
+      <span class="stat-number">{{ status_counts.hot_lead|default:0 }}</span>
+      <span class="stat-label">HOT LEAD</span>
+    </div>
+    <div class="stat-card followup">
+      <span class="stat-number">{{ status_counts.follow_up|default:0 }}</span>
+      <span class="stat-label">FOLLOW UP</span>
+    </div>
+    <div class="stat-card proposal">
+      <span class="stat-number">{{ status_counts.proposal_sent|default:0 }}</span>
+      <span class="stat-label">PROPOSAL SENT</span>
+    </div>
+    <div class="stat-card confirmed">
+      <span class="stat-number">{{ status_counts.confirmed|default:0 }}</span>
+      <span class="stat-label">CONFIRMED</span>
+    </div>
+    <div class="stat-card cancelled">
+      <span class="stat-number">{{ status_counts.cancelled|default:0 }}</span>
+      <span class="stat-label">CANCELLED</span>
+    </div>
+    <div class="stat-card invalid">
+      <span class="stat-number">{{ status_counts.invalid|default:0 }}</span>
+      <span class="stat-label">INVALID</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- MAIN CONTENT SECTION -->
+<div class="queries-content-wrapper">
+  <!-- HEADER WITH SEARCH INLINE -->
+  <div class="page-header" style="display: block;">
     <div class="d-flex justify-content-between align-items-center mb-3">
       <h5 class="mb-0">
-        {{ title }} 
+        Query Management
         <span class="badge bg-primary">{{ total_queries }}</span>
       </h5>
-      
-      <!-- ✅ PERMISSION-BASED ADD BUTTON -->
+
+      <!-- PERMISSION-BASED ADD BUTTON -->
       {% if user_type == 'superuser' %}
-        <button
-          class="btn btn-primary btn-sm"
-          data-bs-toggle="modal"
-          data-bs-target="#queryModal"
-          onclick="openAddModal()"
-        >
-          <i class="fas fa-plus me-1"></i>Add Query
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#queryModal" onclick="openAddModal()">
+          <i class="fas fa-plus me-2"></i>Add Query
         </button>
-      
       {% elif current_user.role == 'admin' or current_user.role == 'manager' %}
-        <button
-          class="btn btn-primary btn-sm"
-          data-bs-toggle="modal"
-          data-bs-target="#queryModal"
-          onclick="openAddModal()"
-        >
-          <i class="fas fa-plus me-1"></i>Add Query
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#queryModal" onclick="openAddModal()">
+          <i class="fas fa-plus me-2"></i>Add Query
         </button>
-      
       {% elif current_user.permissions.can_create_queries %}
-        <button
-          class="btn btn-primary btn-sm"
-          data-bs-toggle="modal"
-          data-bs-target="#queryModal"
-          onclick="openAddModal()"
-        >
-          <i class="fas fa-plus me-1"></i>Add Query
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#queryModal" onclick="openAddModal()">
+          <i class="fas fa-plus me-2"></i>Add Query
         </button>
-      
       {% else %}
         <span class="badge bg-secondary">
           <i class="fas fa-lock me-1"></i>View Only
@@ -205,563 +423,406 @@
       {% endif %}
     </div>
 
-    {% for query in queries %}
-    <div class="record-card {% if query.created_by == current_user %}my-query{% endif %}">
-      <div class="record-header">
-        <span>
-          {{ query.client_name }} ({{ query.get_gender_display }})
-          <!-- ✅ SHOW WHO CREATED IT -->
-          {% if query.created_by %}
-            <span class="creator-badge">
-              <i class="fas fa-user-circle"></i> 
-              {% if query.created_by == current_user %}
-                You
-              {% else %}
-                {{ query.created_by.get_full_name }}
-              {% endif %}
-            </span>
+    <!-- SEARCH FORM MOVED HERE -->
+    <form method="get" class="row g-2">
+      <div class="col-md-2">
+        <input type="text" name="name" class="form-control form-control-sm" placeholder="Name" value="{{ request.GET.name }}">
+      </div>
+      <div class="col-md-2">
+        <input type="text" name="phone" class="form-control form-control-sm" placeholder="Phone" value="{{ request.GET.phone }}">
+      </div>
+      <div class="col-md-2">
+        <input type="date" name="from_date" class="form-control form-control-sm" value="{{ request.GET.from_date }}">
+      </div>
+      <div class="col-md-2">
+        <input type="text" name="assign" class="form-control form-control-sm" placeholder="Assigned User" value="{{ request.GET.assign }}">
+      </div>
+      <div class="col-md-2">
+        <input type="text" name="id" class="form-control form-control-sm" placeholder="Query ID (e.g., dh01)" value="{{ request.GET.id }}">
+      </div>
+      <div class="col-md-2">
+        <button type="submit" class="btn btn-primary btn-sm w-100">
+          <i class="fas fa-search me-1"></i>Search
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- QUERY CARDS - VERTICAL STACKED LAYOUT -->
+  {% for query in queries %}
+  <div class="record-card {% if query.created_by == current_user %}my-query{% endif %}">
+
+    <!-- Header Section -->
+    <div class="record-header">
+      <div class="record-header-left">
+        <span class="query-id">{{ query.query_id }}</span>
+        <span class="client-name">{{ query.client_name }} ({{ query.get_gender_display }})</span>
+        <span class="status-badge">{{ query.get_status_display|upper }}</span>
+
+        {% if query.created_by %}
+          <span class="creator-badge">
+            <i class="fas fa-user-circle"></i>
+            {% if query.created_by == current_user %}You{% else %}{{ query.created_by.get_full_name }}{% endif %}
+          </span>
+        {% endif %}
+      </div>
+
+      <div class="record-actions">
+        <a data-bs-toggle="modal" data-bs-target="#viewQueryModal" onclick="viewQuery({{ query.id }})" title="View">
+          <i class="fas fa-eye"></i>
+        </a>
+
+        {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.permissions.can_edit_all_queries %}
+          <a data-bs-toggle="modal" data-bs-target="#queryModal" onclick="openEditModal({{ query.id }})" title="Edit">
+            <i class="fas fa-pen"></i>
+          </a>
+        {% elif current_user.permissions.can_edit_queries or current_user.role == 'manager' %}
+          {% if query.created_by == current_user or query.assign == current_user %}
+            <a data-bs-toggle="modal" data-bs-target="#queryModal" onclick="openEditModal({{ query.id }})" title="Edit">
+              <i class="fas fa-pen"></i>
+            </a>
           {% endif %}
+        {% endif %}
+
+        <a href="https://wa.me/{{ query.phone_number }}" target="_blank" title="WhatsApp">
+          <i class="fab fa-whatsapp" style="color: #25d366;"></i>
+        </a>
+
+        <a href="mailto:{{ query.email }}" title="Email">
+          <i class="fas fa-envelope"></i>
+        </a>
+
+        <a title="More">
+          <i class="fas fa-ellipsis-v"></i>
+        </a>
+
+        {% if user_type == 'superuser' or current_user.role == 'admin' %}
+          <a onclick="deleteQuery({{ query.id }}, '{{ query.client_name|escapejs }}')" title="Delete">
+            <i class="fas fa-trash text-danger"></i>
+          </a>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Info Grid -->
+    <div class="record-info-grid">
+      <div class="record-info-item">
+        <span class="record-label">Requirement</span>
+        <span class="record-value">{{ query.get_services_display }}</span>
+      </div>
+
+      <div class="record-info-item">
+        <span class="record-label">Source</span>
+        <span class="record-value">
+          {% if query.lead_source %}{{ query.lead_source.source_name }}{% else %}Instagram{% endif %}
         </span>
-        
-  <!-- In your query_list.html - Update the actions section -->
-
-  <div class="record-actions">
-    <!-- VIEW -->
-    <a
-      data-bs-toggle="modal"
-      data-bs-target="#viewQueryModal"
-      onclick="viewQuery({{ query.id }})"
-      title="View Details"
-    >
-      <i class="fas fa-eye"></i>
-    </a>
-    
-    <!-- EDIT BUTTON - Permission Based -->
-    {% if user_type == 'superuser' %}
-      <a
-        data-bs-toggle="modal"
-        data-bs-target="#queryModal"
-        onclick="openEditModal({{ query.id }})"
-        title="Edit"
-      >
-        <i class="fas fa-pen"></i>
-      </a>
-    {% elif current_user.role == 'admin' %}
-      <a
-        data-bs-toggle="modal"
-        data-bs-target="#queryModal"
-        onclick="openEditModal({{ query.id }})"
-        title="Edit"
-      >
-        <i class="fas fa-pen"></i>
-      </a>
-    {% elif current_user.permissions.can_edit_all_queries %}
-      <a
-        data-bs-toggle="modal"
-        data-bs-target="#queryModal"
-        onclick="openEditModal({{ query.id }})"
-        title="Edit"
-      >
-        <i class="fas fa-pen"></i>
-      </a>
-    {% elif current_user.permissions.can_edit_queries %}
-      {% if query.created_by == current_user or query.assign == current_user %}
-        <a
-          data-bs-toggle="modal"
-          data-bs-target="#queryModal"
-          onclick="openEditModal({{ query.id }})"
-          title="Edit"
-        >
-          <i class="fas fa-pen"></i>
-        </a>
-      {% endif %}
-    {% elif current_user.role == 'manager' %}
-      {% if query.created_by == current_user or query.assign == current_user %}
-        <a
-          data-bs-toggle="modal"
-          data-bs-target="#queryModal"
-          onclick="openEditModal({{ query.id }})"
-          title="Edit"
-        >
-          <i class="fas fa-pen"></i>
-        </a>
-      {% endif %}
-    {% endif %}
-    
-    <!-- DELETE BUTTON - Only Admin/Superuser -->
-    {% if user_type == 'superuser' or current_user.role == 'admin' %}
-      <a
-        onclick="deleteQuery({{ query.id }}, '{{ query.client_name|escapejs }}')"
-        title="Delete"
-      >
-        <i class="fas fa-trash text-danger"></i>
-      </a>
-    {% endif %}
-    
-    <!-- ✅ PROPOSALS LINK - PERMISSION BASED -->
-    {% if user_type == 'superuser' %}
-      <!-- Superuser always has access -->
-      <a href="{% url 'query_proposals' query.id %}" title="View Proposals">
-        <i class="fas fa-file-alt text-primary"></i>
-      </a>
-    
-    {% elif current_user.role == 'admin' or current_user.role == 'manager' %}
-      <!-- Admin and Manager always have access -->
-      <a href="{% url 'query_proposals' query.id %}" title="View Proposals">
-        <i class="fas fa-file-alt text-primary"></i>
-      </a>
-    
-    {% elif current_user.permissions.can_view_proposals %}
-      <!-- User with granted permission -->
-      <a href="{% url 'query_proposals' query.id %}" title="View Proposals">
-        <i class="fas fa-file-alt text-primary"></i>
-      </a>
-    {% endif %}
-  </div>
-
       </div>
 
-      <div class="record-info-row">
-        <div class="record-info">
-          <span class="record-label">Phone:</span>{{ query.phone_number }}
-        </div>
-        <div class="record-info">
-          <span class="record-label">Email:</span>{{ query.email|default:"N/A" }}
-        </div>
-        <div class="record-info">
-          <span class="record-label">Type:</span>{{ query.get_type_display }}
-        </div>
-        <div class="record-info">
-          <span class="record-label">Sector:</span>{{ query.get_sector_display }}
-        </div>
-        <div class="record-info">
-          <span class="record-label">Priority:</span>{{ query.get_priority_display }}
-        </div>
-        <div class="record-info">
-          <span class="record-label">Assign:</span>
-          {% if query.assign %}
-            {{ query.assign.get_full_name }}
-          {% else %}
-            <span class="text-muted">Unassigned</span>
-          {% endif %}
-        </div>
-        <div class="record-info">
-          <span class="record-label">Source:</span>
-          {% if query.lead_source %}
-            {{ query.lead_source.source_name }}
-          {% else %}
-            <span class="text-muted">N/A</span>
-          {% endif %}
-        </div>
-        <div class="record-info">
-          <span class="record-label">From:</span>{{ query.from_date|date:"M d, Y" }}
-        </div>
-        <div class="record-info">
-          <span class="record-label">To:</span>{{ query.to_date|date:"M d, Y" }}
-        </div>
-        <div class="record-info">
-          <span class="record-label">Days:</span>{{ query.total_days }}
-        </div>
-        <div class="record-info">
-          <span class="record-label">Adult:</span>{{ query.adult }}
-        </div>
-        <div class="record-info">
-          <span class="record-label">Child:</span>{{ query.childrens }}
-        </div>
-        <div class="record-info">
-          <span class="record-label">Infant:</span>{{ query.infant }}
-        </div>
-        <div class="record-info">
-          <span class="record-label">Service:</span>{{ query.get_services_display }}
-        </div>
+      <div class="record-info-item">
+        <span class="record-label">Sector</span>
+        <span class="record-value sector-badge">{{ query.get_sector_display }}</span>
       </div>
 
-      {% if query.remark %}
-      <div class="record-remark">
-        <span class="record-label">Remark:</span>{{ query.remark }}
+      <div class="record-info-item">
+        <span class="record-label">Phone</span>
+        <span class="record-value">{{ query.phone_number }}</span>
       </div>
-      {% endif %}
 
-      <div class="record-meta mt-1">
-        <small>Created: {{ query.created_at|date:"M d, Y H:i" }}</small>
+      <div class="record-info-item">
+        <span class="record-label">Travellers</span>
+        <span class="record-value">{{ query.adult }} Adult {{ query.childrens }} Child {{ query.infant }} Infant</span>
+      </div>
+
+      <div class="record-info-item">
+        <span class="record-label">📅 {{ query.from_date|date:"d-m-Y" }}</span>
+        <span class="record-value">Till {{ query.to_date|date:"d-m-Y" }}</span>
+      </div>
+
+      <div class="record-info-item">
+        <span class="record-label">Assigned to</span>
+        <span class="record-value">
+          {% if query.assign %}{{ query.assign.get_full_name }}{% else %}Unassigned{% endif %}
+        </span>
+      </div>
+
+      <div class="record-info-item">
+        <span class="record-label">⏱️ Created</span>
+        <span class="record-value">{{ query.created_at|date:"d-m-Y" }}</span>
+      </div>
+
+      <div class="record-info-item">
+        <span class="record-label">⏱️ Last Updated</span>
+        <span class="record-value">{{ query.created_at|date:"d/m/Y - h:i A" }}</span>
       </div>
     </div>
-    {% empty %}
-    <div class="alert alert-info text-center">
-      <i class="fas fa-info-circle me-2"></i>No queries found.
-      {% if user_type == 'team_member' and current_user.role not in 'admin,manager' %}
-        <br><small class="text-muted">You can only see queries you created.</small>
-      {% endif %}
-    </div>
-    {% endfor %}
-  </div>
 
-  <!-- Add/Edit Query Modal -->
-  <div class="modal fade" id="queryModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-scrollable">
-      <div class="modal-content">
-        <form method="POST" id="queryForm" action="">
-          {% csrf_token %}
-          <div class="modal-header bg-primary text-white">
-            <h5 class="modal-title" id="queryModalLabel">
-              <i class="fas fa-user-plus me-2"></i>Add Query
-            </h5>
-            <button
-              type="button"
-              class="btn-close btn-close-white"
-              data-bs-dismiss="modal"
-            ></button>
-          </div>
+    <!-- Footer with Remark and Actions -->
+    <div class="record-footer">
+      <div>
+        {% if query.remark %}
+          <span class="record-remark">
+            <span class="record-label">Remark:</span> {{ query.remark }}
+          </span>
+        {% endif %}
+      </div>
 
-          <div class="modal-body">
-            <input type="hidden" id="queryId" name="query_id" />
-
-            <!-- Client Information Section -->
-            <div class="card mb-3">
-              <div class="card-header bg-light">
-                <h6 class="mb-0">
-                  <i class="fas fa-user me-2"></i>Client Information
-                </h6>
-              </div>
-              <div class="card-body">
-                <div class="row g-3">
-                  <div class="col-md-3">
-                    <label class="form-label">
-                      <i class="fas fa-signature me-1 text-primary"></i>Client Name*
-                    </label>
-                    <input
-                      type="text"
-                      class="form-control"
-                      name="client_name"
-                      id="client_name"
-                      required
-                      placeholder="Enter full name"
-                    />
-                  </div>
-                  <div class="col-md-3">
-                    <label class="form-label">
-                      <i class="fas fa-venus-mars me-1 text-primary"></i>Gender*
-                    </label>
-                    <select class="form-select" name="gender" id="gender" required>
-                      <option value="">Select</option>
-                      {% for value, label in query_form.fields.gender.choices %}
-                      <option value="{{ value }}">{{ label }}</option>
-                      {% endfor %}
-                    </select>
-                  </div>
-                  <div class="col-md-3">
-                    <label class="form-label">
-                      <i class="fas fa-phone me-1 text-primary"></i>Phone Number*
-                    </label>
-                    <input
-                      type="tel"
-                      class="form-control"
-                      name="phone_number"
-                      id="phone_number"
-                      required
-                      placeholder="+91 XXXXXXXXXX"
-                    />
-                  </div>
-                  <div class="col-md-3">
-                    <label class="form-label">
-                      <i class="fas fa-envelope me-1 text-primary"></i>Email*
-                    </label>
-                    <input
-                      type="email"
-                      class="form-control"
-                      name="email"
-                      id="email"
-                      required
-                      placeholder="email@example.com"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Query Details Section -->
-            <div class="card mb-3">
-              <div class="card-header bg-light">
-                <h6 class="mb-0">
-                  <i class="fas fa-info-circle me-2"></i>Query Details
-                </h6>
-              </div>
-              <div class="card-body">
-                <div class="row g-3">
-                  <div class="col-md-3">
-                    <label class="form-label">
-                      <i class="fas fa-users me-1 text-info"></i>Type*
-                    </label>
-                    <select class="form-select" name="type" id="type" required>
-                      <option value="">Select</option>
-                      {% for value, label in query_form.fields.type.choices %}
-                      <option value="{{ value }}">{{ label }}</option>
-                      {% endfor %}
-                    </select>
-                  </div>
-                  <div class="col-md-3">
-                    <label class="form-label">
-                      <i class="fas fa-map-marked-alt me-1 text-info"></i>Sector*
-                    </label>
-                    <select class="form-select" name="sector" id="sector" required>
-                      <option value="">Select</option>
-                      {% for value, label in query_form.fields.sector.choices %}
-                      <option value="{{ value }}">{{ label }}</option>
-                      {% endfor %}
-                    </select>
-                  </div>
-                  <div class="col-md-3">
-                    <label class="form-label">
-                      <i class="fas fa-flag me-1 text-info"></i>Priority*
-                    </label>
-                    <select class="form-select" name="priority" id="priority" required>
-                      <option value="">Select</option>
-                      {% for value, label in query_form.fields.priority.choices %}
-                      <option value="{{ value }}">{{ label }}</option>
-                      {% endfor %}
-                    </select>
-                  </div>
-                  <div class="col-md-3">
-                    <label class="form-label">
-                      <i class="fas fa-concierge-bell me-1 text-info"></i>Services*
-                    </label>
-                    <select class="form-select" name="services" id="services" required>
-                      <option value="">Select Services</option>
-                      {% for value, label in query_form.fields.services.choices %}
-                      <option value="{{ value }}">{{ label }}</option>
-                      {% endfor %}
-                    </select>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Assignment Section - CONDITIONAL -->
-            <div class="card mb-3">
-              <div class="card-header bg-light">
-                <h6 class="mb-0">
-                  <i class="fas fa-tasks me-2"></i>Assignment & Source
-                </h6>
-              </div>
-              <div class="card-body">
-                <div class="row g-3">
-                  <!-- ✅ SHOW ASSIGN FIELD ONLY FOR ADMIN/MANAGER/SUPERUSER -->
-                  {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.role == 'manager' %}
-                  <div class="col-md-6">
-                    <label class="form-label">
-                      <i class="fas fa-user-tie me-1 text-success"></i>Assign To
-                    </label>
-                    <select class="form-select" name="assign" id="assign">
-                      <option value="">-- Select Team Member --</option>
-                      {% for member in team_members %}
-                      <option value="{{ member.id }}">{{ member.get_full_name }}</option>
-                      {% endfor %}
-                    </select>
-                  </div>
-                  <div class="col-md-6">
-                  {% else %}
-                  <!-- ✅ REGULAR USERS: Full width lead source -->
-                  <div class="col-md-12">
-                  {% endif %}
-                    <label class="form-label">
-                      <i class="fas fa-bullseye me-1 text-success"></i>Lead Source
-                    </label>
-                    <select class="form-select" name="lead_source" id="lead_source">
-                      <option value="">-- Select Lead Source --</option>
-                      {% for source in lead_sources %}
-                      <option value="{{ source.id }}">{{ source.source_name }}</option>
-                      {% endfor %}
-                    </select>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Travel Details Section - REORDERED: Total Days FIRST -->
-            <div class="card mb-3">
-              <div class="card-header bg-light">
-                <h6 class="mb-0">
-                  <i class="fas fa-plane-departure me-2"></i>Travel Details
-                </h6>
-              </div>
-              <div class="card-body">
-                <div class="row g-3">
-                  
-                  <!-- 1. Total Days - FIRST FIELD -->
-                  <div class="col-md-4">
-                    <label class="form-label">
-                      <i class="fas fa-clock me-1 text-warning"></i>Total Days*
-                    </label>
-                    <input
-                      type="number"
-                      class="form-control"
-                      name="total_days"
-                      id="total_days"
-                      min="1"
-                      required
-                      placeholder="Enter number of days"
-                    />
-                    <small class="text-muted">Enter trip duration</small>
-                  </div>
-                  
-                  <!-- 2. From Date - SECOND FIELD -->
-                  <div class="col-md-4">
-                    <label class="form-label">
-                      <i class="fas fa-calendar-check me-1 text-warning"></i>From Date*
-                    </label>
-                    <input
-                      type="date"
-                      class="form-control"
-                      name="from_date"
-                      id="from_date"
-                      required
-                    />
-                    <small class="text-muted">Start date of travel</small>
-                  </div>
-                  
-                  <!-- 3. To Date - THIRD FIELD (Auto-calculated) -->
-                  <div class="col-md-4">
-                    <label class="form-label">
-                      <i class="fas fa-calendar-times me-1 text-warning"></i>To Date*
-                    </label>
-                    <input
-                      type="date"
-                      class="form-control"
-                      name="to_date"
-                      id="to_date"
-                      required
-                    />
-                    <small class="text-muted">Auto-calculated (can edit)</small>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Passenger Information Section -->
-            <div class="card mb-3">
-              <div class="card-header bg-light">
-                <h6 class="mb-0">
-                  <i class="fas fa-users me-2"></i>Passenger Information
-                </h6>
-              </div>
-              <div class="card-body">
-                <div class="row g-3">
-                  <div class="col-md-4">
-                    <label class="form-label">
-                      <i class="fas fa-male me-1 text-danger"></i>Adults
-                    </label>
-                    <input
-                      type="number"
-                      class="form-control"
-                      name="adult"
-                      id="adult"
-                      min="0"
-                      value="0"
-                      placeholder="Number of adults"
-                    />
-                  </div>
-                  <div class="col-md-4">
-                    <label class="form-label">
-                      <i class="fas fa-child me-1 text-danger"></i>Childrens
-                    </label>
-                    <input
-                      type="number"
-                      class="form-control"
-                      name="childrens"
-                      id="childrens"
-                      min="0"
-                      value="0"
-                      placeholder="Number of childrens"
-                    />
-                  </div>
-                  <div class="col-md-4">
-                    <label class="form-label">
-                      <i class="fas fa-baby me-1 text-danger"></i>Infants
-                    </label>
-                    <input
-                      type="number"
-                      class="form-control"
-                      name="infant"
-                      id="infant"
-                      min="0"
-                      value="0"
-                      placeholder="Number of infants"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Remarks Section -->
-            <div class="card mb-3">
-              <div class="card-header bg-light">
-                <h6 class="mb-0">
-                  <i class="fas fa-comment me-2"></i>Additional Notes
-                </h6>
-              </div>
-              <div class="card-body">
-                <textarea
-                  class="form-control"
-                  name="remark"
-                  id="remark"
-                  rows="3"
-                  placeholder="Enter any special requirements or notes..."
-                ></textarea>
-              </div>
-            </div>
-          </div>
-
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-              <i class="fas fa-times me-1"></i>Cancel
-            </button>
-            <button type="submit" class="btn btn-primary">
-              <i class="fas fa-save me-1"></i>Save Query
-            </button>
-          </div>
-        </form>
+      <div>
+        {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.role == 'manager' or current_user.permissions.can_view_proposals %}
+          <a href="{% url 'query_proposals' query.id %}" class="view-proposal-btn">
+            ⦿ VIEW PROPOSAL (1)
+          </a>
+        {% endif %}
       </div>
     </div>
   </div>
-    
-
-
-  <!-- View Query Modal -->
-  <div class="modal fade" id="viewQueryModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-scrollable">
-      <div class="modal-content">
-        <div class="modal-header bg-info text-white">
-          <h5 class="modal-title">
-            <i class="fas fa-eye me-2"></i>Query Details
+  {% empty %}
+  <div class="alert alert-info text-center">
+    <i class="fas fa-info-circle me-2"></i>No queries found.
+    {% if user_type == 'team_member' and current_user.role not in 'admin,manager' %}
+      <br><small class="text-muted">You can only see queries you created.</small>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+<!-- Add/Edit Query Modal -->
+<div class="modal fade" id="queryModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+      <form method="POST" id="queryForm" action="">
+        {% csrf_token %}
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title" id="queryModalLabel">
+            <i class="fas fa-user-plus me-2"></i>Add Query
           </h5>
-          <button
-            type="button"
-            class="btn-close btn-close-white"
-            data-bs-dismiss="modal"
-          ></button>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
-        <div class="modal-body" id="viewQueryContent">
-          <div class="text-center py-5">
-            <div class="spinner-border text-primary" role="status">
-              <span class="visually-hidden">Loading...</span>
+
+        <!-- ✅ ERROR ALERT CONTAINER - ADD THIS -->
+        <div id="formErrorAlert" class="alert alert-danger m-3" style="display: none;">
+          <i class="fas fa-exclamation-triangle me-2"></i>
+          <strong>Please correct the following errors:</strong>
+          <ul id="formErrorList" class="mb-0 mt-2"></ul>
+        </div>
+
+        <div class="modal-body">
+          <input type="hidden" id="queryId" name="query_id" />
+
+          <!-- Client Information Section -->
+          <div class="card mb-3">
+            <div class="card-header bg-light">
+              <h6 class="mb-0"><i class="fas fa-user me-2"></i>Client Information</h6>
             </div>
-            <p class="mt-2 text-muted">Loading query details...</p>
+            <div class="card-body">
+              <div class="row g-3">
+                <div class="col-md-3">
+                  <label class="form-label"><i class="fas fa-signature me-1 text-primary"></i>Client Name*</label>
+                  <input type="text" class="form-control" name="client_name" id="client_name" required placeholder="Enter full name" />
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label"><i class="fas fa-venus-mars me-1 text-primary"></i>Gender*</label>
+                  <select class="form-select" name="gender" id="gender" required>
+                    <option value="">Select</option>
+                    {% for value, label in query_form.fields.gender.choices %}
+                    <option value="{{ value }}">{{ label }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label"><i class="fas fa-phone me-1 text-primary"></i>Phone Number*</label>
+                  <input type="tel" class="form-control" name="phone_number" id="phone_number" required placeholder="+91 XXXXXXXXXX" />
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label"><i class="fas fa-envelope me-1 text-primary"></i>Email*</label>
+                  <input type="email" class="form-control" name="email" id="email"  placeholder="email@example.com" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Query Details Section -->
+          <div class="card mb-3">
+            <div class="card-header bg-light">
+              <h6 class="mb-0"><i class="fas fa-info-circle me-2"></i>Query Details</h6>
+            </div>
+            <div class="card-body">
+              <div class="row g-3">
+                <div class="col-md-3">
+                  <label class="form-label"><i class="fas fa-users me-1 text-info"></i>Type*</label>
+                  <select class="form-select" name="type" id="type" required>
+                    <option value="">Select</option>
+                    {% for value, label in query_form.fields.type.choices %}
+                    <option value="{{ value }}">{{ label }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label"><i class="fas fa-map-marked-alt me-1 text-info"></i>Sector*</label>
+                  <select class="form-select" name="sector" id="sector" required>
+                    <option value="">Select</option>
+                    {% for value, label in query_form.fields.sector.choices %}
+                    <option value="{{ value }}">{{ label }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label"><i class="fas fa-flag me-1 text-info"></i>Priority*</label>
+                  <select class="form-select" name="priority" id="priority" required>
+                    <option value="">Select</option>
+                    {% for value, label in query_form.fields.priority.choices %}
+                    <option value="{{ value }}">{{ label }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label"><i class="fas fa-concierge-bell me-1 text-info"></i>Services*</label>
+                  <select class="form-select" name="services" id="services" required>
+                    <option value="">Select Services</option>
+                    {% for value, label in query_form.fields.services.choices %}
+                    <option value="{{ value }}">{{ label }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Assignment Section -->
+          <div class="card mb-3">
+            <div class="card-header bg-light">
+              <h6 class="mb-0"><i class="fas fa-tasks me-2"></i>Assignment & Source</h6>
+            </div>
+            <div class="card-body">
+              <div class="row g-3">
+                {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.role == 'manager' %}
+                <div class="col-md-6">
+                  <label class="form-label"><i class="fas fa-user-tie me-1 text-success"></i>Assign To</label>
+                  <select class="form-select" name="assign" id="assign">
+                    <option value="">-- Select Team Member --</option>
+                    {% for member in team_members %}
+                    <option value="{{ member.id }}">{{ member.get_full_name }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="col-md-6">
+                {% else %}
+                <div class="col-md-12">
+                {% endif %}
+                  <label class="form-label"><i class="fas fa-bullseye me-1 text-success"></i>Lead Source</label>
+                  <select class="form-select" name="lead_source" id="lead_source">
+                    <option value="">-- Select Lead Source --</option>
+                    {% for source in lead_sources %}
+                    <option value="{{ source.id }}">{{ source.source_name }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Travel Details Section -->
+          <div class="card mb-3">
+            <div class="card-header bg-light">
+              <h6 class="mb-0"><i class="fas fa-plane-departure me-2"></i>Travel Details</h6>
+            </div>
+            <div class="card-body">
+              <div class="row g-3">
+                <div class="col-md-4">
+                  <label class="form-label"><i class="fas fa-clock me-1 text-warning"></i>Total Days*</label>
+                  <input type="number" class="form-control" name="total_days" id="total_days" min="1" required placeholder="Enter number of days" />
+                  <small class="text-muted">Enter trip duration</small>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label"><i class="fas fa-calendar-check me-1 text-warning"></i>From Date*</label>
+                  <input type="date" class="form-control" name="from_date" id="from_date" required />
+                  <small class="text-muted">Start date of travel</small>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label"><i class="fas fa-calendar-times me-1 text-warning"></i>To Date*</label>
+                  <input type="date" class="form-control" name="to_date" id="to_date" required />
+                  <small class="text-muted">Auto-calculated (can edit)</small>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Passenger Information Section -->
+          <div class="card mb-3">
+            <div class="card-header bg-light">
+              <h6 class="mb-0"><i class="fas fa-users me-2"></i>Passenger Information</h6>
+            </div>
+            <div class="card-body">
+              <div class="row g-3">
+                <div class="col-md-4">
+                  <label class="form-label"><i class="fas fa-male me-1 text-danger"></i>Adults</label>
+                  <input type="number" class="form-control" name="adult" id="adult" min="0" value="0" placeholder="Number of adults" />
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label"><i class="fas fa-child me-1 text-danger"></i>Childrens</label>
+                  <input type="number" class="form-control" name="childrens" id="childrens" min="0" value="0" placeholder="Number of childrens" />
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label"><i class="fas fa-baby me-1 text-danger"></i>Infants</label>
+                  <input type="number" class="form-control" name="infant" id="infant" min="0" value="0" placeholder="Number of infants" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Remarks Section -->
+          <div class="card mb-3">
+            <div class="card-header bg-light">
+              <h6 class="mb-0"><i class="fas fa-comment me-2"></i>Additional Notes</h6>
+            </div>
+            <div class="card-body">
+              <textarea class="form-control" name="remark" id="remark" rows="3" placeholder="Enter any special requirements or notes..."></textarea>
+            </div>
           </div>
         </div>
+
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-            <i class="fas fa-times me-1"></i>Close
+            <i class="fas fa-times me-1"></i>Cancel
+          </button>
+          <button type="submit" class="btn btn-primary" id="submitQueryBtn">
+            <i class="fas fa-save me-1"></i>Save Query
           </button>
         </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- View Query Modal -->
+<div class="modal fade" id="viewQueryModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header bg-info text-white">
+        <h5 class="modal-title"><i class="fas fa-eye me-2"></i>Query Details</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="viewQueryContent">
+        <div class="text-center py-5">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <p class="mt-2 text-muted">Loading query details...</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          <i class="fas fa-times me-1"></i>Close
+        </button>
       </div>
     </div>
   </div>
+</div>
+
 
   <script>
     // =====================================================
     // QUERY MANAGEMENT SYSTEM - JavaScript
     // =====================================================
-    
+
     const userType = "{{ user_type }}";
     const userRole = "{{ current_user.role }}";
     const currentUserId = {{ current_user.id|default:"null" }};
@@ -878,7 +939,7 @@
       modalTitle.innerHTML = '<i class="fas fa-user-plus me-2"></i>Add Query';
       form.action = "{% url 'add_query' %}";
       form.reset();
-      
+
       const queryIdField = document.getElementById("queryId");
       if (queryIdField) {
         queryIdField.value = "";

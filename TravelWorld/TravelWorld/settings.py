@@ -26,10 +26,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-$_ru*(rgnd(ovi@(v!8c73o*mh%l3ly@@dl9oz5=a#%c!dx-q0'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
-STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+ALLOWED_HOSTS = ['*']
+# STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 
 
 # Application definition
@@ -45,7 +45,8 @@ INSTALLED_APPS = [
     'Travel',
     'team_member',
     'widget_tweaks',
-    
+    'rest_framework',
+
 ]
 
 MIDDLEWARE = [
@@ -150,6 +151,22 @@ CKEDITOR_CONFIGS = {
         'height': 300,
         'width': '100%',
     },
+    'terms': {
+        'toolbar': 'Custom',
+        'toolbar_Custom': [
+            ['Bold', 'Italic', 'Underline', 'Strike'],
+            ['NumberedList', 'BulletedList', '-', 'Indent', 'Outdent'],
+            ['JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock'],
+            ['Link', 'Unlink'],
+            ['RemoveFormat', 'Source'],
+            ['Format'],
+        ],
+        'format_tags': 'p;h1;h2;h3;h4;h5;h6',
+        'height': 250,
+        'width': '100%',
+        'removePlugins': 'elementspath',
+        'resize_enabled': False,
+    },
 }
 
 
@@ -163,7 +180,7 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'prajinprakash722@gmail.com'
 EMAIL_HOST_PASSWORD = 'gnih ybca wxmd hthl'
-DEFAULT_FROM_EMAIL = 'prajinprakash722@gmail.com' 
+DEFAULT_FROM_EMAIL = 'prajinprakash722@gmail.com'
 
 
 
