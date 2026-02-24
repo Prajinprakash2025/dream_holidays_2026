@@ -34,11 +34,33 @@
   .card-dark-blue h4 {
     color: #ffffff !important;
   }
+
+  /* LOCK SCREEN STYLES (MATCHES SCREENSHOT) */
+  .lock-card {
+     max-width: 550px;
+     margin: 0 auto;
+     box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+     border-radius: 16px;
+  }
+  
+  .lock-icon-wrapper {
+     width: 80px;
+     height: 80px;
+     background-color: #ffeaea;
+     color: #ff4d4d;
+     border-radius: 50%;
+     display: inline-flex;
+     align-items: center;
+     justify-content: center;
+     margin-bottom: 20px;
+  }
 </style>
 
 <div class="container mt-4">
   <div class="page-inner">
 
+    {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.permissions.can_access_queries_dashboard or current_user.permissions.can_access_itineraries_dashboard or current_user.permissions.can_access_sales_dashboard or current_user.permissions.can_access_leads_dashboard %}
+    
     <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
       <div>
         <h3 class="fw-bold mb-3">Dashboard</h3>
@@ -53,7 +75,6 @@
 
     <div class="row g-4 mt-3">
 
-      <!-- ✅ Queries Card -->
       {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.permissions.can_access_queries_dashboard %}
       <div class="col-sm-6 col-md-3">
         <a href="{% url 'query_list' %}" class="text-decoration-none">
@@ -73,7 +94,6 @@
       </div>
       {% endif %}
 
-      <!-- ✅ Itineraries Card -->
       {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.permissions.can_access_itineraries_dashboard %}
       <div class="col-sm-6 col-md-3">
         <a href="{% url 'itinerary_dayplan_list' %}" class="text-decoration-none">
@@ -93,7 +113,6 @@
       </div>
       {% endif %}
 
-      <!-- ✅ Sales Card -->
       {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.permissions.can_access_sales_dashboard %}
       <div class="col-sm-6 col-md-3">
         <a href="{% url 'room_type_list' %}" class="text-decoration-none">
@@ -113,7 +132,6 @@
       </div>
       {% endif %}
 
-      <!-- ✅ Team Management Card - ADMIN ONLY -->
       {% if user_type == 'superuser' or current_user.role == 'admin' %}
       <div class="col-sm-6 col-md-3">
         <a href="{% url 'team_member:team_member_list' %}" class="text-decoration-none">
@@ -133,7 +151,6 @@
       </div>
       {% endif %}
 
-      <!-- ✅ Lead Management Card -->
       {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.permissions.can_access_leads_dashboard %}
       <div class="col-sm-6 col-md-3">
         <a href="{% url 'lead-list' %}" class="text-decoration-none">
@@ -151,9 +168,32 @@
           </div>
         </a>
       </div>
-      {% endif %}
+      {% endif %}``
 
     </div>
+
+    {% else %}
+
+    <div class="d-flex align-items-center justify-content-center" style="min-height: 65vh;">
+      <div class="card lock-card text-center p-5 border-0 w-100">
+        <div class="card-body py-4">
+          <div class="lock-icon-wrapper">
+            <i class="fas fa-lock fa-2x"></i>
+          </div>
+          <h3 class="fw-bold mb-3 text-dark">Access Restricted</h3>
+          <p class="text-dark fs-6 mb-2">Welcome, {{ current_user.get_full_name|default:"User" }}!</p>
+          <p class="text-muted mb-4 px-2" style="font-size: 0.95rem;">
+            You currently do not have any permissions assigned to your account. Please contact your administrator to get access to the dashboard modules.
+          </p>
+          <button class="btn btn-primary px-4 py-2" onclick="location.reload()">
+            <i class="fas fa-sync-alt me-2"></i>Refresh Page
+          </button>
+        </div>
+      </div>
+    </div>
+
+    {% endif %}
+
   </div>
 </div>
 

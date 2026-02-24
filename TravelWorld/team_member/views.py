@@ -268,7 +268,15 @@ def add_team_member(request):
 def edit_team_member(request, member_id):
     """Edit team member via modal form"""
     member = get_object_or_404(TeamMember, id=member_id)
-    form = TeamMemberForm(request.POST, instance=member)
+    
+    # Logic Fix: Manually handle is_active if it's missing from POST (unchecked)
+    data = request.POST.copy()
+    if 'is_active' not in data:
+        data['is_active'] = False
+    else:
+        data['is_active'] = True
+
+    form = TeamMemberForm(data, instance=member)
 
     if form.is_valid():
         team_member = form.save(commit=False)
@@ -280,7 +288,9 @@ def edit_team_member(request, member_id):
         team_member.save()
         messages.success(request, f'✅ Team Member "{team_member.get_full_name()}" updated successfully!')
     else:
-        messages.error(request, f'❌ Error: {form.errors.as_text()}')
+        # Better error reporting for debugging
+        error_msg = ", ".join([f"{k}: {v[0]}" for k, v in form.errors.items()])
+        messages.error(request, f'❌ Error: {error_msg}')
 
     return redirect('team_member:team_member_list')
 

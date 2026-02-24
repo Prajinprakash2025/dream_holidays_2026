@@ -11,9 +11,37 @@ from .views import *
 # Create your views here.
 
 @custom_login_required
-def Index(request):
-    return render(request,'index.html')
+def Index(request): # (or whatever your index view is named)
+    user_id = request.session.get('user_id')
+    user_type = request.session.get('user_type')
 
+    if not user_id:
+        return redirect('team_member:login')
+
+    if user_type == 'superuser':
+        from django.contrib.auth.models import User
+        current_user = User.objects.get(id=user_id)
+        has_any_permission = True
+    else:
+        from .models import TeamMember
+        current_user = TeamMember.objects.get(id=user_id)
+        
+        # Calculate if user has ANY permissions (to show/hide the lock screen)
+        has_any_permission = False
+        if current_user.role == 'admin':
+            has_any_permission = True
+        elif hasattr(current_user, 'permissions') and current_user.permissions:
+            # Check if any permission in the JSON dictionary is explicitly set to True
+            if any(value == True for value in current_user.permissions.values()):
+                has_any_permission = True
+
+    context = {
+        'current_user': current_user,
+        'user_type': user_type,
+        'has_any_permission': has_any_permission,
+    }
+
+    return render(request, 'index.html', context)
 # def team_member_list(request):
 #     team_members = TeamMember.objects.all()
 #     form = TeamMemberForm()

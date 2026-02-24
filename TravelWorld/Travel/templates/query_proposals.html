@@ -975,7 +975,7 @@
       </div>
       <h5>Create New Itinerary</h5>
 
-      {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.role == 'manager' %}
+      {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.permissions.can_create_itinerary %}
       <button class="btn" data-bs-toggle="modal" data-bs-target="#createItineraryModal">
         <i class="fas fa-plus me-2"></i>Create Itinerary
       </button>

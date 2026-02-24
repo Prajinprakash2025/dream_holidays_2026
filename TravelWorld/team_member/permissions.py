@@ -124,6 +124,31 @@ for key, config in MASTER_DATA_ITEMS.items():
 # COMBINE ALL PERMISSIONS
 # ==========================================
 AVAILABLE_PERMISSIONS = {
+
+
+    # ==========================================
+    # DASHBOARD ACCESS
+    # ==========================================
+    'can_access_queries_dashboard': {
+        'label': 'Queries Dashboard',
+        'description': 'Can view and access the Queries card on the main dashboard',
+        'category': 'Dashboard Access',
+    },
+    'can_access_itineraries_dashboard': {
+        'label': 'Itineraries Dashboard',
+        'description': 'Can view and access the Itineraries card on the main dashboard',
+        'category': 'Dashboard Access',
+    },
+    'can_access_sales_dashboard': {
+        'label': 'Sales Dashboard',
+        'description': 'Can view and access the Sales card on the main dashboard',
+        'category': 'Dashboard Access',
+    },
+    'can_access_leads_dashboard': {
+        'label': 'Leads Dashboard',
+        'description': 'Can view and access the Lead Management card on the main dashboard',
+        'category': 'Dashboard Access',
+    },
     # ==========================================
     # QUERIES
     # ==========================================

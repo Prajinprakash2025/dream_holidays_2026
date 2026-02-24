@@ -60,6 +60,90 @@
       </div>
     </div>
 
+    <div class="card mb-4 border-success">
+      <div class="card-header d-flex justify-content-between align-items-center bg-light">
+        <h5 class="mb-0 text-success">
+          <i class="fas fa-home me-2"></i>Dashboard Access
+        </h5>
+        <button class="btn btn-sm btn-outline-success select-all-btn" onclick="selectAllInCard({{ data.member.id }}, 'dashboard')">
+          <i class="fas fa-check-double me-1"></i>Select All
+        </button>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          
+          <div class="col-md-6 mb-3">
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="flex-grow-1">
+                <label class="form-label fw-bold mb-1">Queries Dashboard</label>
+                <p class="text-muted small mb-0">Show Queries card on home page</p>
+              </div>
+              <div class="form-check form-switch ms-3">
+                <input class="form-check-input permission-dashboard" type="checkbox"
+                  id="{{ data.member.id }}_can_access_queries_dashboard"
+                  data-permission="can_access_queries_dashboard"
+                  {% if data.permissions_status.can_access_queries_dashboard %}checked{% endif %}
+                  onchange="togglePermission({{ data.member.id }}, 'can_access_queries_dashboard', this.checked)"
+                  style="width: 48px; height: 24px; cursor: pointer" />
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="flex-grow-1">
+                <label class="form-label fw-bold mb-1">Itineraries Dashboard</label>
+                <p class="text-muted small mb-0">Show Itineraries card on home page</p>
+              </div>
+              <div class="form-check form-switch ms-3">
+                <input class="form-check-input permission-dashboard" type="checkbox"
+                  id="{{ data.member.id }}_can_access_itineraries_dashboard"
+                  data-permission="can_access_itineraries_dashboard"
+                  {% if data.permissions_status.can_access_itineraries_dashboard %}checked{% endif %}
+                  onchange="togglePermission({{ data.member.id }}, 'can_access_itineraries_dashboard', this.checked)"
+                  style="width: 48px; height: 24px; cursor: pointer" />
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="flex-grow-1">
+                <label class="form-label fw-bold mb-1">Sales Dashboard</label>
+                <p class="text-muted small mb-0">Show Sales card on home page</p>
+              </div>
+              <div class="form-check form-switch ms-3">
+                <input class="form-check-input permission-dashboard" type="checkbox"
+                  id="{{ data.member.id }}_can_access_sales_dashboard"
+                  data-permission="can_access_sales_dashboard"
+                  {% if data.permissions_status.can_access_sales_dashboard %}checked{% endif %}
+                  onchange="togglePermission({{ data.member.id }}, 'can_access_sales_dashboard', this.checked)"
+                  style="width: 48px; height: 24px; cursor: pointer" />
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="flex-grow-1">
+                <label class="form-label fw-bold mb-1">Leads Dashboard</label>
+                <p class="text-muted small mb-0">Show Lead Management card on home page</p>
+              </div>
+              <div class="form-check form-switch ms-3">
+                <input class="form-check-input permission-dashboard" type="checkbox"
+                  id="{{ data.member.id }}_can_access_leads_dashboard"
+                  data-permission="can_access_leads_dashboard"
+                  {% if data.permissions_status.can_access_leads_dashboard %}checked{% endif %}
+                  onchange="togglePermission({{ data.member.id }}, 'can_access_leads_dashboard', this.checked)"
+                  style="width: 48px; height: 24px; cursor: pointer" />
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
     <!-- ========================================== -->
     <!-- QUERIES SECTION -->
     <!-- ========================================== -->
