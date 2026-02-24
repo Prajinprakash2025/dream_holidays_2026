@@ -23,3 +23,9 @@ db.sqlite3
 # OS
 .DS_Store
 Thumbs.db
+# SQLite
+db.sqlite3
+*.sqlite3
+
+# Django local DB path
+TravelWorld/db.sqlite3
