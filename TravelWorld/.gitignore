@@ -1,31 +1,60 @@
+# =========================
 # Python
+# =========================
 __pycache__/
 *.py[cod]
 *.pyo
+*.pyd
+*.so
 
-# Virtual Environment
+# =========================
+# Virtual Environments
+# =========================
 venv/
 env/
 .venv/
 virtualenv/
 
-# Django
-db.sqlite3
-/staticfiles
-/media
-
-# Secrets
-.env
-
-# PythonAnywhere
-*.log
-
-# OS
-.DS_Store
-Thumbs.db
-# SQLite
+# =========================
+# Django Core
+# =========================
 db.sqlite3
 *.sqlite3
 
-# Django local DB path
-TravelWorld/db.sqlite3
+# Collected Static (DO NOT TRACK)
+static_root/
+TravelWorld/static_root/
+staticfiles/
+
+# User Uploads / Media
+media/
+vehicle_photos/
+
+# =========================
+# Environment Variables
+# =========================
+.env
+.env.*
+!.env.example
+
+# =========================
+# Logs
+# =========================
+*.log
+
+# =========================
+# OS Files
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# IDE / Editor
+# =========================
+.vscode/
+.idea/
+
+# =========================
+# Misc
+# =========================
+*.pyc
