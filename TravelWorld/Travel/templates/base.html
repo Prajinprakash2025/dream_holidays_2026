@@ -462,22 +462,25 @@
 
 
       <li>
+        {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.permissions.can_access_queries_dashboard %}
         <a href="{% url 'query_list' %}"
            class="{% if 'query' in request.path %}active{% endif %}"
            data-bs-toggle="tooltip" data-bs-placement="right" title="Queries">
           <i class="fas fa-list"></i>
           <span>Queries</span>
         </a>
+        {% endif %}
       </li>
 
 
       <li>
-        <a href="{% url 'itinerary_dayplan_list' %}"
+        {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.permissions.can_access_itineraries_dashboard %}        <a href="{% url 'itinerary_dayplan_list' %}"
            class="{% if 'itinerary' in request.path %}active{% endif %}"
            data-bs-toggle="tooltip" data-bs-placement="right" title="Itineraries">
           <i class="fas fa-route"></i>
           <span>Itineraries</span>
         </a>
+        {% endif %}
       </li>
 
 
@@ -567,14 +570,14 @@
 
 
       <div class="navbar-icons">
-        <div class="dropdown">
+        {% comment %} <div class="dropdown">
           <button class="nav-icon-btn" data-bs-toggle="dropdown" title="Search">
             <i class="fas fa-search"></i>
           </button>
           <div class="dropdown-menu dropdown-menu-end" style="width: 300px;">
             <input type="text" class="form-control" placeholder="Search...">
           </div>
-        </div>
+        </div> {% endcomment %}
 
 
         <div class="dropdown">
@@ -647,9 +650,14 @@
             <a href="{% url 'team_member:dashboard' %}" class="dropdown-item">
               <i class="fas fa-user me-2"></i>My Profile
             </a>
+
+
+            {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.permissions.can_access_admin_settings %}
             <a href="{% url 'admin_board' %}" class="dropdown-item">
               <i class="fas fa-cog me-2"></i>Admin Settings
             </a>
+            {%endif%}
+            
             <a href="#" class="dropdown-item">
               <i class="fas fa-question-circle me-2"></i>Help Center
             </a>

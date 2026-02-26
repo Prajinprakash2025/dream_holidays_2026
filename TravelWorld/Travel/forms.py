@@ -1598,14 +1598,21 @@ class QueryForm(forms.ModelForm):
 
         super(QueryForm, self).__init__(*args, **kwargs)
 
-        # ✅ HIDE assign field for regular users (non-admin/non-manager)
+        # ✅ MAKE Email, Lead Source, and Remark completely optional
+        if 'email' in self.fields:
+            self.fields['email'].required = False
+        if 'lead_source' in self.fields:
+            self.fields['lead_source'].required = False
+        if 'remark' in self.fields:
+            self.fields['remark'].required = False
+
+        # ✅ HIDE assign field for regular users (Keeps your working logic)
         if self.user_role not in ['superuser', 'admin', 'manager']:
             if 'assign' in self.fields:
                 self.fields.pop('assign')
 
-        # ✅ OPTIONAL: Make assign field show current user by default for admins
+        # ✅ Make assign field show current user by default for admins
         if self.user_role in ['admin', 'manager'] and not self.instance.pk:
-            # On create, pre-select current user in assign dropdown
             if 'assign' in self.fields and self.user:
                 self.fields['assign'].initial = self.user
 

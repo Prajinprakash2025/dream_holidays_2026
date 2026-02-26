@@ -1547,6 +1547,7 @@ class Query(models.Model):
         related_name='created_queries',
         help_text="Team member who created this query"
     )
+    updated_at = models.DateTimeField(auto_now=True)
 
     def save(self, *args, **kwargs):
         if not self.query_id:

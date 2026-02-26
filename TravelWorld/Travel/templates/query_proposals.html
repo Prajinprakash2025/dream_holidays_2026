@@ -979,10 +979,12 @@
       <button class="btn" data-bs-toggle="modal" data-bs-target="#createItineraryModal">
         <i class="fas fa-plus me-2"></i>Create Itinerary
       </button>
+      {% if user_type == 'superuser' or current_user.role == 'admin' or current_user.permissions.can_insert_itinerary %}
 
       <a href="{% url 'insert_package_to_itinerary' query.id %}" class="btn">
         <i class="fas fa-download me-2"></i>Insert Itinerary
       </a>
+      {%endif%}
       {% endif %}
     </div>
 

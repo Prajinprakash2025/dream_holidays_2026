@@ -484,17 +484,20 @@
           {% endif %}
         {% endif %}
 
-        <a href="https://wa.me/{{ query.phone_number }}" target="_blank" title="WhatsApp">
-          <i class="fab fa-whatsapp" style="color: #25d366;"></i>
+        <a href="https://wa.me/91{{ query.phone_number }}" target="_blank" title="WhatsApp">          <i class="fab fa-whatsapp" style="color: #25d366;"></i>
         </a>
 
-        <a href="mailto:{{ query.email }}" title="Email">
-          <i class="fas fa-envelope"></i>
-        </a>
+        {% if query.email %}
+          <a href="mailto:{{ query.email }}" title="Email {{ query.email }}">
+            <i class="fas fa-envelope"></i>
+          </a>
+        {% else %}
+          <a title="No Email Provided" style="color: #ccc; cursor: not-allowed;">
+            <i class="fas fa-envelope"></i>
+          </a>
+        {% endif %}
 
-        <a title="More">
-          <i class="fas fa-ellipsis-v"></i>
-        </a>
+  
 
         {% if user_type == 'superuser' or current_user.role == 'admin' %}
           <a onclick="deleteQuery({{ query.id }}, '{{ query.client_name|escapejs }}')" title="Delete">
@@ -550,10 +553,10 @@
         <span class="record-value">{{ query.created_at|date:"d-m-Y" }}</span>
       </div>
 
-      <div class="record-info-item">
-        <span class="record-label">⏱️ Last Updated</span>
-        <span class="record-value">{{ query.created_at|date:"d/m/Y - h:i A" }}</span>
-      </div>
+    <div class="record-info-item">
+      <span class="record-label">⏱️ Last Updated</span>
+      <span class="record-value">{{ query.updated_at|date:"d/m/Y - h:i A" }}</span>
+    </div>
     </div>
 
     <!-- Footer with Remark and Actions -->
@@ -632,7 +635,7 @@
                   <input type="tel" class="form-control" name="phone_number" id="phone_number" required placeholder="+91 XXXXXXXXXX" />
                 </div>
                 <div class="col-md-3">
-                  <label class="form-label"><i class="fas fa-envelope me-1 text-primary"></i>Email*</label>
+                  <label class="form-label"><i class="fas fa-envelope me-1 text-primary"></i>Email</label>
                   <input type="email" class="form-control" name="email" id="email"  placeholder="email@example.com" />
                 </div>
               </div>
@@ -754,7 +757,7 @@
               <div class="row g-3">
                 <div class="col-md-4">
                   <label class="form-label"><i class="fas fa-male me-1 text-danger"></i>Adults</label>
-                  <input type="number" class="form-control" name="adult" id="adult" min="0" value="0" placeholder="Number of adults" />
+                  <input type="number" class="form-control" name="adult" id="adult" min="0" value="0" required placeholder="Number of adults" />
                 </div>
                 <div class="col-md-4">
                   <label class="form-label"><i class="fas fa-child me-1 text-danger"></i>Childrens</label>

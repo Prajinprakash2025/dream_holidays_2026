@@ -1,116 +1,134 @@
 {% extends "base.html" %}
 {% block content %}
 
-<body class="bg-light">
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#">
-                <i class="fas fa-plane"></i> Dreamholidays
-            </a>
-            <div class="ms-auto">
-                <span class="navbar-text text-white me-3">
-                    <i class="fas fa-user-circle"></i> {{ full_name }}
-                </span>
-                <a href="{% url 'team_member:logout' %}" class="btn btn-danger btn-sm">
-                    <i class="fas fa-sign-out-alt"></i> Logout
-                </a>
-            </div>
-        </div>
-    </nav>
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
+    <div>
+        <h2 class="fw-bold mb-1 text-dark">Welcome back, {{ full_name }}! 👋</h2>
+        <p class="text-muted mb-0">Here's a quick overview of your account status.</p>
+    </div>
+    <div class="mt-3 mt-md-0">
+        <a href="{% url 'team_member:logout' %}" class="btn btn-white shadow-sm border text-danger rounded-pill px-4 fw-semibold transition-all">
+            <i class="fas fa-sign-out-alt me-2"></i> Logout
+        </a>
+    </div>
+</div>
 
-
-
-        <div class="row">
-            <div class="col-md-8">
-                <div class="card">
-                    <div class="card-header bg-primary text-white">
-                        <h4 class="mb-0"><i class="fas fa-tachometer-alt"></i> Dashboard</h4>
-                    </div>
-                    <div class="card-body">
-                        <h5>✅ Login Successful!</h5>
-
-                        <div class="mt-4">
-                            <h6>User Information:</h6>
-                            <table class="table table-striped">
-                                <tr>
-                                    <td><strong>Name:</strong></td>
-                                    <td>{{ full_name }}</td>
-                                </tr>
-                                <tr>
-                                    <td><strong>Email:</strong></td>
-                                    <td>{{ user.email }}</td>
-                                </tr>
-                                <tr>
-                                    <td><strong>Role:</strong></td>
-                                    <td>
-                                        <span class="badge bg-{{ user.get_role_display_badge }}">
-                                            {{ role }}
-                                        </span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td><strong>Last Login:</strong></td>
-                                    <td>{{ user.last_login|date:"d-m-Y H:i" }}</td>
-                                </tr>
-                            </table>
-                        </div>
-
-                        <!-- Admin Quick Links Section -->
-                        {% if user_type == 'superuser' or role == 'admin' %}
-                        <div class="mt-4">
-                            <h6><i class="fas fa-cog"></i> Admin Panel:</h6>
-                            <div class="list-group">
-                                <a href="{% url 'team_member:team_member_list' %}" class="list-group-item list-group-item-action">
-                                    <i class="fas fa-users"></i> Team Members Management
-                                </a>
-                                <a href="{% url 'team_member:manage_permissions' %}" class="list-group-item list-group-item-action">
-                                    <i class="fas fa-user-shield"></i> Manage Permissions
-                                </a>
-                            </div>
-                        </div>
-                        {% endif %}
-                    </div>
+<div class="row mb-4 g-4">
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm rounded-4 h-100">
+            <div class="card-body d-flex align-items-center p-4">
+                <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex justify-content-center align-items-center me-3" style="width: 55px; height: 55px; font-size: 1.5rem;">
+                    <i class="fas fa-id-badge"></i>
                 </div>
-            </div>
-
-            <div class="col-md-4">
-                <div class="card text-center">
-                    <div class="card-header bg-success text-white">
-                        Status
-                    </div>
-                    <div class="card-body">
-                        <h1 class="text-success">
-                            <i class="fas fa-check-circle"></i>
-                        </h1>
-                        <h5 class="mt-3">✅ Login Working!</h5>
-                        <p class="text-muted">Session is active</p>
-
-                        <hr>
-
-                        <a href="{% url 'team_member:logout' %}" class="btn btn-danger w-100">
-                            <i class="fas fa-sign-out-alt"></i> Logout
-                        </a>
-                    </div>
+                <div>
+                    <p class="text-muted mb-1 small text-uppercase fw-bold letter-spacing-1">Current Role</p>
+                    <h5 class="fw-bold mb-0 text-dark">{{ role|title }}</h5>
                 </div>
-
-                <!-- Admin Quick Actions Card -->
-                {% if user_type == 'superuser' or role == 'admin' %}
-                <div class="card mt-3">
-                    <div class="card-header bg-warning text-dark">
-                        <i class="fas fa-tools"></i> Quick Actions
-                    </div>
-                    <div class="card-body">
-                        <a href="{% url 'team_member:team_member_list' %}" class="btn btn-outline-primary w-100 mb-2">
-                            <i class="fas fa-users"></i> Manage Team
-                        </a>
-                        <a href="{% url 'team_member:manage_permissions' %}" class="btn btn-outline-secondary w-100">
-                            <i class="fas fa-shield-alt"></i> Permissions
-                        </a>
-                    </div>
-                </div>
-                {% endif %}
             </div>
         </div>
     </div>
-</body>
+
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm rounded-4 h-100">
+            <div class="card-body d-flex align-items-center p-4">
+                <div class="bg-success bg-opacity-10 text-success rounded-circle d-flex justify-content-center align-items-center me-3" style="width: 55px; height: 55px; font-size: 1.5rem;">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div>
+                    <p class="text-muted mb-1 small text-uppercase fw-bold letter-spacing-1">Session Status</p>
+                    <h5 class="fw-bold mb-0 text-success">Active & Secure</h5>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm rounded-4 h-100">
+            <div class="card-body d-flex align-items-center p-4">
+                <div class="bg-info bg-opacity-10 text-info rounded-circle d-flex justify-content-center align-items-center me-3" style="width: 55px; height: 55px; font-size: 1.5rem;">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div>
+                    <p class="text-muted mb-1 small text-uppercase fw-bold letter-spacing-1">Last Login</p>
+                    <h5 class="fw-bold mb-0 text-dark fs-6">{{ user.last_login|date:"M d, Y, h:i A" }}</h5>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-{% if user_type == 'superuser' or role == 'admin' %}8{% else %}12{% endif %}">
+        <div class="card border-0 shadow-sm rounded-4 h-100">
+            <div class="card-header bg-white border-0 pt-4 pb-0 px-4">
+                <h5 class="fw-bold text-dark"><i class="fas fa-user-circle text-primary me-2"></i> Profile Details</h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="row mb-3 align-items-center">
+                    <div class="col-sm-4 text-muted fw-medium">Full Name</div>
+                    <div class="col-sm-8 fw-bold text-dark fs-6">{{ full_name }}</div>
+                </div>
+                <hr class="text-muted opacity-10 my-3">
+                <div class="row mb-3 align-items-center">
+                    <div class="col-sm-4 text-muted fw-medium">Email Address</div>
+                    <div class="col-sm-8 fw-semibold text-dark">{{ user.email }}</div>
+                </div>
+                <hr class="text-muted opacity-10 my-3">
+                <div class="row align-items-center">
+                    <div class="col-sm-4 text-muted fw-medium">Access Level</div>
+                    <div class="col-sm-8">
+                        <span class="badge bg-{{ user.get_role_display_badge|default:'primary' }} rounded-pill px-3 py-2 fw-semibold shadow-sm">
+                            {{ role|title }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if user_type == 'superuser' or role == 'admin' %}
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm rounded-4 h-100 text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+            <div class="card-body p-4 d-flex flex-column">
+                <h5 class="fw-bold mb-4 text-white"><i class="fas fa-tools me-2"></i> Admin Panel</h5>
+                <p class="text-white-50 mb-4 small">Quick access to essential management tools and system settings.</p>
+                
+                <div class="d-grid gap-3 mt-auto">
+                    <a href="{% url 'team_member:team_member_list' %}" class="btn btn-light text-primary fw-bold rounded-pill text-start px-4 py-2 shadow-sm d-flex align-items-center transition-all">
+                        <i class="fas fa-users me-3 fs-5"></i> 
+                        <span>Manage Team</span>
+                        <i class="fas fa-chevron-right ms-auto fs-6"></i>
+                    </a>
+                    <a href="{% url 'team_member:manage_permissions' %}" class="btn btn-outline-light fw-bold rounded-pill text-start px-4 py-2 d-flex align-items-center transition-all">
+                        <i class="fas fa-shield-alt me-3 fs-5"></i> 
+                        <span>Permissions</span>
+                        <i class="fas fa-chevron-right ms-auto fs-6"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    .transition-all {
+        transition: all 0.3s ease;
+    }
+    .btn-white:hover {
+        background-color: #f8f9fa;
+        transform: translateY(-2px);
+    }
+    .card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 .5rem 1rem rgba(0,0,0,.1) !important;
+    }
+    .letter-spacing-1 {
+        letter-spacing: 0.5px;
+    }
+</style>
+
 {% endblock %}

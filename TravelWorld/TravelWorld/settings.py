@@ -174,6 +174,10 @@ CKEDITOR_CONFIGS = {
 }
 
 
+
+TIME_ZONE = 'Asia/Kolkata'
+USE_TZ = True
+
 # ============================================================================
 # EMAIL CONFIGURATION (Add this to your settings.py)
 # ============================================================================
